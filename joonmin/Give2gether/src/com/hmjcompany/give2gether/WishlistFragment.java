@@ -2,6 +2,9 @@ package com.hmjcompany.give2gether;
 
 import java.util.ArrayList;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -32,6 +35,7 @@ public class WishlistFragment extends Fragment {
 	
 	MainActivity mActivity;
 	ArrayList<String> arrWishList;
+	ArrayList<MyWish> arrMyWishList;
 
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -49,8 +53,9 @@ public class WishlistFragment extends Fragment {
 		listMyWish = (ListView) rootView.findViewById(R.id.listMyWish);
 		
 		arrWishList = new ArrayList<String>();
-		arrWishList.add("ABC");
-		arrWishList.add("XYZ");
+		arrMyWishList = new ArrayList<MyWish>();
+
+		selectWishAll();
 		
 		mAdapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1, arrWishList);
 		
@@ -62,7 +67,15 @@ public class WishlistFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				insertWishlistData("Notebook", 10000);
+				
+				if (arrWishList.size() < 3) {
+					Intent i = new Intent(mActivity.getApplicationContext(), AddWishActivity.class);
+					startActivityForResult(i, 1001);
+				} else {
+					Toast.makeText(mActivity.getApplicationContext(), "Can't put more 3", Toast.LENGTH_SHORT).show();
+				}
+				
+//				insertWishlistData("Notebook", 10000);
 			}
 		});
 		
@@ -75,12 +88,72 @@ public class WishlistFragment extends Fragment {
 				Toast.makeText(mActivity.getApplicationContext(), mAdapter.getItem(position), Toast.LENGTH_SHORT).show();
 			}
 		});
-	}
+		
+		listMyWish.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
-	public void insertWishlistData(String title, int price) {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> partent, View view,
+					int position, long id) {
+				// TODO Auto-generated method stub
+				AlertDialog.Builder alert = new AlertDialog.Builder(mActivity);
+				final int pos = position;
+				
+				alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						removeWishlistData(arrMyWishList.get(pos).getId());
+
+						arrWishList.remove(pos);
+						arrMyWishList.remove(pos);
+						mAdapter.notifyDataSetChanged();
+					}
+				});
+				
+				alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						dialog.dismiss();						
+					}
+				});
+				
+				alert.setTitle("Are you delete?");
+				alert.setMessage(arrMyWishList.get(position).getId() + " "
+						+ arrMyWishList.get(position).getTitle() + " "
+						+ arrMyWishList.get(position).getPrice() + " "
+						+ arrMyWishList.get(position).getEventOn() + " "
+						+ arrMyWishList.get(position).getDate() );
+				alert.show();
+				
+				return false;
+			}
+		});
+	}
+	
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		switch(resultCode) {
+		case 1001:
+			String title = data.getStringExtra("title");
+			int price = Integer.parseInt(data.getStringExtra("price"));
+			
+			insertWishlistData(title, price);
+			
+			break;
+		default:
+			break;
+		}
+	}
+	
+	public void insertWishlistData (String title, int price) {
 		mActivity.insertWishlistData(title, price);
 
-		selectWishlistData(1);
+		selectWishAll();
 		
 		mAdapter.notifyDataSetChanged();
 	}
@@ -96,12 +169,39 @@ public class WishlistFragment extends Fragment {
 		result.close();
 	}
 	
+	public void selectWishAll() {
+		Cursor result = mActivity.selectWishAll();
+		
+		arrWishList.clear();
+		result.moveToFirst();
+		
+		while (!result.isAfterLast()) {
+			int id = result.getInt(0);
+			String title = result.getString(1);
+			int price = result.getInt(2);
+			String eventOn = result.getString(3);
+			String date = result.getString(4);
+
+			MyWish myWish = new MyWish(id, title, price, eventOn, date);
+			
+			arrWishList.add(title);
+			arrMyWishList.add(myWish);
+			
+			result.moveToNext();
+		}
+		
+		result.close();
+		
+
+		
+	}
+	
 	public void updateWishlistData() {
 		
 	}
 	
-	public void removeWishlistData() {
-		
+	public void removeWishlistData(int index) {
+		mActivity.removeWishlistData(index);
 	}
 
 }

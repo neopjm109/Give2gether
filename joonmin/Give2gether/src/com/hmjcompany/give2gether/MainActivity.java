@@ -119,15 +119,15 @@ public class MainActivity extends FragmentActivity {
 				+ " name text not null,"
 				+ " email text not null,"
 				+ " phone text not null,"
-				+ " birth numeric)";
+				+ " birth text)";
 		db.execSQL(sql);
 
 		sql = "create table if not exists " + dbTableWishlist
 				+ " (id integer primary key autoincrement,"
 				+ " title text not null,"
-				+ " price Integer not null,"
+				+ " price integer not null,"
 				+ " event text not null,"
-				+ " date numeric)";
+				+ " date text)";
 		
 		db.execSQL(sql);
 	}
@@ -186,7 +186,7 @@ public class MainActivity extends FragmentActivity {
 	public void insertWishlistData(String title, int price) {
 		String wTitle = title;
 		int wPrice = price;
-		int wEvent = 0;
+		String wEvent = "false";
 		
 		
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -210,12 +210,20 @@ public class MainActivity extends FragmentActivity {
 		return result;
 	}
 	
+	public Cursor selectWishAll() {
+		String sql = "select * from " + dbTableWishlist + ";";
+		Cursor result = db.rawQuery(sql, null);
+		
+		return result;
+	}
+	
 	public void updateWishlistData() {
 		
 	}
 	
-	public void removeWishlistData() {
-		
+	public void removeWishlistData(int index) {
+		String sql = "delete from " + dbTableWishlist + " where id = " + index + ";";
+		db.execSQL(sql);
 	}
 
 }
