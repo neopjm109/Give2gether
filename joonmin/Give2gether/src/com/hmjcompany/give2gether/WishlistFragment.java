@@ -64,9 +64,7 @@ public class WishlistFragment extends Fragment {
 		
 		btnAddWish.setOnClickListener(new View.OnClickListener() {
 			
-			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				
 				if (arrWishList.size() < 3) {
 					Intent i = new Intent(mActivity.getApplicationContext(), AddWishActivity.class);
@@ -81,28 +79,22 @@ public class WishlistFragment extends Fragment {
 		
 		listMyWish.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
-				// TODO Auto-generated method stub
 				Toast.makeText(mActivity.getApplicationContext(), mAdapter.getItem(position), Toast.LENGTH_SHORT).show();
 			}
 		});
 		
 		listMyWish.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
-			@Override
 			public boolean onItemLongClick(AdapterView<?> partent, View view,
 					int position, long id) {
-				// TODO Auto-generated method stub
 				AlertDialog.Builder alert = new AlertDialog.Builder(mActivity);
 				final int pos = position;
 				
 				alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 					
-					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
 						removeWishlistData(arrMyWishList.get(pos).getId());
 
 						arrWishList.remove(pos);
@@ -113,9 +105,7 @@ public class WishlistFragment extends Fragment {
 				
 				alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
 					
-					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
 						dialog.dismiss();						
 					}
 				});
@@ -134,7 +124,6 @@ public class WishlistFragment extends Fragment {
 	}
 	
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// TODO Auto-generated method stub
 		super.onActivityResult(requestCode, resultCode, data);
 		
 		switch(resultCode) {
@@ -191,8 +180,6 @@ public class WishlistFragment extends Fragment {
 		}
 		
 		result.close();
-		
-
 		
 	}
 	

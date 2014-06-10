@@ -1,6 +1,5 @@
 package com.hmjcompany.give2gether;
 
-import java.util.Date;
 
 public class MyWish {
 	int id;

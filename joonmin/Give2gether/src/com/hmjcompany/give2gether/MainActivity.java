@@ -39,7 +39,6 @@ public class MainActivity extends FragmentActivity {
 	
 	SQLiteDatabase db;
 	
-	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
@@ -48,7 +47,7 @@ public class MainActivity extends FragmentActivity {
 
 		createDatabase(dbName, dbMode);
 
-		removeTable();
+//		removeTable();
 		createTable();
 
 	}
@@ -66,42 +65,30 @@ public class MainActivity extends FragmentActivity {
 			actionBar.addTab(actionBar.newTab().setText(tab_name)
 					.setTabListener(new ActionBar.TabListener() {
 						
-						@Override
 						public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-							// TODO Auto-generated method stub
 							
 						}
 						
-						@Override
 						public void onTabSelected(Tab tab, FragmentTransaction ft) {
-							// TODO Auto-generated method stub
 							viewPager.setCurrentItem(tab.getPosition());
 						}
 						
-						@Override
 						public void onTabReselected(Tab tab, FragmentTransaction ft) {
-							// TODO Auto-generated method stub
 							
 						}
 					}));
 			
 			viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 				
-				@Override
 				public void onPageSelected(int position) {
-					// TODO Auto-generated method stub
 					actionBar.setSelectedNavigationItem(position);
 				}
 				
-				@Override
 				public void onPageScrolled(int arg0, float arg1, int arg2) {
-					// TODO Auto-generated method stub
 					
 				}
 				
-				@Override
 				public void onPageScrollStateChanged(int arg0) {
-					// TODO Auto-generated method stub
 					
 				}
 			});
@@ -152,6 +139,7 @@ public class MainActivity extends FragmentActivity {
 		
 		DateFormat df = new SimpleDateFormat("EEE MMM dd kk:mm:ss zzz yyyy", Locale.KOREAN);
 		Date fBirth = null;
+		
 		try {
 			fBirth = df.parse(birth);
 		} catch (Exception e) {

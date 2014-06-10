@@ -5,6 +5,14 @@
     android:orientation="vertical"
     android:background="#ff8400" >
     
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="1 Wish = 1000원"
+        android:textSize="20sp"
+        android:gravity="center"
+        />
+    
     <AutoCompleteTextView
         android:id="@+id/editTitle"
         android:layout_width="match_parent"
