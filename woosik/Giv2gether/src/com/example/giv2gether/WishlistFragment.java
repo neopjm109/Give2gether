@@ -1,4 +1,4 @@
-package com.hmjcompany.give2gether;
+package com.example.giv2gether;
 
 import java.util.ArrayList;
 

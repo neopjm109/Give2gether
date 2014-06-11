@@ -1,4 +1,4 @@
-package com.hmjcompany.give2gether;
+package com.example.giv2gether;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -131,7 +131,7 @@ public class MainActivity extends FragmentActivity {
 	 * 		DB Function
 	 */
 	
-	// Friends Å×ÀÌºí
+	// Friends ï¿½ï¿½ï¿½Ìºï¿½
 	public void insertFriendsData(String name, String email, String phone, String birth) {
 		String fName = name;
 		String fEmail = email;
@@ -170,7 +170,7 @@ public class MainActivity extends FragmentActivity {
 		
 	}
 	
-	// Wishlist Å×ÀÌºí
+	// Wishlist ï¿½ï¿½ï¿½Ìºï¿½
 	public void insertWishlistData(String title, int price) {
 		String wTitle = title;
 		int wPrice = price;
