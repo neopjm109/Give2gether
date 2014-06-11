@@ -1,4 +1,4 @@
-package com.hmjcompany.give2gether;
+package com.example.giv2gether;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -206,7 +206,7 @@ public class AddWishActivity extends Activity {
 					
 					SearchData sData = new SearchData(title, (price / 1000), imagePath);
 					
-//					searchList.add(title + " " + df.format(price) + "¿ø");	
+//					searchList.add(title + " " + df.format(price) + "ï¿½ï¿½");	
 					searchList.add(sData);
 				}
 
@@ -282,7 +282,7 @@ public class AddWishActivity extends Activity {
 				
 				mImage.setImageBitmap(bm);
 				mTitle.setText(sData.getTitle());
-				mPrice.setText("¼îÇÎ¸ô ÃÖÀú°¡ : " + df.format(sData.getPrice()) + " Wish");
+				mPrice.setText("ì‡¼í•‘ëª° ìµœì €ê°€ : " + df.format(sData.getPrice()) + " Wish");
 				
 			}
 			

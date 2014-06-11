@@ -1,4 +1,4 @@
-package com.hmjcompany.give2gether;
+package com.example.giv2gether;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
