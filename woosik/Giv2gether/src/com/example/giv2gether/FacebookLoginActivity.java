@@ -1,9 +1,13 @@
 package com.example.giv2gether;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -18,7 +22,10 @@ import com.facebook.Settings;
 import com.facebook.model.GraphUser;
 
 public class FacebookLoginActivity extends Activity {
-
+	
+	public static String TAG = "naddola";
+	List<String> permissions = new ArrayList<String>();
+	
 	private Session.StatusCallback statusCallback = new SessionStatusCallback();
 	private Button buttonLoginLogout;
 	TextView facebookstatus;
@@ -47,6 +54,9 @@ public class FacebookLoginActivity extends Activity {
 	}
 
 	private void facebookInit(Bundle savedInstanceState) {
+		
+		permissions.add("email");
+		
 		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 
 		Session session = Session.getActiveSession();
@@ -61,7 +71,7 @@ public class FacebookLoginActivity extends Activity {
 			Session.setActiveSession(session);
 			if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
 				session.openForRead(new Session.OpenRequest(this)
-						.setCallback(statusCallback));
+						.setCallback(statusCallback).setPermissions(permissions));
 			}
 		}
 
@@ -95,42 +105,61 @@ public class FacebookLoginActivity extends Activity {
 	}
 
 	private void updateView() {
+
 		Session session = Session.getActiveSession();
 		if (session.isOpened()) {
 			Request.newMeRequest(session, new Request.GraphUserCallback() {
 				@Override
 				public void onCompleted(GraphUser user, Response response) {
 					// TODO Auto-generated method stub
-					if (user != null)
+					if (user != null) {
+
+						TelephonyManager telManager = (TelephonyManager) FacebookLoginActivity.this
+								.getSystemService(TELEPHONY_SERVICE);
+
+						Intent intent = new Intent(FacebookLoginActivity.this,
+								SignupProcActivity.class);
+						String email = user.getProperty("email").toString();
+						String name = user.getName();
+						String phone = telManager.getLine1Number();
+						String birth = user.getBirthday();
+						intent.putExtra("email", email);
+						intent.putExtra("name", name);
+						intent.putExtra("phone", phone);
+						intent.putExtra("birth", birth);
+						startActivity(intent);
+
 						facebookstatus.setText(user.getName());
-					else
+
+					} else
 						facebookstatus.setText("None");
 
 				}
 			}).executeAsync();
+
 			buttonLoginLogout.setText("Logout");
 			buttonLoginLogout.setOnClickListener(new OnClickListener() {
 				public void onClick(View view) {
 					onClickLogout();
 				}
 			});
-		} else {
-			buttonLoginLogout.setText("Login");
-			buttonLoginLogout.setOnClickListener(new OnClickListener() {
-				public void onClick(View view) {
-					onClickLogin();
-				}
-			});
+
+		} else if (!session.isOpened() && !session.isClosed()) {
+			session.openForRead(new Session.OpenRequest(this).setPermissions(permissions)
+					.setCallback(statusCallback));
 		}
+
 	}
 
 	private void onClickLogin() {
 		Session session = Session.getActiveSession();
 		if (!session.isOpened() && !session.isClosed()) {
+			// session.openActiveSession(this, true, statusCallback);
 			session.openForRead(new Session.OpenRequest(this)
 					.setCallback(statusCallback));
 		} else {
 			Session.openActiveSession(this, true, statusCallback);
+
 		}
 	}
 
