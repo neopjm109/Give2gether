@@ -19,7 +19,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		Intent intent = new Intent(MainActivity.this, SignUpSelect.class);
+		Intent intent = new Intent(MainActivity.this, SignUpSelectActivity.class);
 		startActivity(intent);
 	}
 	
