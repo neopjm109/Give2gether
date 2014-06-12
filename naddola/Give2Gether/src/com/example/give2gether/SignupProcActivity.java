@@ -109,7 +109,13 @@ public class SignupProcActivity extends Activity {
 				if (resEntity != null) {
 					String resp = EntityUtils.toString(resEntity);
 					Log.w(TAG, resp);
-					Toast.makeText(getApplicationContext(), resp, Toast.LENGTH_LONG);
+					if(resp.equals("true")){
+						Intent intent = new Intent(SignupProcActivity.this, MainActivity.class);
+						startActivity(intent);
+					}
+					else{
+						Toast.makeText(getApplicationContext(), "회원가입 실패", Toast.LENGTH_LONG).show();;
+					}
 				}
 
 				
