@@ -1,28 +1,51 @@
 package com.example.give2gether;
 
 import android.app.Activity;
-import android.app.ActionBar;
-import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.os.Build;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
+
+	public static final String TAG = "naddola";
+	
+	TextView tv;
+	CheckBox ck;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		Intent intent = new Intent(MainActivity.this, SignUpSelectActivity.class);
-		startActivity(intent);
+
+		Log.v(TAG, this.getClass().toString());
+
+		tv = (TextView) findViewById(R.id.tv);
+		ck = (CheckBox) findViewById(R.id.checkLogin);
+
+		final SettingPreference s = new SettingPreference(this);
+		tv.setText(s.getID());
+		ck.setChecked(s.isLogin());
+
+		ck.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				// TODO Auto-generated method stub
+				if (isChecked) {
+					s.setAutoLoginTrue();
+				} else
+					s.setAutoLoginFalse();
+			}
+		});
+
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 

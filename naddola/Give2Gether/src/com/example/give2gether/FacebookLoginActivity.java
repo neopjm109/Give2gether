@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -34,6 +35,8 @@ public class FacebookLoginActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_facebook_login);
+		
+		Log.v(TAG, this.getClass().toString());
 
 		init();
 		dataInit();
@@ -128,11 +131,10 @@ public class FacebookLoginActivity extends Activity {
 						intent.putExtra("phone", phone);
 						intent.putExtra("birth", birth);
 						startActivity(intent);
-
-						facebookstatus.setText(user.getName());
-
-					} else
-						facebookstatus.setText("None");
+						finish();
+					} else{
+						
+					}
 
 				}
 			}).executeAsync();

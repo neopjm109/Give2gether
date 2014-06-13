@@ -15,7 +15,7 @@ import android.widget.EditText;
 public class SignupGiv2gether extends Activity implements OnClickListener,
 		OnDateChangedListener {
 	
-	public static String TAG = "naddola";
+	public static final String TAG = "naddola";
 
 	Button bt_signup;
 
@@ -28,6 +28,8 @@ public class SignupGiv2gether extends Activity implements OnClickListener,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_giv2gether_signup);
+		
+		Log.v(TAG, this.getClass().toString());
 		
 		init();
 	}
@@ -70,6 +72,7 @@ public class SignupGiv2gether extends Activity implements OnClickListener,
 			Log.i(TAG, "SignupGiv2gether - email:"+email+"  name:" + name+"  phone:"+phone+"  birth:"+birth);
 			break;
 		}
+		finish();
 
 	}
 

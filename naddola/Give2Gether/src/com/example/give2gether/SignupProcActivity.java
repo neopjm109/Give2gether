@@ -40,7 +40,7 @@ public class SignupProcActivity extends Activity {
 		String Phone = intent.getStringExtra("phone");
 		String Birth = intent.getStringExtra("birth");
 
-		Log.i(TAG, "SignupProcActivity - email:" + Email + "  Name:" + Name
+		Log.v(TAG, "SignupProcActivity - email:" + Email + "  Name:" + Name
 				+ "  Phone:" + Phone + "  Birth:" + Birth);
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
 				.permitAll().build();
@@ -75,10 +75,10 @@ public class SignupProcActivity extends Activity {
 	{
 		@Override
 		protected Long doInBackground(String... params) {
-			String username = params[0];
-			String idvalue = params[1];
-			String contact = params[2];
-			String address = params[3];
+			String Email = params[0];
+			String Name = params[1];
+			String Phone = params[2];
+			String Birth = params[3];
 
 			try {
 				HttpClient client = new DefaultHttpClient();
@@ -95,10 +95,10 @@ public class SignupProcActivity extends Activity {
 
 				// 전달인자  
 				List params2 = new ArrayList();
-				params2.add(new BasicNameValuePair("email", username));
-				params2.add(new BasicNameValuePair("name", idvalue));
-				params2.add(new BasicNameValuePair("phone", contact));
-				params2.add(new BasicNameValuePair("birth", address));
+				params2.add(new BasicNameValuePair("email", Email));
+				params2.add(new BasicNameValuePair("name", Name));
+				params2.add(new BasicNameValuePair("phone", Phone));
+				params2.add(new BasicNameValuePair("birth", Birth));
 
 				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
 						HTTP.UTF_8);
@@ -110,8 +110,17 @@ public class SignupProcActivity extends Activity {
 					String resp = EntityUtils.toString(resEntity);
 					Log.w(TAG, resp);
 					if(resp.equals("true")){
+						for (int i = 0; i < ActivityReference.ActList.size(); i++){
+							Log.i(TAG, ActivityReference.ActList.size()+"  "+ActivityReference.ActList.get(i).getClass().toString());
+							ActivityReference.ActList.get(i).finish();
+						}
+						SettingPreference setting = new SettingPreference(SignupProcActivity.this);
+						setting.setAutoLoginTrue();
+						setting.setID(Email);
+						setting.setName(Name);
 						Intent intent = new Intent(SignupProcActivity.this, MainActivity.class);
 						startActivity(intent);
+						finish();
 					}
 					else{
 						Toast.makeText(getApplicationContext(), "회원가입 실패", Toast.LENGTH_LONG).show();;

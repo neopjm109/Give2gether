@@ -3,15 +3,17 @@ package com.example.give2gether;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import com.facebook.widget.LoginButton;
 import com.google.android.gms.common.SignInButton;
 
 public class SignUpSelectActivity extends Activity implements OnClickListener {
 
+	public static final String TAG = "naddola";
+	
 	// LoginButton bt_FacebookLogin;
 	Button bt_FacebookLogin;
 	SignInButton bt_GoogleLogin;
@@ -21,6 +23,8 @@ public class SignUpSelectActivity extends Activity implements OnClickListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_signupselect);
+		
+		Log.v(TAG, this.getClass().toString());
 
 		init();
 	}
@@ -39,6 +43,7 @@ public class SignUpSelectActivity extends Activity implements OnClickListener {
 	public void onClick(View view) {
 		
 		Intent intent;
+		ActivityReference.ActList.add(SignUpSelectActivity.this);
 		
 		switch (view.getId()) {
 		case R.id.signup_facebookButton:
