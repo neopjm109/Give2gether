@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -16,7 +17,7 @@ import com.google.android.gms.plus.PlusClient;
 public class GoogleLoginActivity extends Activity implements
 		ConnectionCallbacks, OnConnectionFailedListener {
 
-	private static final String TAG = "ExampleActivity";
+	private static final String TAG = "naddola";
 	private static final int REQUEST_CODE_RESOLVE_ERR = 9000;
 
 	private ProgressDialog mConnectionProgressDialog;
@@ -28,6 +29,8 @@ public class GoogleLoginActivity extends Activity implements
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_google_login);
+		
+		Log.v(TAG, this.getClass().toString());
 
 		mPlusClient = new PlusClient.Builder(this, this, this).setActions(
 				"http://schemas.google.com/AddActivity",
@@ -111,6 +114,7 @@ public class GoogleLoginActivity extends Activity implements
 		intent.putExtra("phone", accountPhone);
 		intent.putExtra("birth", accountBirth);
 		startActivity(intent);
+		finish();
 	}
 
 	@Override
