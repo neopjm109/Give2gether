@@ -113,8 +113,10 @@ public class MainActivity extends FragmentActivity {
 				+ " (id integer primary key autoincrement,"
 				+ " title text not null,"
 				+ " price integer not null,"
+				+ " wish integer not null,"
 				+ " event text not null,"
-				+ " date text)";
+				+ " date text,"
+				+ " image text not null)";
 		
 		db.execSQL(sql);
 	}
@@ -131,7 +133,7 @@ public class MainActivity extends FragmentActivity {
 	 * 		DB Function
 	 */
 	
-	// Friends 테이블
+	// Friends
 	public void insertFriendsData(String name, String email, String phone, String birth) {
 		String fName = name;
 		String fEmail = email;
@@ -170,12 +172,13 @@ public class MainActivity extends FragmentActivity {
 		
 	}
 	
-	// Wishlist 테이블
-	public void insertWishlistData(String title, int price) {
+	// Wishlist
+	public void insertWishlistData(String title, int price, int wish, String imagePath) {
 		String wTitle = title;
 		int wPrice = price;
+		int wWish = wish;
+		String wImagePath = imagePath;
 		String wEvent = "false";
-		
 		
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date date = new Date(System.currentTimeMillis());
@@ -185,8 +188,10 @@ public class MainActivity extends FragmentActivity {
 				+ " values(NULL, '"
 				+ wTitle + "', '"
 				+ wPrice + "', '"
+				+ wWish + "','"
 				+ wEvent + "', '"
-				+ wDate + "');";
+				+ wDate + "','"
+				+ wImagePath + "');";
 		
 		db.execSQL(sql);
 	}

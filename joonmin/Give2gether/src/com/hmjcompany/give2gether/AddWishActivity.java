@@ -26,7 +26,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,12 +45,15 @@ public class AddWishActivity extends Activity {
 	 */
 	
 	AutoCompleteTextView editTitle;
-	EditText editPrice;
+	ImageView editImage;
+	EditText editPrice, editWish;
 	Button btnAdd;
 	
 	/*
 	 * 		Variables
 	 */
+	
+	SearchData myWish;
 	
 	ArrayList<SearchData> searchList;
 	SearchAdapter sAdapter;
@@ -64,7 +66,6 @@ public class AddWishActivity extends Activity {
 	DecimalFormat df = new DecimalFormat("#,##0");
 	boolean bAutoListClick;
 	
-	Bitmap bm = null;
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -77,7 +78,8 @@ public class AddWishActivity extends Activity {
 	public void initViews() {
 		searchList = new ArrayList<SearchData>();
 		bAutoListClick = false;
-				
+
+		editImage = (ImageView) findViewById (R.id.editImage);
 		editTitle = (AutoCompleteTextView) findViewById (R.id.editTitle);
 		
 		editTitle.addTextChangedListener(new TextWatcher() {
@@ -121,15 +123,25 @@ public class AddWishActivity extends Activity {
 
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
+				
+				myWish = new SearchData(searchList.get(position).getTitle(),
+						searchList.get(position).getPrice(),
+						searchList.get(position).getWish(),
+						searchList.get(position).getImagePath());
+
+				new ImageThread(editImage).execute(searchList.get(position).getImagePath());
+				
 				editTitle.setText(searchList.get(position).getTitle());
-				editPrice.setText(searchList.get(position).getPrice()+"");
+				editPrice.setText(df.format(searchList.get(position).getPrice()));
+				editWish.setText(searchList.get(position).getWish()+"");
 				
 				bAutoListClick = true;
 			}
 			
 		});
-		
+
 		editPrice = (EditText) findViewById (R.id.editPrice);
+		editWish = (EditText) findViewById (R.id.editWish);
 		btnAdd = (Button) findViewById (R.id.btnAdd);
 		
 		btnAdd.setOnClickListener(new View.OnClickListener() {
@@ -139,8 +151,10 @@ public class AddWishActivity extends Activity {
 				if( editTitle.length() != 0 && editPrice.length() != 0) {
 					Intent intent = new Intent();
 					
-					intent.putExtra("title", editTitle.getText().toString());
-					intent.putExtra("price", editPrice.getText().toString());
+					intent.putExtra("title", myWish.getTitle());
+					intent.putExtra("price", myWish.getPrice()+"");
+					intent.putExtra("wish", myWish.getWish()+"");
+					intent.putExtra("image", myWish.getImagePath());
 					
 					setResult(1001, intent);
 					finish();
@@ -156,9 +170,13 @@ public class AddWishActivity extends Activity {
 	 * 		JsonParse
 	 * 		- Using a Naver's open api, we get a data that is product information. 
 	 */
+	
 	private class JsonParse extends AsyncTask<String, String, JSONObject> {
 		
 		protected JSONObject doInBackground(String... params) {
+
+			searchList.clear();
+			sAdapter = null;
 			
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost(params[0]);
@@ -193,9 +211,6 @@ public class AddWishActivity extends Activity {
 			try {
 				product = result.getJSONArray("product");
 				
-				searchList.clear();
-				sAdapter = null;
-				
 				for(int i=0; i<product.length(); i++) {
 					JSONObject c = product.getJSONObject(i);
 					String title = c.getString("title").replaceAll("<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>","");
@@ -204,36 +219,38 @@ public class AddWishActivity extends Activity {
 					int price = c.getInt("lprice");
 					String imagePath = c.getString("image");
 					
-					SearchData sData = new SearchData(title, (price / 1000), imagePath);
-					
-//					searchList.add(title + " " + df.format(price) + "ø¯");	
+					SearchData sData = new SearchData(title, price, (price / 1000), imagePath);
+						
 					searchList.add(sData);
 				}
 
 				sAdapter = new SearchAdapter(AddWishActivity.this, R.layout.custom_auto_list, searchList);
-				sAdapter.setNotifyOnChange(false);
+						
+				sAdapter.notifyDataSetChanged();
 
 				editTitle.setAdapter(sAdapter);
 				editTitle.showDropDown();
 				
-				sAdapter.notifyDataSetChanged();
-				Log.i("PJM", searchList.size() + " > " + searchList.get(0).getTitle());
-
 			} catch (Exception e) {
 				
 			}
 			
 		}
-				
+
 	}
+	
+	/*
+	 * 		AutoCompleteTextView List Adapter
+	 */
 	
 	public class SearchData {
 		String title, imagePath;
-		int price;
+		int price, wish;
 		
-		public SearchData(String title, int price, String imagePath) {
+		public SearchData(String title, int price, int wish, String imagePath) {
 			this.title = title;
 			this.price = price;
+			this.wish = wish;
 			this.imagePath = imagePath;
 		}
 			
@@ -245,44 +262,71 @@ public class AddWishActivity extends Activity {
 			return price;
 		}
 		
+		public int getWish() {
+			return wish;
+		}
+		
 		public String getImagePath() {
 			return imagePath;
 		}
 		
+	}
+	
+	class SearchViewHolder {
+		ImageView mImage = null;
+		TextView mTitle, mPrice = null;
+		String imagePath = null;
+		Bitmap bmp = null;
+		
+		public SearchViewHolder(ImageView mImage, TextView mTitle, TextView mPrice, String imagePath) {
+			this.mImage = mImage;
+			this.mTitle = mTitle;
+			this.mPrice = mPrice;
+			this.imagePath = imagePath;
+		}
 	}
 
 	class SearchAdapter extends ArrayAdapter<SearchData> {
 		
 		ArrayList<SearchData> list = new ArrayList<SearchData>();
 
-		public SearchAdapter(Context context, int resource,
-				ArrayList<SearchData> objects) {
+		public SearchAdapter(Context context, int resource, ArrayList<SearchData> objects) {
 			super(context, resource, objects);
-			// TODO Auto-generated constructor stub
 			list = objects;
 		}
 		
 		public View getView (int position, View converView, ViewGroup parent) {
 			View v = converView;
+			ImageView mImage = null;
+			TextView mTitle, mPrice = null;
+			SearchViewHolder viewHolder;
 			
 			if (v == null) {
 				LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				v = inflater.inflate(R.layout.custom_auto_list, null);
+
+				mImage = (ImageView) v.findViewById(R.id.mImage);
+				mTitle = (TextView) v.findViewById(R.id.mTitle);
+				mPrice = (TextView) v.findViewById(R.id.mPrice);
+				
+				viewHolder = new SearchViewHolder(mImage, mTitle, mPrice, list.get(position).getImagePath());
+				v.setTag(viewHolder);
+			} else {
+				viewHolder = (SearchViewHolder) v.getTag();
+				mImage = viewHolder.mImage;
+				mTitle = viewHolder.mTitle;
+				mPrice = viewHolder.mPrice;
 			}
 			
 			SearchData sData = list.get(position);
 			
 			if (sData != null) {
-				ImageView mImage = (ImageView) v.findViewById(R.id.mImage);
-				TextView mTitle = (TextView) v.findViewById(R.id.mTitle);
-				TextView mPrice = (TextView) v.findViewById(R.id.mPrice);
+
+				new SearchImageThread().execute(viewHolder);
 				
-				Thread thread = new Thread(new GettingImageThread(sData.getImagePath()));
-				thread.start();
-				
-				mImage.setImageBitmap(bm);
 				mTitle.setText(sData.getTitle());
-				mPrice.setText("ºÓ«Œ∏Ù √÷¿˙∞° : " + df.format(sData.getPrice()) + " Wish");
+				mPrice.setText("ÏáºÌïëÎ™∞ ÏµúÏ†ÄÍ∞Ä : " + df.format(sData.getPrice()) + " Ïõê\n"
+						+ "Wish : " + df.format(sData.getWish()) + " \n");
 				
 			}
 			
@@ -291,24 +335,61 @@ public class AddWishActivity extends Activity {
 		
 	}
 	
-	class GettingImageThread implements Runnable {
+	class SearchImageThread extends AsyncTask<SearchViewHolder, Void, SearchViewHolder> {
 
-		String src;
-		public GettingImageThread(String src) {
-			this.src = src;
-		}
+		SearchViewHolder viewHolder;
 		
-		@Override
-		public void run() {
+		protected SearchViewHolder doInBackground(SearchViewHolder... params) {
 			try {
-				URL url = new URL(src);
-				bm = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+				viewHolder = params[0];
+				URL url = new URL(viewHolder.imagePath);
+				viewHolder.bmp = BitmapFactory.decodeStream(url.openStream());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			
+			return viewHolder;
+		}
+
+		protected void onPostExecute(SearchViewHolder result) {
+			super.onPostExecute(result);
+			
+			if (result.bmp != null)
+				result.mImage.setImageBitmap(result.bmp);
+			else
+				result.mImage.setImageResource(R.drawable.image_loading);
+		}
+	}
+	
+	/*
+	 * 		ImageView. get a bitmap of image's url.
+	 */
+		
+	class ImageThread extends AsyncTask<String, Void, Bitmap> {
+
+		ImageView image;
+		Bitmap bmp;
+		
+		public ImageThread(ImageView imageView) {
+			this.image = imageView;
+			bmp = null;
 		}
 		
-	}
+		protected Bitmap doInBackground(String... params) {
+			try {
+				URL url = new URL(params[0]);
+				bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return bmp;
+		}
 
+		protected void onPostExecute(Bitmap result) {
+			super.onPostExecute(result);
+			
+			image.setImageBitmap(result);
+		}
+	}
 }
