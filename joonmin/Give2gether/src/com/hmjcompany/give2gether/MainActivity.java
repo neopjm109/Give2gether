@@ -34,6 +34,7 @@ public class MainActivity extends FragmentActivity {
 	private static final String dbName = "give2gether.db";
 	private static final String dbTableFriends = "friends";
 	private static final String dbTableWishlist = "wishlist";
+	private static final String dbTableFriendsWishlist = "friendswishlist";
 	
 	private static final int dbMode = Context.MODE_PRIVATE;
 	

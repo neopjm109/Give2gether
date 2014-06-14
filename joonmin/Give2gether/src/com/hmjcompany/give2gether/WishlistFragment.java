@@ -118,7 +118,19 @@ public class WishlistFragment extends Fragment {
 		Cursor result = mActivity.selectWishlistData(index);
 		
 		if (result.moveToFirst()) {
+			
+			int id = result.getInt(0);
 			String title = result.getString(1);
+			int price = result.getInt(2);
+			int wish = result.getInt(3);
+			String eventOn = result.getString(4);
+			String date = result.getString(5);
+			String imagePath = result.getString(6);
+			String bookmarkOn = result.getString(7);
+			
+			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, bm);
+
+			Toast.makeText(mActivity.getApplicationContext(), myWish.getTitle(), Toast.LENGTH_SHORT).show();
 		}
 		
 		result.close();
@@ -141,35 +153,10 @@ public class WishlistFragment extends Fragment {
 			String imagePath = result.getString(6);
 			String bookmarkOn = result.getString(7);
 			
-			final String image = imagePath;
-			
 			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, bm);
 
 			new ImageThread().execute(myWish);
-			
-			/*
-			Thread thread = new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					try {
-						URL url = new URL(image);
-						bm = BitmapFactory.decodeStream(url.openStream());
-					} catch (Exception e) {
-						
-					}
-				}
-				
-			});
-			thread.start();
-			
-			try {
-				Thread.sleep(1500);
-			} catch (Exception e) {
-				
-			}
-*/
+	
 			result.moveToNext();
 		}
 
@@ -326,32 +313,6 @@ public class WishlistFragment extends Fragment {
 		
 	}
 
-	class MyWishImageThread extends AsyncTask<MyWishViewHolder, Void, MyWishViewHolder> {
-
-		MyWishViewHolder viewHolder;
-		
-		protected MyWishViewHolder doInBackground(MyWishViewHolder... params) {
-			try {
-				viewHolder = params[0];
-				URL url = new URL(viewHolder.imagePath);
-				viewHolder.bmp = BitmapFactory.decodeStream(url.openStream());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			return viewHolder;
-		}
-
-		protected void onPostExecute(MyWishViewHolder result) {
-			super.onPostExecute(result);
-			
-			if (result.bmp != null)
-				result.mImage.setImageBitmap(result.bmp);
-			else
-				result.mImage.setImageResource(R.drawable.image_loading);
-		}
-	}	
-	
 	class ImageThread extends AsyncTask<MyWish, Void, Bitmap> {
 
 		MyWish myWish;
