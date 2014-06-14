@@ -128,6 +128,7 @@ public class FacebookLoginActivity extends Activity {
 						intent.putExtra("phone", phone);
 						intent.putExtra("birth", birth);
 						startActivity(intent);
+						finish();
 
 						facebookstatus.setText(user.getName());
 
