@@ -116,7 +116,8 @@ public class MainActivity extends FragmentActivity {
 				+ " wish integer not null,"
 				+ " event text not null,"
 				+ " date text,"
-				+ " image text not null)";
+				+ " image text not null,"
+				+ " bookmark text not null)";
 		
 		db.execSQL(sql);
 	}
@@ -179,6 +180,7 @@ public class MainActivity extends FragmentActivity {
 		int wWish = wish;
 		String wImagePath = imagePath;
 		String wEvent = "false";
+		String wBookmark = "false";
 		
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date date = new Date(System.currentTimeMillis());
@@ -191,7 +193,8 @@ public class MainActivity extends FragmentActivity {
 				+ wWish + "','"
 				+ wEvent + "', '"
 				+ wDate + "','"
-				+ wImagePath + "');";
+				+ wImagePath + "','"
+				+ wBookmark + "');";
 		
 		db.execSQL(sql);
 	}
@@ -210,8 +213,17 @@ public class MainActivity extends FragmentActivity {
 		return result;
 	}
 	
-	public void updateWishlistData() {
+	public void updateWishlistData(int flag, int id, String query) {
 		
+		String set = null;
+		switch(flag) {
+		case 0:
+			set = "bookmark";
+			break;
+		}
+		
+		String sql = "update " + dbTableWishlist + " set " + set +" = '" + query + "' where id = " + id + ";";
+		db.execSQL(sql);
 	}
 	
 	public void removeWishlistData(int index) {

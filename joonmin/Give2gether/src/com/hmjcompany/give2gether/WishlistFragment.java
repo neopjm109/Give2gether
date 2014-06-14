@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -48,6 +49,7 @@ public class WishlistFragment extends Fragment {
 	DecimalFormat df = new DecimalFormat("#,##0");
 	
 	int x, y;
+	int speed = 0;
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -137,11 +139,37 @@ public class WishlistFragment extends Fragment {
 			String eventOn = result.getString(4);
 			String date = result.getString(5);
 			String imagePath = result.getString(6);
+			String bookmarkOn = result.getString(7);
+			
+			final String image = imagePath;
+			
+			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, bm);
 
-			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath);
+			new ImageThread().execute(myWish);
 			
-			arrMyWishList.add(myWish);
+			/*
+			Thread thread = new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					try {
+						URL url = new URL(image);
+						bm = BitmapFactory.decodeStream(url.openStream());
+					} catch (Exception e) {
+						
+					}
+				}
+				
+			});
+			thread.start();
 			
+			try {
+				Thread.sleep(1500);
+			} catch (Exception e) {
+				
+			}
+*/
 			result.moveToNext();
 		}
 
@@ -149,8 +177,8 @@ public class WishlistFragment extends Fragment {
 		
 	}
 	
-	public void updateWishlistData() {
-		
+	public void updateWishlistData(int flag, int id, String query) {
+		mActivity.updateWishlistData(flag, id, query);
 	}
 	
 	public void removeWishlistData(int index) {
@@ -164,11 +192,12 @@ public class WishlistFragment extends Fragment {
 		String imagePath = null;
 		Bitmap bmp = null;
 		
-		public MyWishViewHolder(ImageView mImage, TextView mTitle, TextView mPrice, String imagePath) {
+		public MyWishViewHolder(ImageView mImage, TextView mTitle, TextView mPrice, String imagePath, Bitmap bmp) {
 			this.mImage = mImage;
 			this.mTitle = mTitle;
 			this.mPrice = mPrice;
 			this.imagePath = imagePath;
+			this.bmp = bmp;
 		}
 	}
 
@@ -200,24 +229,31 @@ public class WishlistFragment extends Fragment {
 				mTitle = (TextView) v.findViewById(R.id.wishTitle);
 				mPrice = (TextView) v.findViewById(R.id.wishPrice);
 				
-				viewHolder = new MyWishViewHolder(mImage, mTitle, mPrice, list.get(position).getImagePath());
+				viewHolder = new MyWishViewHolder(mImage, mTitle, mPrice, list.get(position).getImagePath(), list.get(position).getBitmap());
 				v.setTag(viewHolder);
 			} else {
 				viewHolder = (MyWishViewHolder) v.getTag();
+				
 				mImage = viewHolder.mImage;
 				mTitle = viewHolder.mTitle;
 				mPrice = viewHolder.mPrice;
 				
-				viewHolder.imagePath = list.get(position).getImagePath();		// When list items are deleted or Added, reinitialized new position
-				viewHolder.mImage.setImageResource(R.drawable.image_loading); 
+				viewHolder.bmp = list.get(position).getBitmap();
+				
 			}
 
 			final MyWish mData = list.get(position);
 			
 			if (mData != null) {
-				new MyWishImageThread().execute(viewHolder);			
+				mImage.setImageBitmap(viewHolder.bmp);
 				mTitle.setText(mData.getTitle());
 				mPrice.setText(df.format(mData.getPrice()) + " Wish");
+				
+				if (mData.getBookmarkOn().equals("true")) {
+					v.setBackgroundColor(Color.WHITE);
+				} else {
+					v.setBackgroundColor(Color.TRANSPARENT);
+				}
 			}
 			
 			v.setOnTouchListener(new View.OnTouchListener() {
@@ -240,24 +276,44 @@ public class WishlistFragment extends Fragment {
 						v.setPadding(0, v.getPaddingTop(),
 								v.getPaddingRight(), v.getPaddingBottom());
 						
-						if ( (x - event.getX()) > 150 ) {
+						if ( (x - event.getX()) > 250 ) {
 							removeWishlistData(arrMyWishList.get(pos).getId());
 
 							arrMyWishList.remove(pos);
+						} else if ( (event.getX() - x) > 250) {
+							
+							String query = null;
+							
+							if (arrMyWishList.get(pos).bookmarkOn.equals("true")) {
+								arrMyWishList.get(pos).bookmarkOn = "false";
+								query = "false";
+							} else {
+								arrMyWishList.get(pos).bookmarkOn = "true";
+								query = "true";
+							}
+							
+							updateWishlistData(0, arrMyWishList.get(pos).getId(), query);
+							mAdapter.notifyDataSetChanged();
 						}
+
+						speed = 0;
 						
 						break;
 						
 					case MotionEvent.ACTION_MOVE:
 						Log.i("PJM", "Move");
 						
-						if (x > event.getX())
-							v.setPadding(v.getPaddingLeft() - 10, v.getPaddingTop(),
+						if (x > event.getX()) {
+							v.setPadding(speed, v.getPaddingTop(),
 									v.getPaddingRight(), v.getPaddingBottom());
-						else
-							v.setPadding(v.getPaddingLeft() + 10, v.getPaddingTop(),
+							if(speed > -100)
+								speed-=10;
+						} else {
+							v.setPadding(speed, v.getPaddingTop(),
 									v.getPaddingRight(), v.getPaddingBottom());
-							
+							if(speed < 100)
+								speed+=10;
+						}
 						break;
 					}
 					
@@ -293,6 +349,34 @@ public class WishlistFragment extends Fragment {
 				result.mImage.setImageBitmap(result.bmp);
 			else
 				result.mImage.setImageResource(R.drawable.image_loading);
+		}
+	}	
+	
+	class ImageThread extends AsyncTask<MyWish, Void, Bitmap> {
+
+		MyWish myWish;
+		Bitmap bmp;
+		
+		protected Bitmap doInBackground(MyWish... params) {
+			try {
+				myWish = params[0];
+				URL url = new URL(params[0].imagePath);
+				bmp = BitmapFactory.decodeStream(url.openStream());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return bmp;
+		}
+
+		protected void onPostExecute(Bitmap result) {
+			super.onPostExecute(result);
+			
+			myWish.bmp = result;
+			
+			arrMyWishList.add(myWish);
+			
+			mAdapter.notifyDataSetChanged();
 		}
 	}	
 }
