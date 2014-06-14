@@ -172,10 +172,11 @@ int drawable ic_plusone_tall_off_client 0x7f020045
 int drawable image_loading 0x7f020046
 int drawable powered_by_google_dark 0x7f020047
 int drawable powered_by_google_light 0x7f020048
-int id action_settings 0x7f06004b
+int id Setting_AutoLogin 0x7f060049
+int id action_settings 0x7f06004c
 int id book_now 0x7f060010
 int id btnAdd 0x7f06001a
-int id btnAddWish 0x7f060049
+int id btnAddWish 0x7f06004a
 int id buttonLoginLogout 0x7f06001b
 int id buyButton 0x7f06000a
 int id buy_now 0x7f06000f
@@ -217,7 +218,7 @@ int id holo_dark 0x7f060005
 int id holo_light 0x7f060006
 int id hybrid 0x7f060004
 int id large 0x7f060015
-int id listMyWish 0x7f06004a
+int id listMyWish 0x7f06004b
 int id mImage 0x7f060041
 int id mPrice 0x7f060043
 int id mText 0x7f060048
