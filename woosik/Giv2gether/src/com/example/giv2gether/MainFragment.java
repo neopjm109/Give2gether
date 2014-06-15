@@ -17,15 +17,22 @@ public class MainFragment extends Fragment {
 	 */
 	
 	View rootView;
+	SettingPreference setting;
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		rootView = inflater.inflate(R.layout.tab_main, container, false);
 		
-		final SettingPreference setting = new SettingPreference(getActivity());
 		
-		TextView tv = (TextView)rootView.findViewById(R.id.mText);
-		tv.setText("welcome " + setting.getID());
+		return rootView;
+	}
+	
+	public void initViews() {
+
+		setting = new SettingPreference(getActivity());
+		
+		TextView tv = (TextView) rootView.findViewById(R.id.mText);
+		tv.setText("Welcome " + setting.getID());
 		CheckBox ck = (CheckBox)rootView.findViewById(R.id.Setting_AutoLogin);
 		ck.setChecked(setting.isLogin());
 		ck.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -39,6 +46,5 @@ public class MainFragment extends Fragment {
 			}
 		});
 		
-		return rootView;
 	}
 }

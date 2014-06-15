@@ -611,11 +611,11 @@ containing a value of this type.
         public static final int powered_by_google_light=0x7f020048;
     }
     public static final class id {
-        public static final int Setting_AutoLogin=0x7f060049;
-        public static final int action_settings=0x7f06004c;
+        public static final int Setting_AutoLogin=0x7f06004d;
+        public static final int action_settings=0x7f060050;
         public static final int book_now=0x7f060010;
         public static final int btnAdd=0x7f06001a;
-        public static final int btnAddWish=0x7f06004a;
+        public static final int btnAddWish=0x7f06004e;
         public static final int buttonLoginLogout=0x7f06001b;
         public static final int buyButton=0x7f06000a;
         public static final int buy_now=0x7f06000f;
@@ -650,17 +650,21 @@ containing a value of this type.
         public static final int editPrice=0x7f060018;
         public static final int editTitle=0x7f060016;
         public static final int editWish=0x7f060019;
-        public static final int fText=0x7f060047;
         public static final int facebookstatus=0x7f06001c;
+        public static final int friendsBirth=0x7f060045;
+        public static final int friendsList=0x7f06004b;
+        public static final int friendsName=0x7f060044;
+        public static final int friendsWishImage=0x7f060047;
         public static final int grayscale=0x7f060012;
         public static final int holo_dark=0x7f060005;
         public static final int holo_light=0x7f060006;
         public static final int hybrid=0x7f060004;
+        public static final int imageList=0x7f060046;
         public static final int large=0x7f060015;
-        public static final int listMyWish=0x7f06004b;
+        public static final int listMyWish=0x7f06004f;
         public static final int mImage=0x7f060041;
         public static final int mPrice=0x7f060043;
-        public static final int mText=0x7f060048;
+        public static final int mText=0x7f06004c;
         public static final int mTitle=0x7f060042;
         public static final int match_parent=0x7f06000c;
         public static final int monochrome=0x7f060013;
@@ -684,9 +688,9 @@ containing a value of this type.
         public static final int start_signup_bt=0x7f060025;
         public static final int strict_sandbox=0x7f060009;
         public static final int terrain=0x7f060003;
-        public static final int wishImage=0x7f060044;
-        public static final int wishPrice=0x7f060046;
-        public static final int wishTitle=0x7f060045;
+        public static final int wishImage=0x7f060048;
+        public static final int wishPrice=0x7f06004a;
+        public static final int wishTitle=0x7f060049;
         public static final int wrap_content=0x7f06000d;
     }
     public static final class integer {
@@ -716,10 +720,11 @@ containing a value of this type.
         public static final int com_facebook_tooltip_bubble=0x7f030014;
         public static final int com_facebook_usersettingsfragment=0x7f030015;
         public static final int custom_auto_list=0x7f030016;
-        public static final int custom_wish_list=0x7f030017;
-        public static final int tab_friends=0x7f030018;
-        public static final int tab_main=0x7f030019;
-        public static final int tab_wish=0x7f03001a;
+        public static final int custom_friends_list=0x7f030017;
+        public static final int custom_wish_list=0x7f030018;
+        public static final int tab_friends=0x7f030019;
+        public static final int tab_main=0x7f03001a;
+        public static final int tab_wish=0x7f03001b;
     }
     public static final class menu {
         public static final int main=0x7f0a0000;
