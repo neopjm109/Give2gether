@@ -44,13 +44,16 @@ public class WishlistFragment extends Fragment {
 	MainActivity mActivity;
 	ArrayList<MyWish> arrMyWishList;
 
-	Bitmap bm = null;
-
 	DecimalFormat df = new DecimalFormat("#,##0");
 	
+	//		Swipe
 	int x, y;
-	int speed = 0;
-	
+	float speed = 0;
+	float speedJitter = 10;
+
+	int minViewMovingX = 0;
+	int maxViewMovingX = 0;
+		
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		rootView = inflater.inflate(R.layout.tab_wish, container, false);
@@ -128,7 +131,7 @@ public class WishlistFragment extends Fragment {
 			String imagePath = result.getString(6);
 			String bookmarkOn = result.getString(7);
 			
-			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, bm);
+			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
 
 			Toast.makeText(mActivity.getApplicationContext(), myWish.getTitle(), Toast.LENGTH_SHORT).show();
 		}
@@ -153,7 +156,7 @@ public class WishlistFragment extends Fragment {
 			String imagePath = result.getString(6);
 			String bookmarkOn = result.getString(7);
 			
-			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, bm);
+			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
 
 			new ImageThread().execute(myWish);
 	
@@ -254,6 +257,8 @@ public class WishlistFragment extends Fragment {
 
 						x = (int) event.getX();
 						y = (int) event.getY();
+						minViewMovingX = (int) event.getX();
+						maxViewMovingX = (int) event.getX();
 						
 						v.getParent().requestDisallowInterceptTouchEvent(true);
 						break;
@@ -263,11 +268,11 @@ public class WishlistFragment extends Fragment {
 						v.setPadding(0, v.getPaddingTop(),
 								v.getPaddingRight(), v.getPaddingBottom());
 						
-						if ( (x - event.getX()) > 250 ) {
+						if ( (x - event.getX()) > 200 ) {
 							removeWishlistData(arrMyWishList.get(pos).getId());
 
 							arrMyWishList.remove(pos);
-						} else if ( (event.getX() - x) > 250) {
+						} else if ( (event.getX() - x) > 200) {
 							
 							String query = null;
 							
@@ -284,22 +289,74 @@ public class WishlistFragment extends Fragment {
 						}
 
 						speed = 0;
+						speedJitter = 10;
+						minViewMovingX = 0;
+						maxViewMovingX = 0;
 						
 						break;
 						
 					case MotionEvent.ACTION_MOVE:
-						Log.i("PJM", "Move");
 						
 						if (x > event.getX()) {
-							v.setPadding(speed, v.getPaddingTop(),
+
+							maxViewMovingX = x;
+							
+							if (minViewMovingX > event.getX()) {
+								minViewMovingX = (int) event.getX();
+								
+								if (speed > -100) {
+									speed -= speedJitter;
+									
+									if(speedJitter > 0) {
+										speedJitter -= 0.5;
+									}
+								}
+								
+							} else {
+								if (speed < 0) {
+									speed += speedJitter;
+									
+									if (speedJitter < 10) {
+										speedJitter += 0.5;								
+									}
+								}
+							}
+							
+							v.setPadding((int)speed, v.getPaddingTop(),
 									v.getPaddingRight(), v.getPaddingBottom());
-							if(speed > -100)
-								speed-=10;
+							
 						} else {
-							v.setPadding(speed, v.getPaddingTop(),
+							
+							minViewMovingX = x;
+							
+							if (maxViewMovingX < event.getX()) {
+								maxViewMovingX = (int) event.getX();
+								
+								if (speed < 100) {
+									speed += speedJitter;
+
+									if(speedJitter > 0) {
+										speedJitter -= 0.5;
+									}
+								}
+								
+							} else {
+								if (speed > 0) {
+									speed -= speedJitter;
+
+									if (speedJitter < 10) {
+										speedJitter += 0.5;										
+									}
+								}
+							}
+							
+							v.setPadding((int)speed, v.getPaddingTop(),
 									v.getPaddingRight(), v.getPaddingBottom());
-							if(speed < 100)
-								speed+=10;
+							
+						}
+
+						if (speed == 10) {
+							x = (int) event.getX();
 						}
 						break;
 					}
@@ -321,7 +378,7 @@ public class WishlistFragment extends Fragment {
 		protected Bitmap doInBackground(MyWish... params) {
 			try {
 				myWish = params[0];
-				URL url = new URL(params[0].imagePath);
+				URL url = new URL(params[0].getImagePath());
 				bmp = BitmapFactory.decodeStream(url.openStream());
 			} catch (Exception e) {
 				e.printStackTrace();

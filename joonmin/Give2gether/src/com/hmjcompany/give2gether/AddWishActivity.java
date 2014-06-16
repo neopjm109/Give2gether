@@ -46,7 +46,7 @@ public class AddWishActivity extends Activity {
 	
 	AutoCompleteTextView editTitle;
 	ImageView editImage;
-	EditText editPrice, editWish;
+	TextView editPrice, editWish;
 	Button btnAdd;
 	
 	/*
@@ -132,16 +132,16 @@ public class AddWishActivity extends Activity {
 				new ImageThread(editImage).execute(searchList.get(position).getImagePath());
 				
 				editTitle.setText(searchList.get(position).getTitle());
-				editPrice.setText(df.format(searchList.get(position).getPrice()));
-				editWish.setText(searchList.get(position).getWish()+"");
+				editPrice.setText(df.format(searchList.get(position).getPrice())+" 원");
+				editWish.setText(searchList.get(position).getWish()+" Wish");
 				
 				bAutoListClick = true;
 			}
 			
 		});
 
-		editPrice = (EditText) findViewById (R.id.editPrice);
-		editWish = (EditText) findViewById (R.id.editWish);
+		editPrice = (TextView) findViewById (R.id.editPrice);
+		editWish = (TextView) findViewById (R.id.editWish);
 		btnAdd = (Button) findViewById (R.id.btnAdd);
 		
 		btnAdd.setOnClickListener(new View.OnClickListener() {
