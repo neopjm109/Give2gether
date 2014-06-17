@@ -4,7 +4,9 @@ import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -12,11 +14,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -42,15 +45,23 @@ public class WishlistFragment extends Fragment {
 	 */
 	
 	MainActivity mActivity;
+	Giv2DBManager dbManager;
 	ArrayList<MyWish> arrMyWishList;
-
-	Bitmap bm = null;
 
 	DecimalFormat df = new DecimalFormat("#,##0");
 	
+	//		Swipe
 	int x, y;
-	int speed = 0;
+	float speed = 0;
+	float speedJitter = 10;
+
+	int minViewMovingX = 0;
+	int maxViewMovingX = 0;
 	
+	boolean bLongPress;
+	CheckForLongPress longPress = null;
+	Handler mHandler;
+		
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		rootView = inflater.inflate(R.layout.tab_wish, container, false);
@@ -62,8 +73,11 @@ public class WishlistFragment extends Fragment {
 	
 	public void initViews() {
 		mActivity = (MainActivity) getActivity();
+		dbManager = mActivity.getDBManager();
 		btnAddWish = (Button) rootView.findViewById(R.id.btnAddWish);
 		listMyWish = (ListView) rootView.findViewById(R.id.listMyWish);
+		
+		mHandler = new Handler();
 		
 		arrMyWishList = new ArrayList<MyWish>();
 
@@ -106,8 +120,12 @@ public class WishlistFragment extends Fragment {
 		}
 	}
 	
+	/*
+	 * 		DB Function
+	 */
+	
 	public void insertWishlistData (String title, int price, int wish, String imagePath) {
-		mActivity.insertWishlistData(title, price, wish, imagePath);
+		dbManager.insertWishlistData(title, price, wish, imagePath);
 
 		selectWishAll();
 
@@ -115,7 +133,7 @@ public class WishlistFragment extends Fragment {
 	}
 	
 	public void selectWishlistData(int index) {
-		Cursor result = mActivity.selectWishlistData(index);
+		Cursor result = dbManager.selectWishlistData(index);
 		
 		if (result.moveToFirst()) {
 			
@@ -128,7 +146,7 @@ public class WishlistFragment extends Fragment {
 			String imagePath = result.getString(6);
 			String bookmarkOn = result.getString(7);
 			
-			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, bm);
+			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
 
 			Toast.makeText(mActivity.getApplicationContext(), myWish.getTitle(), Toast.LENGTH_SHORT).show();
 		}
@@ -137,7 +155,7 @@ public class WishlistFragment extends Fragment {
 	}
 	
 	public void selectWishAll() {
-		Cursor result = mActivity.selectWishAll();
+		Cursor result = dbManager.selectWishAll();
 		
 		arrMyWishList.clear();
 		
@@ -153,7 +171,7 @@ public class WishlistFragment extends Fragment {
 			String imagePath = result.getString(6);
 			String bookmarkOn = result.getString(7);
 			
-			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, bm);
+			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
 
 			new ImageThread().execute(myWish);
 	
@@ -165,13 +183,17 @@ public class WishlistFragment extends Fragment {
 	}
 	
 	public void updateWishlistData(int flag, int id, String query) {
-		mActivity.updateWishlistData(flag, id, query);
+		dbManager.updateWishlistData(flag, id, query);
 	}
 	
 	public void removeWishlistData(int index) {
-		mActivity.removeWishlistData(index);
+		dbManager.removeWishlistData(index);
 		mAdapter.notifyDataSetChanged();
 	}
+	
+	/*
+	 * 		for MyWish ArrayList & ArrayAdapter
+	 */
 	
 	class MyWishViewHolder {
 		ImageView mImage = null;
@@ -187,7 +209,6 @@ public class WishlistFragment extends Fragment {
 			this.bmp = bmp;
 		}
 	}
-
 	
 	class MyWishAdapter extends ArrayAdapter<MyWish> {
 
@@ -237,7 +258,7 @@ public class WishlistFragment extends Fragment {
 				mPrice.setText(df.format(mData.getPrice()) + " Wish");
 				
 				if (mData.getBookmarkOn().equals("true")) {
-					v.setBackgroundColor(Color.WHITE);
+					v.setBackgroundColor(Color.rgb(255, 187, 51));
 				} else {
 					v.setBackgroundColor(Color.TRANSPARENT);
 				}
@@ -254,20 +275,27 @@ public class WishlistFragment extends Fragment {
 
 						x = (int) event.getX();
 						y = (int) event.getY();
+						minViewMovingX = (int) event.getX();
+						maxViewMovingX = (int) event.getX();
 						
+						bLongPress = false;
+						postCheckForLongClick(pos, 1000);
+												
 						v.getParent().requestDisallowInterceptTouchEvent(true);
 						break;
 						
 					case MotionEvent.ACTION_UP:
-						Log.i("PJM", "Up");
+
+						removeLongPressCallback();
+						
 						v.setPadding(0, v.getPaddingTop(),
 								v.getPaddingRight(), v.getPaddingBottom());
 						
-						if ( (x - event.getX()) > 250 ) {
+						if ( (x - event.getX()) > 200 ) {
 							removeWishlistData(arrMyWishList.get(pos).getId());
 
 							arrMyWishList.remove(pos);
-						} else if ( (event.getX() - x) > 250) {
+						} else if ( (event.getX() - x) > 200) {
 							
 							String query = null;
 							
@@ -284,30 +312,84 @@ public class WishlistFragment extends Fragment {
 						}
 
 						speed = 0;
+						speedJitter = 10;
+						minViewMovingX = 0;
+						maxViewMovingX = 0;
 						
 						break;
 						
 					case MotionEvent.ACTION_MOVE:
-						Log.i("PJM", "Move");
+						
+						int mTouchSlop = ViewConfiguration.get(mActivity).getScaledTouchSlop();
+						
+						int deltaX = Math.abs((int)(x - event.getX()));
+						
+						if (deltaX >= mTouchSlop) {
+							if (!bLongPress) {
+								removeLongPressCallback();
+							}
+						}
 						
 						if (x > event.getX()) {
+
+							maxViewMovingX = x;
 							
-							v.setPadding(speed, v.getPaddingTop(),
-									v.getPaddingRight(), v.getPaddingBottom());
-							
-							if (speed > -100) {
-								speed-=10;
+							if (minViewMovingX > event.getX()) {
+								minViewMovingX = (int) event.getX();
+								
+								if (speed > -100) {
+									speed -= speedJitter;
+									
+									if(speedJitter > 0) {
+										speedJitter -= 0.5;
+									}
+								}
+								
+							} else {
+								if (speed < 0) {
+									speed += speedJitter;
+									
+									if (speedJitter < 10) {
+										speedJitter += 0.5;								
+									}
+								}
 							}
+							
+							v.setPadding((int)speed, v.getPaddingTop(),
+									v.getPaddingRight(), v.getPaddingBottom());
 							
 						} else {
 							
-							v.setPadding(speed, v.getPaddingTop(),
-									v.getPaddingRight(), v.getPaddingBottom());
+							minViewMovingX = x;
 							
-							if (speed < 100) {
-								speed+=10;
+							if (maxViewMovingX < event.getX()) {
+								maxViewMovingX = (int) event.getX();
+								
+								if (speed < 100) {
+									speed += speedJitter;
+
+									if(speedJitter > 0) {
+										speedJitter -= 0.5;
+									}
+								}
+								
+							} else {
+								if (speed > 0) {
+									speed -= speedJitter;
+
+									if (speedJitter < 10) {
+										speedJitter += 0.5;										
+									}
+								}
 							}
 							
+							v.setPadding((int)speed, v.getPaddingTop(),
+									v.getPaddingRight(), v.getPaddingBottom());
+							
+						}
+
+						if (speed == 10) {
+							x = (int) event.getX();
 						}
 						break;
 					}
@@ -321,6 +403,7 @@ public class WishlistFragment extends Fragment {
 		
 	}
 
+	// 		Get a Image by url
 	class ImageThread extends AsyncTask<MyWish, Void, Bitmap> {
 
 		MyWish myWish;
@@ -348,4 +431,95 @@ public class WishlistFragment extends Fragment {
 			mAdapter.notifyDataSetChanged();
 		}
 	}	
+	
+	//		Long Click Runnable
+	class CheckForLongPress implements Runnable {
+		int pos;
+		
+		public CheckForLongPress(int pos) {
+			this.pos = pos;
+		}
+		
+		public void run() {
+			bLongPress = true;
+			AlertDialog.Builder dialog = new AlertDialog.Builder(mActivity);
+			
+			ArrayList<String> menulist = new ArrayList<String>();
+			if ( arrMyWishList.get(pos).getBookmarkOn().equals("true"))
+				menulist.add("즐겨찾기 해제");
+			else
+				menulist.add("즐겨찾기 지정");
+			menulist.add("수정하기");
+			menulist.add("삭제");
+			
+			ArrayAdapter<String> dAdapter = new ArrayAdapter<>(mActivity.getApplicationContext(), R.layout.dialog_menu, menulist);
+			
+			dialog.setTitle("메뉴");
+			
+			dialog.setAdapter(dAdapter, new DialogInterface.OnClickListener() {
+				
+				public void onClick(DialogInterface dialog, int which) {
+
+					switch(which) {
+					case 0:			// Bookmark Func
+						
+						String query = null;
+						
+						if (arrMyWishList.get(pos).bookmarkOn.equals("true")) {
+							arrMyWishList.get(pos).bookmarkOn = "false";
+							query = "false";
+						} else {
+							arrMyWishList.get(pos).bookmarkOn = "true";
+							query = "true";
+						}
+						
+						updateWishlistData(0, arrMyWishList.get(pos).getId(), query);
+						mAdapter.notifyDataSetChanged();
+						break;
+						
+					case 1:			// Modify Func
+						Toast.makeText(mActivity, pos+"", Toast.LENGTH_SHORT).show();
+//						Toast.makeText(mActivity.getApplicationContext(), "곧 나옵니다!", Toast.LENGTH_SHORT).show();
+						break;
+						
+					case 2:			// Remove Func
+						removeWishlistData(arrMyWishList.get(pos).getId());
+
+						arrMyWishList.remove(pos);
+						break;
+					}
+					
+					longPress = null;
+				}
+			});
+			
+			dialog.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+
+				public void onClick(DialogInterface dialog, int which) {
+
+					dialog.dismiss();
+					
+					longPress = null;
+				}
+			});
+			
+			dialog.show();
+		}
+	}
+	
+	private void postCheckForLongClick(int position, int delayOffset) {
+		bLongPress = false;
+		
+		if (longPress == null) {
+			longPress = new CheckForLongPress(position);
+		}
+		
+		mHandler.postDelayed(longPress, delayOffset);
+	}
+	
+	private void removeLongPressCallback() {
+		if (longPress != null) {
+			mHandler.removeCallbacks(longPress);
+		}
+	}
 }

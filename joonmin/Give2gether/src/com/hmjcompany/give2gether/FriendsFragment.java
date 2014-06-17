@@ -23,6 +23,7 @@ public class FriendsFragment extends Fragment {
 	FriendsAdapter mAdapter;
 	
 	MainActivity mActivity;
+	Giv2DBManager dbManager;
 	ArrayList<MyFriends> friends;
 	
 	
@@ -37,6 +38,7 @@ public class FriendsFragment extends Fragment {
 	
 	public void initViews() {
 		mActivity = (MainActivity) getActivity();
+		dbManager = mActivity.getDBManager();
 		friends = new ArrayList<MyFriends>();
 		friendsList = (ListView) rootView.findViewById(R.id.friendsList);
 

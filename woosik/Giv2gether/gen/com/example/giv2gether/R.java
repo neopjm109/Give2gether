@@ -722,9 +722,10 @@ containing a value of this type.
         public static final int custom_auto_list=0x7f030016;
         public static final int custom_friends_list=0x7f030017;
         public static final int custom_wish_list=0x7f030018;
-        public static final int tab_friends=0x7f030019;
-        public static final int tab_main=0x7f03001a;
-        public static final int tab_wish=0x7f03001b;
+        public static final int dialog_menu=0x7f030019;
+        public static final int tab_friends=0x7f03001a;
+        public static final int tab_main=0x7f03001b;
+        public static final int tab_wish=0x7f03001c;
     }
     public static final class menu {
         public static final int main=0x7f0a0000;

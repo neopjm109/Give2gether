@@ -45,6 +45,7 @@ public class WishlistFragment extends Fragment {
 	 */
 	
 	MainActivity mActivity;
+	Giv2DBManager dbManager;
 	ArrayList<MyWish> arrMyWishList;
 
 	DecimalFormat df = new DecimalFormat("#,##0");
@@ -72,6 +73,7 @@ public class WishlistFragment extends Fragment {
 	
 	public void initViews() {
 		mActivity = (MainActivity) getActivity();
+		dbManager = mActivity.getDBManager();
 		btnAddWish = (Button) rootView.findViewById(R.id.btnAddWish);
 		listMyWish = (ListView) rootView.findViewById(R.id.listMyWish);
 		
@@ -118,8 +120,12 @@ public class WishlistFragment extends Fragment {
 		}
 	}
 	
+	/*
+	 * 		DB Function
+	 */
+	
 	public void insertWishlistData (String title, int price, int wish, String imagePath) {
-		mActivity.insertWishlistData(title, price, wish, imagePath);
+		dbManager.insertWishlistData(title, price, wish, imagePath);
 
 		selectWishAll();
 
@@ -127,7 +133,7 @@ public class WishlistFragment extends Fragment {
 	}
 	
 	public void selectWishlistData(int index) {
-		Cursor result = mActivity.selectWishlistData(index);
+		Cursor result = dbManager.selectWishlistData(index);
 		
 		if (result.moveToFirst()) {
 			
@@ -149,7 +155,7 @@ public class WishlistFragment extends Fragment {
 	}
 	
 	public void selectWishAll() {
-		Cursor result = mActivity.selectWishAll();
+		Cursor result = dbManager.selectWishAll();
 		
 		arrMyWishList.clear();
 		
@@ -177,13 +183,17 @@ public class WishlistFragment extends Fragment {
 	}
 	
 	public void updateWishlistData(int flag, int id, String query) {
-		mActivity.updateWishlistData(flag, id, query);
+		dbManager.updateWishlistData(flag, id, query);
 	}
 	
 	public void removeWishlistData(int index) {
-		mActivity.removeWishlistData(index);
+		dbManager.removeWishlistData(index);
 		mAdapter.notifyDataSetChanged();
 	}
+	
+	/*
+	 * 		for MyWish ArrayList & ArrayAdapter
+	 */
 	
 	class MyWishViewHolder {
 		ImageView mImage = null;
@@ -199,7 +209,6 @@ public class WishlistFragment extends Fragment {
 			this.bmp = bmp;
 		}
 	}
-
 	
 	class MyWishAdapter extends ArrayAdapter<MyWish> {
 
