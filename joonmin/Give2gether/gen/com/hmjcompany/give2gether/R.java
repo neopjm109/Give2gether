@@ -22,9 +22,41 @@ public final class R {
         public static final int activity_vertical_margin=0x7f040001;
     }
     public static final class drawable {
-        public static final int app_icon=0x7f020000;
-        public static final int ic_launcher=0x7f020001;
-        public static final int image_loading=0x7f020002;
+        public static final int ab_background_textured_give2gether=0x7f020000;
+        public static final int ab_bottom_solid_give2gether=0x7f020001;
+        public static final int ab_solid_give2gether=0x7f020002;
+        public static final int ab_stacked_solid_give2gether=0x7f020003;
+        public static final int ab_texture_tile_give2gether=0x7f020004;
+        public static final int ab_transparent_give2gether=0x7f020005;
+        public static final int app_icon=0x7f020006;
+        public static final int btn_cab_done_default_give2gether=0x7f020007;
+        public static final int btn_cab_done_focused_give2gether=0x7f020008;
+        public static final int btn_cab_done_give2gether=0x7f020009;
+        public static final int btn_cab_done_pressed_give2gether=0x7f02000a;
+        public static final int cab_background_bottom_give2gether=0x7f02000b;
+        public static final int cab_background_top_give2gether=0x7f02000c;
+        public static final int ic_launcher=0x7f02000d;
+        public static final int image_loading=0x7f02000e;
+        public static final int list_focused_give2gether=0x7f02000f;
+        public static final int list_pressed_give2gether=0x7f020010;
+        public static final int menu_dropdown_panel_give2gether=0x7f020011;
+        public static final int progress_bg_give2gether=0x7f020012;
+        public static final int progress_horizontal_give2gether=0x7f020013;
+        public static final int progress_primary_give2gether=0x7f020014;
+        public static final int progress_secondary_give2gether=0x7f020015;
+        public static final int selectable_background_give2gether=0x7f020016;
+        public static final int spinner_ab_default_give2gether=0x7f020017;
+        public static final int spinner_ab_disabled_give2gether=0x7f020018;
+        public static final int spinner_ab_focused_give2gether=0x7f020019;
+        public static final int spinner_ab_pressed_give2gether=0x7f02001a;
+        public static final int spinner_background_ab_give2gether=0x7f02001b;
+        public static final int tab_indicator_ab_give2gether=0x7f02001c;
+        public static final int tab_selected_focused_give2gether=0x7f02001d;
+        public static final int tab_selected_give2gether=0x7f02001e;
+        public static final int tab_selected_pressed_give2gether=0x7f02001f;
+        public static final int tab_unselected_focused_give2gether=0x7f020020;
+        public static final int tab_unselected_give2gether=0x7f020021;
+        public static final int tab_unselected_pressed_give2gether=0x7f020022;
     }
     public static final class id {
         public static final int action_settings=0x7f080014;
@@ -55,9 +87,10 @@ public final class R {
         public static final int custom_auto_list=0x7f030002;
         public static final int custom_friends_list=0x7f030003;
         public static final int custom_wish_list=0x7f030004;
-        public static final int tab_friends=0x7f030005;
-        public static final int tab_main=0x7f030006;
-        public static final int tab_wish=0x7f030007;
+        public static final int dialog_menu=0x7f030005;
+        public static final int tab_friends=0x7f030006;
+        public static final int tab_main=0x7f030007;
+        public static final int tab_wish=0x7f030008;
     }
     public static final class menu {
         public static final int main=0x7f070000;
@@ -68,6 +101,10 @@ public final class R {
         public static final int hello_world=0x7f050001;
     }
     public static final class style {
+        public static final int ActionBar_Solid_Give2gether=0x7f060003;
+        public static final int ActionBar_Transparent_Give2gether=0x7f060004;
+        public static final int ActionBarTabStyle_Give2gether=0x7f060007;
+        public static final int ActionButton_CloseMode_Give2gether=0x7f06000a;
         /** 
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
@@ -94,5 +131,13 @@ public final class R {
  All customizations that are NOT specific to a particular API-level can go here. 
          */
         public static final int AppTheme=0x7f060001;
+        public static final int DropDownListView_Give2gether=0x7f060006;
+        public static final int DropDownNav_Give2gether=0x7f060008;
+        public static final int PopupMenu_Give2gether=0x7f060005;
+        public static final int ProgressBar_Give2gether=0x7f060009;
+        public static final int Theme_Give2gether=0x7f060002;
+        /**  this style is only referenced in a Light.DarkActionBar based theme 
+         */
+        public static final int Theme_Give2gether_Widget=0x7f06000b;
     }
 }

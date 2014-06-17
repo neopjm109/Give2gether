@@ -13,7 +13,7 @@
         android:allowBackup="true"
         android:icon="@drawable/app_icon"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
+        android:theme="@style/Theme.Give2gether" >
         <activity
             android:name="com.hmjcompany.give2gether.MainActivity"
             android:label="@string/app_name" >

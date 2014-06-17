@@ -4,7 +4,9 @@ import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -12,11 +14,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -53,6 +56,10 @@ public class WishlistFragment extends Fragment {
 
 	int minViewMovingX = 0;
 	int maxViewMovingX = 0;
+	
+	boolean bLongPress;
+	CheckForLongPress longPress = null;
+	Handler mHandler;
 		
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -67,6 +74,8 @@ public class WishlistFragment extends Fragment {
 		mActivity = (MainActivity) getActivity();
 		btnAddWish = (Button) rootView.findViewById(R.id.btnAddWish);
 		listMyWish = (ListView) rootView.findViewById(R.id.listMyWish);
+		
+		mHandler = new Handler();
 		
 		arrMyWishList = new ArrayList<MyWish>();
 
@@ -240,7 +249,7 @@ public class WishlistFragment extends Fragment {
 				mPrice.setText(df.format(mData.getPrice()) + " Wish");
 				
 				if (mData.getBookmarkOn().equals("true")) {
-					v.setBackgroundColor(Color.WHITE);
+					v.setBackgroundColor(Color.rgb(255, 187, 51));
 				} else {
 					v.setBackgroundColor(Color.TRANSPARENT);
 				}
@@ -260,11 +269,16 @@ public class WishlistFragment extends Fragment {
 						minViewMovingX = (int) event.getX();
 						maxViewMovingX = (int) event.getX();
 						
+						bLongPress = false;
+						postCheckForLongClick(pos, 1000);
+												
 						v.getParent().requestDisallowInterceptTouchEvent(true);
 						break;
 						
 					case MotionEvent.ACTION_UP:
-						Log.i("PJM", "Up");
+
+						removeLongPressCallback();
+						
 						v.setPadding(0, v.getPaddingTop(),
 								v.getPaddingRight(), v.getPaddingBottom());
 						
@@ -296,6 +310,16 @@ public class WishlistFragment extends Fragment {
 						break;
 						
 					case MotionEvent.ACTION_MOVE:
+						
+						int mTouchSlop = ViewConfiguration.get(mActivity).getScaledTouchSlop();
+						
+						int deltaX = Math.abs((int)(x - event.getX()));
+						
+						if (deltaX >= mTouchSlop) {
+							if (!bLongPress) {
+								removeLongPressCallback();
+							}
+						}
 						
 						if (x > event.getX()) {
 
@@ -370,6 +394,7 @@ public class WishlistFragment extends Fragment {
 		
 	}
 
+	// 		Get a Image by url
 	class ImageThread extends AsyncTask<MyWish, Void, Bitmap> {
 
 		MyWish myWish;
@@ -397,4 +422,95 @@ public class WishlistFragment extends Fragment {
 			mAdapter.notifyDataSetChanged();
 		}
 	}	
+	
+	//		Long Click Runnable
+	class CheckForLongPress implements Runnable {
+		int pos;
+		
+		public CheckForLongPress(int pos) {
+			this.pos = pos;
+		}
+		
+		public void run() {
+			bLongPress = true;
+			AlertDialog.Builder dialog = new AlertDialog.Builder(mActivity);
+			
+			ArrayList<String> menulist = new ArrayList<String>();
+			if ( arrMyWishList.get(pos).getBookmarkOn().equals("true"))
+				menulist.add("즐겨찾기 해제");
+			else
+				menulist.add("즐겨찾기 지정");
+			menulist.add("수정하기");
+			menulist.add("삭제");
+			
+			ArrayAdapter<String> dAdapter = new ArrayAdapter<>(mActivity.getApplicationContext(), R.layout.dialog_menu, menulist);
+			
+			dialog.setTitle("메뉴");
+			
+			dialog.setAdapter(dAdapter, new DialogInterface.OnClickListener() {
+				
+				public void onClick(DialogInterface dialog, int which) {
+
+					switch(which) {
+					case 0:			// Bookmark Func
+						
+						String query = null;
+						
+						if (arrMyWishList.get(pos).bookmarkOn.equals("true")) {
+							arrMyWishList.get(pos).bookmarkOn = "false";
+							query = "false";
+						} else {
+							arrMyWishList.get(pos).bookmarkOn = "true";
+							query = "true";
+						}
+						
+						updateWishlistData(0, arrMyWishList.get(pos).getId(), query);
+						mAdapter.notifyDataSetChanged();
+						break;
+						
+					case 1:			// Modify Func
+						Toast.makeText(mActivity, pos+"", Toast.LENGTH_SHORT).show();
+//						Toast.makeText(mActivity.getApplicationContext(), "곧 나옵니다!", Toast.LENGTH_SHORT).show();
+						break;
+						
+					case 2:			// Remove Func
+						removeWishlistData(arrMyWishList.get(pos).getId());
+
+						arrMyWishList.remove(pos);
+						break;
+					}
+					
+					longPress = null;
+				}
+			});
+			
+			dialog.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+
+				public void onClick(DialogInterface dialog, int which) {
+
+					dialog.dismiss();
+					
+					longPress = null;
+				}
+			});
+			
+			dialog.show();
+		}
+	}
+	
+	private void postCheckForLongClick(int position, int delayOffset) {
+		bLongPress = false;
+		
+		if (longPress == null) {
+			longPress = new CheckForLongPress(position);
+		}
+		
+		mHandler.postDelayed(longPress, delayOffset);
+	}
+	
+	private void removeLongPressCallback() {
+		if (longPress != null) {
+			mHandler.removeCallbacks(longPress);
+		}
+	}
 }
