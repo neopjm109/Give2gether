@@ -111,6 +111,7 @@ public class GoogleLoginActivity extends Activity implements
 		intent.putExtra("phone", accountPhone);
 		intent.putExtra("birth", accountBirth);
 		startActivity(intent);
+		finish();
 	}
 
 	@Override

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#17df0d" >
+    
+    <TextView
+        android:id="@+id/fText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Friends Tab"
+        />
+    
+    <ListView
+        android:id="@+id/friend_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" 
+        ></ListView>
+    
+    <Button
+        android:id="@+id/fAddFriends"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="8"
+        android:text="Add Friends"
+        />
+    
+
+</LinearLayout>
