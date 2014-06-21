@@ -8,9 +8,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -20,14 +18,12 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.give2gether.WishlistFragment.MyWishImageThread;
-import com.google.android.gms.internal.df;
-
 public class FriendsFragment extends Fragment implements OnClickListener {
 
 	View rootView;
 	MyFriendAdapter adapter;
 	MainActivity mActivity;
+	Giv2DBManager dbManager;
 	ArrayList<MyFriend> arrMyFriendList;
 
 	Button bt_AddFriends;
@@ -37,23 +33,32 @@ public class FriendsFragment extends Fragment implements OnClickListener {
 			Bundle savedInstanceState) {
 		rootView = inflater.inflate(R.layout.tab_friends, container, false);
 
-		init();
+		//init();
 
 		return rootView;
 	}
 
+	@Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		
+		init();
+	}
+
 	public void init() {
 		mActivity = (MainActivity) getActivity();
+		dbManager = mActivity.getDBManager();
 		bt_AddFriends = (Button) rootView.findViewById(R.id.fAddFriends);
 		bt_AddFriends.setOnClickListener(this);
 		listFriend = (ListView) rootView.findViewById(R.id.friend_listview);
 
 		arrMyFriendList = new ArrayList<MyFriend>();
 		
-		selectFriendsAll();
+		arrMyFriendList = dbManager.getFriendsList();
 		
 		adapter = new MyFriendAdapter(getActivity().getApplicationContext(),
-				R.layout.layout_friend_list, arrMyFriendList);
+				R.layout.custom_friend_list, arrMyFriendList);
 		
 		listFriend.setAdapter(adapter);
 		listFriend.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -107,9 +112,11 @@ public class FriendsFragment extends Fragment implements OnClickListener {
 			final int pos = position;
 
 			if (v == null) {
-				LayoutInflater inflater = (LayoutInflater) mActivity
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				v = inflater.inflate(R.layout.custom_wish_list, null);
+				//LayoutInflater inflater = (LayoutInflater) mActivity
+				//		.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				LayoutInflater inflater = (LayoutInflater) getActivity()
+								.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				v = inflater.inflate(R.layout.custom_friend_list, null);
 
 				mImage = (ImageView) v.findViewById(R.id.Friend_list_PhotoWish);
 				mName = (TextView) v.findViewById(R.id.Friend_list_Name);
@@ -142,7 +149,7 @@ public class FriendsFragment extends Fragment implements OnClickListener {
 			if (mData != null) {
 				// new MyWishImageThread().execute(viewHolder);
 				mName.setText(mData.getName());
-				mBirth.setText(mData.getBirth());
+				//mBirth.setText(mData.getBirth());
 			}
 			/*
 			 * v.setOnTouchListener(new View.OnTouchListener() {
@@ -181,31 +188,5 @@ public class FriendsFragment extends Fragment implements OnClickListener {
 			return v;
 		}
 
-	}
-	
-	public void selectFriendsAll() {
-		Cursor result = mActivity.selectFriendsAll();
-		
-		arrMyFriendList.clear();
-		
-		result.moveToFirst();
-		
-		while (!result.isAfterLast()) {
-			int id = result.getInt(0);
-			String name = result.getString(1);
-			String email = result.getString(2);
-			String phone = result.getString(3);
-			String birth = result.getString(4);
-			String imagePath = result.getString(5);
-
-			MyFriend myFriend = new MyFriend(id, name, email, phone, birth, imagePath);
-			
-			arrMyFriendList.add(myFriend);
-			
-			result.moveToNext();
-		}
-
-		result.close();
-		
 	}
 }
