@@ -1,10 +1,12 @@
-package com.example.giv2gether;
+package com.example.give2gether;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+
+import com.example.give2gether.WishlistFragment.ImageThread;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -88,6 +90,7 @@ public class Giv2DBManager {
 		} catch (Exception e) {
 			
 		}
+		
 		String sql = "insert into " + DB_TABLE_FRIENDS
 				+ " values(NULL, '"
 				+ fName + "', '"
@@ -96,6 +99,7 @@ public class Giv2DBManager {
 				+ fBirth + "');";
 		
 		db.execSQL(sql);
+		
 	}
 	
 	public Cursor selectFriendsAll() {
@@ -141,12 +145,10 @@ public class Giv2DBManager {
 		
 	}
 	
-	public void removeFriendsData(int index) {
+	public void removeFriendsDataFromId(int index) {
 		String sql = "delete from " + DB_TABLE_FRIENDS + " where id = " + index + ";";
 		db.execSQL(sql);
 	}
-	
-	
 	
 	// Wishlist
 	
