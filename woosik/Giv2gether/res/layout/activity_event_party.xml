@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <TextView
+        android:id="@+id/eventFriendsName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Friends Name" />
+    
+    <TextView
+        android:id="@+id/eventDay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Event D-Day"
+        />
+    
+    <LinearLayout
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        >
+        
+	    <ImageView
+	        android:id="@+id/wishImage"
+	        android:layout_width="100dp"
+	        android:layout_height="100dp"
+	        android:padding="10dp"
+	        android:src="@drawable/ic_launcher"
+	        android:layout_weight="1"
+	        />
+	    
+	    <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginLeft="5dp"
+	        android:orientation="vertical"
+	        android:layout_weight="10"
+	        >
+	        
+	        <TextView
+	            android:id="@+id/wishTitle"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="Title"
+	            android:textSize="25sp"
+	            android:singleLine="true"
+	            />
+	        
+	        <TextView
+	            android:id="@+id/wishPrice"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="Low Price"
+	            />
+	        
+	    </LinearLayout>
+        
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnEventPresent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Present"
+        />
+    
+</LinearLayout>

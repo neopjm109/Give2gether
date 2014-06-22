@@ -8,6 +8,9 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
     <application
         android:allowBackup="true"
@@ -15,7 +18,7 @@
         android:label="@string/app_name"
         android:theme="@style/Theme.Give2gether" >
         <activity
-            android:name="com.hmjcompany.give2gether.MainActivity"
+            android:name="com.hmjcompany.give2gether.StartActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,10 +27,23 @@
             </intent-filter>
         </activity>
         
-        <activity
-            android:name="com.hmjcompany.give2gether.AddWishActivity"
-            >
-        </activity>
+        <activity android:name="com.hmjcompany.give2gether.MainActivity"/>
+        <activity android:name="com.hmjcompany.give2gether.LoginActivity"/>
+        <activity android:name="com.hmjcompany.give2gether.AddFriendsActivity"/>
+        <activity android:name="com.hmjcompany.give2gether.AddWishActivity"/>
+        <activity android:name="com.hmjcompany.give2gether.FacebookLoginActivity" />
+        <activity android:name="com.hmjcompany.give2gether.GoogleLoginActivity" />
+        <activity android:name="com.hmjcompany.give2gether.SignupGiv2gether" />
+        <activity android:name="com.hmjcompany.give2gether.SignupProcActivity" />
+        <activity android:name="com.hmjcompany.give2gether.SignUpSelectActivity" />
+        <activity android:name="com.hmjcompany.give2gether.EventGenerationActivity" />
+        <activity android:name="com.hmjcompany.give2gether.EventPartyActivity" />
+        
+         <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
+         <activity android:name="com.facebook.LoginActivity"></activity>
     </application>
 
 </manifest>

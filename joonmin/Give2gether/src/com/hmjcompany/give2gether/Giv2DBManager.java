@@ -2,6 +2,7 @@ package com.hmjcompany.give2gether;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -87,7 +88,6 @@ public class Giv2DBManager {
 		} catch (Exception e) {
 			
 		}
-		
 		String sql = "insert into " + DB_TABLE_FRIENDS
 				+ " values(NULL, '"
 				+ fName + "', '"
@@ -96,7 +96,6 @@ public class Giv2DBManager {
 				+ fBirth + "');";
 		
 		db.execSQL(sql);
-		
 	}
 	
 	public Cursor selectFriendsAll() {
@@ -104,6 +103,31 @@ public class Giv2DBManager {
 		Cursor result = db.rawQuery(sql, null);
 		
 		return result;
+	}
+	
+	public ArrayList<MyFriend> getFriendsList(){
+		Cursor result = selectFriendsAll();
+		ArrayList<MyFriend> fl = new ArrayList<MyFriend>();
+		
+		result.moveToFirst();
+		
+		while (!result.isAfterLast()) {
+			int id = result.getInt(0);
+			String name = result.getString(1);
+			String email = result.getString(2);
+			String phone = result.getString(3);
+			String birth = result.getString(4);
+			//String imagePath = result.getString(5);
+			
+			MyFriend tempFriend= new MyFriend(id, name, email, phone, birth, null);
+			
+			fl.add(tempFriend);
+
+			//new ImageThread().execute(tempFriend);
+	
+			result.moveToNext();
+		}
+		return fl;
 	}
 	
 	public Cursor selectFriendsData(int index) {

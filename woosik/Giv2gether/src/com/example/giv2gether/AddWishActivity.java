@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -65,6 +66,7 @@ public class AddWishActivity extends Activity {
 	DecimalFormat df = new DecimalFormat("#,##0");
 	boolean bAutoListClick;
 	
+	Handler mHandler;
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -77,6 +79,8 @@ public class AddWishActivity extends Activity {
 	public void initViews() {
 		searchList = new ArrayList<SearchData>();
 		bAutoListClick = false;
+		
+		mHandler = new Handler();
 
 		editImage = (ImageView) findViewById (R.id.editImage);
 		editTitle = (AutoCompleteTextView) findViewById (R.id.editTitle);
@@ -104,15 +108,17 @@ public class AddWishActivity extends Activity {
 				timer.schedule(new TimerTask() {
 					
 					public void run() {
-						
-						// When list click, suggestion list isn't shown.
-						if(!bAutoListClick)
-							new JsonParse().execute(parseUrl);
-						else
-							bAutoListClick = false;
-						
-					}
-					
+						mHandler.post(new Runnable(){
+							public void run(){
+								// When list click, suggestion list isn't shown.
+								if(!bAutoListClick)
+									new JsonParse().execute(parseUrl);
+								else
+									bAutoListClick = false;
+								
+							}
+						});						
+					}					
 				}, delay);
 					
 			}

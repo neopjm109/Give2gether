@@ -7,31 +7,27 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import com.google.android.gms.common.SignInButton;
-
 public class SignUpSelectActivity extends Activity implements OnClickListener {
 
 	// LoginButton bt_FacebookLogin;
-	Button bt_FacebookLogin;
-	SignInButton bt_GoogleLogin;
-	Button bt_giv2gether;
+	Button btnFacebookLogin, btnGoogleLogin, btngiv2gether;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_signupselect);
 
-		init();
+		initViews();
 	}
 
-	public void init() {
-		bt_FacebookLogin = (Button) findViewById(R.id.signup_facebookButton);
-		bt_GoogleLogin = (SignInButton) findViewById(R.id.signup_googleButton);
-		bt_giv2gether = (Button) findViewById(R.id.signup_Give2Gether);
+	public void initViews() {
+		btnFacebookLogin = (Button) findViewById(R.id.signup_facebookButton);
+		btnGoogleLogin = (Button) findViewById(R.id.signup_googleButton);
+		btngiv2gether = (Button) findViewById(R.id.signup_Give2Gether);
 
-		bt_FacebookLogin.setOnClickListener(this);
-		bt_GoogleLogin.setOnClickListener(this);
-		bt_giv2gether.setOnClickListener(this);
+		btnFacebookLogin.setOnClickListener(this);
+		btnGoogleLogin.setOnClickListener(this);
+		btngiv2gether.setOnClickListener(this);
 	}
 
 	@Override

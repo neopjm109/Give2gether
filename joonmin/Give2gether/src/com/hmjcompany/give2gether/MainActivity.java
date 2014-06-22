@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 
+
 public class MainActivity extends FragmentActivity {
 
 	/*
@@ -18,7 +19,7 @@ public class MainActivity extends FragmentActivity {
 	private TabsPagerAdapter mAdapter;
 	private ActionBar actionBar;
 	
-	private String[] tabs = { "Main", "My Wishlist", "My Friends" };
+	private String[] tabs = { "News Feed", "W Pocket", "My Friends", "My Page" };
 	
 	/*
 	 * 		Database
@@ -37,13 +38,8 @@ public class MainActivity extends FragmentActivity {
 				
 		db = dbManager.getDatabase();
 
-//		createDatabase(dbName, dbMode);
-
-//		removeTable();
-//		createTable();
-
 	}
-	
+
 	public void initTabs() {
 		viewPager = (ViewPager) findViewById(R.id.pager);
 		actionBar = getActionBar();
@@ -74,6 +70,7 @@ public class MainActivity extends FragmentActivity {
 				
 				public void onPageSelected(int position) {
 					actionBar.setSelectedNavigationItem(position);
+					invalidateOptionsMenu();
 				}
 				
 				public void onPageScrolled(int arg0, float arg1, int arg2) {
@@ -91,4 +88,6 @@ public class MainActivity extends FragmentActivity {
 	public Giv2DBManager getDBManager() {
 		return dbManager;
 	}
+	
+	
 }
