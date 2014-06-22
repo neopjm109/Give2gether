@@ -312,7 +312,7 @@ public class WPocketFragment extends Fragment {
 			if (mData != null) {
 				mImage.setImageBitmap(viewHolder.bmp);
 				mTitle.setText(mData.getTitle());
-				mPrice.setText(df.format(mData.getPrice()) + " Wish");
+				mPrice.setText(df.format(mData.getWish()) + " Wish");
 				
 				if (!editOn) {
 					if (mData.getBookmarkOn().equals("true")) {
@@ -529,7 +529,7 @@ public class WPocketFragment extends Fragment {
 			menulist.add("수정하기");
 			menulist.add("삭제");
 			
-			ArrayAdapter<String> dAdapter = new ArrayAdapter<String>(mActivity.getApplicationContext(), R.layout.dialog_menu, menulist);
+			ArrayAdapter<String> dAdapter = new ArrayAdapter<>(mActivity.getApplicationContext(), R.layout.dialog_menu, menulist);
 			
 			dialog.setTitle("메뉴");
 			

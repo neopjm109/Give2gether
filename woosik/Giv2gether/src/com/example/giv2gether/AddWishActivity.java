@@ -224,8 +224,8 @@ public class AddWishActivity extends Activity {
 					int price = c.getInt("lprice");
 					String imagePath = c.getString("image");
 					
-					SearchData sData = new SearchData(title, price, (price / 1000), imagePath);
-						
+					SearchData sData = new SearchData(title, price, (int)Math.ceil(price / 1000.0), imagePath);
+
 					searchList.add(sData);
 				}
 
