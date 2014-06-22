@@ -10,6 +10,13 @@
         android:layout_height="wrap_content"
         android:text="Friends : "/>
     
+    <EditText 
+        android:id="@+id/AddFriend_et_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search"
+        />
+    
     <ListView 
         android:id="@+id/AddFriends_list"
         android:layout_width="match_parent"

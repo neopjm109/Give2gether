@@ -36,18 +36,21 @@ public class SignupProcActivity extends Activity {
 
 		Intent intent = getIntent();
 		String Email = intent.getStringExtra("email");
+		String Password = intent.getStringExtra("password");
 		String Name = intent.getStringExtra("name");
 		String Phone = intent.getStringExtra("phone");
 		String Birth = intent.getStringExtra("birth");
 
 		Log.v(TAG, "SignupProcActivity - email:" + Email + "  Name:" + Name
 				+ "  Phone:" + Phone + "  Birth:" + Birth);
+
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
 				.permitAll().build();
 		StrictMode.setThreadPolicy(policy);
 
 		HttpPostAsyncTask task = new HttpPostAsyncTask();
-		task.doInBackground(Email, Name, Phone, Birth);
+
+		task.doInBackground(Email, Password, Name, Phone, Birth);
 	}
 
 	@Override
@@ -76,26 +79,29 @@ public class SignupProcActivity extends Activity {
 		@Override
 		protected Long doInBackground(String... params) {
 			String Email = params[0];
-			String Name = params[1];
-			String Phone = params[2];
-			String Birth = params[3];
+			String Password = params[1];
+			String Name = params[2];
+			String Phone = params[3];
+			String Birth = params[4];
 
 			try {
 				HttpClient client = new DefaultHttpClient();
-				//우리집 
-				//String postUrl = "http://192.168.0.4:8888/insertMember.php";
-				//드림엔터 
-				//String postUrl = "http://10.10.10.152:8888/insertMember.php";
-				//우시기 에그 
-				//String postUrl = "http://192.168.1.10:8888/insertMember.php";
-				//본 서버(카페24)
-				String postUrl = "http://naddola.cafe24.com/insertMember.php";
+				String postUrl;
+
+				//자체 가입
+				if(Password != null)
+					postUrl = "http://naddola.cafe24.com/insertMemberGiv2gether.php";
 				
+				//google, facebook 가입, 로그인  
+				else
+					postUrl = "http://naddola.cafe24.com/insertMemberSNS.php";
+
 				HttpPost post = new HttpPost(postUrl);
 
-				// 전달인자  
+				// 전달인자
 				List params2 = new ArrayList();
 				params2.add(new BasicNameValuePair("email", Email));
+				params2.add(new BasicNameValuePair("password", Password));
 				params2.add(new BasicNameValuePair("name", Name));
 				params2.add(new BasicNameValuePair("phone", Phone));
 				params2.add(new BasicNameValuePair("birth", Birth));
@@ -108,23 +114,30 @@ public class SignupProcActivity extends Activity {
 
 				if (resEntity != null) {
 					String resp = EntityUtils.toString(resEntity);
-					Log.w(TAG, resp);
-					if(resp.equals("true")){
-						
-						SettingPreference setting = new SettingPreference(SignupProcActivity.this);
+					
+					if (resp.equals("SNS Login Success") ||
+							resp.equals("Giv2gether Signup Success")) {
+						SettingPreference setting = new SettingPreference(
+								SignupProcActivity.this);
 						setting.setAutoLoginTrue();
 						setting.setID(Email);
 						setting.setName(Name);
-						Intent intent = new Intent(SignupProcActivity.this, MainActivity.class);
+						Intent intent = new Intent(SignupProcActivity.this,
+								MainActivity.class);
 						startActivity(intent);
 						finish();
+					}else if(resp.equals("Signed email")){
+						Toast.makeText(getApplicationContext(), "이미 가입된 email입니다.",
+								Toast.LENGTH_LONG).show();
+						finish();
 					}
-					else{
-						Toast.makeText(getApplicationContext(), "회원가입 실패", Toast.LENGTH_LONG).show();;
+					else {
+						Toast.makeText(getApplicationContext(), "회원가입 실패",
+								Toast.LENGTH_LONG).show();
+						finish();
 					}
 				}
 
-				
 			} catch (MalformedURLException e) {
 				//
 			} catch (IOException e) {

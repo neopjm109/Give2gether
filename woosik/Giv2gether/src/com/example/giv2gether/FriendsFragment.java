@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,6 +21,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class FriendsFragment extends Fragment {
 
@@ -79,6 +79,7 @@ public class FriendsFragment extends Fragment {
 
 		listFriend.setAdapter(adapter);
 		listFriend.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		
 	}
 
 	public void setTextWatcher() {
@@ -219,6 +220,17 @@ public class FriendsFragment extends Fragment {
 				mName.setText(mData.getName());
 				// mBirth.setText(mData.getBirth());
 			}
+			
+			v.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					Intent intent = new Intent(mActivity, EventGenerationActivity.class);
+					intent.putExtra("name", mData.getName());
+					startActivity(intent);
+				}
+			});
 			return v;
 		}
 	}

@@ -12,10 +12,15 @@ public class EventGenerationActivity extends Activity {
 	TextView friendName, eventDday;
 	Button btnGenerate;
 	
+	Intent intent;
+	String name;
+	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_event_generate);
 		
+		intent = getIntent();
+		name = intent.getStringExtra("name");
 		initViews();
 	}
 	
@@ -31,6 +36,9 @@ public class EventGenerationActivity extends Activity {
 				startActivity(intent);
 			}
 		});
+		
+		friendName = (TextView) findViewById(R.id.eventGenerateFriendsName);
+		friendName.setText(name);
 	}
 
 }
