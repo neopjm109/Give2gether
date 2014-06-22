@@ -2,8 +2,8 @@
 <resources>
 
     <string name="app_name">Give2Gether</string>
+    <string name="app_id">1394506730770067</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="app_id">1394506730770067</string>
 
 </resources>

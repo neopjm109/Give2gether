@@ -1,6 +1,5 @@
 package com.example.give2gether;
 
-
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;

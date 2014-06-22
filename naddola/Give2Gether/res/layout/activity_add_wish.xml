@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#ff8400" >
+    android:background="#ffdd77" >
     
     <AutoCompleteTextView
 	     android:id="@+id/editTitle"
@@ -30,17 +30,21 @@
 		    android:orientation="vertical"
 	        >
 	    
-		    <EditText
+		    <TextView
 		        android:id="@+id/editPrice"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
+		        android:textSize="18sp"
+		        android:padding="10sp"
 		        android:hint="Goods Price"
 		        />
 		    
-		    <EditText
+		    <TextView
 		        android:id="@+id/editWish"
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
+		        android:textSize="18sp"
+		        android:padding="10sp"
 		        android:hint="Goods Wish"
 		        />
 		    
