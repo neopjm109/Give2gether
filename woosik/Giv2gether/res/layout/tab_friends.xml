@@ -11,6 +11,13 @@
         android:text="Friends Tab"
         />
     
+    <EditText 
+        android:id="@+id/friend_et_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search"
+        />
+    
     <ListView
         android:id="@+id/friend_listview"
         android:layout_width="match_parent"

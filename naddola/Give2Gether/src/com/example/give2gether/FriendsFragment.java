@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,28 +18,33 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 public class FriendsFragment extends Fragment {
 
+	public static final String TAG = "naddola";
+
 	View rootView;
 	MyFriendAdapter adapter;
 	MainActivity mActivity;
 	Giv2DBManager dbManager;
 	ArrayList<MyFriend> arrMyFriendList;
-	
+	ArrayList<MyFriend> arrSearchFriendList;
+
 	boolean editOn = false;
 
 	Button bt_AddFriends;
 	ListView listFriend;
+	EditText et_SearchFriend;
+	TextWatcher textwatcher;
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		rootView = inflater.inflate(R.layout.tab_friends, container, false);
 
-		//init();
 		setHasOptionsMenu(true);
 
 		return rootView;
@@ -46,19 +54,74 @@ public class FriendsFragment extends Fragment {
 	public void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		
+
 		init();
+	}
+
+	public void init() {
+
+		et_SearchFriend = (EditText) rootView
+				.findViewById(R.id.friend_et_search);
+		setTextWatcher();
+		et_SearchFriend.addTextChangedListener(textwatcher);
+
+		mActivity = (MainActivity) getActivity();
+		dbManager = mActivity.getDBManager();
+		listFriend = (ListView) rootView.findViewById(R.id.friend_listview);
+
+		arrMyFriendList = new ArrayList<MyFriend>();
+		arrSearchFriendList = new ArrayList<MyFriend>();
+	
+		arrMyFriendList = dbManager.getFriendsList();
+
+		adapter = new MyFriendAdapter(getActivity().getApplicationContext(),
+				R.layout.custom_friend_list, arrMyFriendList);
+
+		listFriend.setAdapter(adapter);
+		listFriend.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+	}
+
+	public void setTextWatcher() {
+		textwatcher = new TextWatcher() {
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before,
+					int count) {
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				arrSearchFriendList.clear();
+				for (int i = 0; i < arrMyFriendList.size(); i++) {
+					MyFriend tempFriend = arrMyFriendList.get(i);
+					if(tempFriend.getName().matches(".*"+s.toString()+".*")){
+						arrSearchFriendList.add(tempFriend);
+					}
+				}
+				
+				adapter = new MyFriendAdapter(getActivity().getApplicationContext(),
+						R.layout.custom_friend_list, arrSearchFriendList);
+
+				listFriend.setAdapter(adapter);
+				listFriend.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+			}
+		};
 	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		// TODO Auto-generated method stub
 		super.onCreateOptionsMenu(menu, inflater);
-		
+
 		MenuItem item1 = menu.add(0, 0, 0, "Edit Friends List");
 		item1.setIcon(android.R.drawable.ic_menu_edit);
 		item1.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-		
+
 		MenuItem item2 = menu.add(0, 1, 1, "Add Friends");
 		item2.setIcon(android.R.drawable.ic_menu_add);
 		item2.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
@@ -67,7 +130,7 @@ public class FriendsFragment extends Fragment {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// TODO Auto-generated method stub
-		
+
 		switch (item.getItemId()) {
 		case 0:
 			editOn = !editOn;
@@ -78,26 +141,10 @@ public class FriendsFragment extends Fragment {
 			startActivity(intent);
 			break;
 		}
-		
+
 		return super.onOptionsItemSelected(item);
 	}
-	public void init() {
-		mActivity = (MainActivity) getActivity();
-		dbManager = mActivity.getDBManager();
-		listFriend = (ListView) rootView.findViewById(R.id.friend_listview);
 
-		arrMyFriendList = new ArrayList<MyFriend>();
-		
-		arrMyFriendList = dbManager.getFriendsList();
-		
-		adapter = new MyFriendAdapter(getActivity().getApplicationContext(),
-				R.layout.custom_friend_list, arrMyFriendList);
-		
-		listFriend.setAdapter(adapter);
-		listFriend.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-
-	}
-	
 	class MyFriendViewHolder {
 		ImageView mImage = null;
 		TextView mName = null;
@@ -170,12 +217,9 @@ public class FriendsFragment extends Fragment {
 			if (mData != null) {
 				// new MyWishImageThread().execute(viewHolder);
 				mName.setText(mData.getName());
-				//mBirth.setText(mData.getBirth());
+				// mBirth.setText(mData.getBirth());
 			}
-			
 			return v;
 		}
-
 	}
 }
-
