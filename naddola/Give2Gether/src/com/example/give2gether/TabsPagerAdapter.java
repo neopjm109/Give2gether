@@ -17,11 +17,13 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
 		
 		switch (index) {
 		case 0:
-			return new MainFragment();
+			return new NewsFeedFragment();
 		case 1:
-			return new WishlistFragment();
+			return new WPocketFragment();
 		case 2:
 			return new FriendsFragment();
+		case 3:
+			return new MyPageFragment();
 		}
 		
 		return null;
@@ -30,7 +32,7 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
 	@Override
 	public int getCount() {
 		// TODO Auto-generated method stub
-		return 3;
+		return 4;
 	}
 
 }

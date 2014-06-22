@@ -36,18 +36,20 @@ public class SignupProcActivity extends Activity {
 
 		Intent intent = getIntent();
 		String Email = intent.getStringExtra("email");
+		String Password = intent.getStringExtra("password");
 		String Name = intent.getStringExtra("name");
 		String Phone = intent.getStringExtra("phone");
 		String Birth = intent.getStringExtra("birth");
 
 		Log.v(TAG, "SignupProcActivity - email:" + Email + "  Name:" + Name
 				+ "  Phone:" + Phone + "  Birth:" + Birth);
+		
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
 				.permitAll().build();
 		StrictMode.setThreadPolicy(policy);
 
 		HttpPostAsyncTask task = new HttpPostAsyncTask();
-		task.doInBackground(Email, Name, Phone, Birth);
+		task.doInBackground(Email, Password, Name, Phone, Birth);
 	}
 
 	@Override
@@ -76,9 +78,10 @@ public class SignupProcActivity extends Activity {
 		@Override
 		protected Long doInBackground(String... params) {
 			String Email = params[0];
-			String Name = params[1];
-			String Phone = params[2];
-			String Birth = params[3];
+			String Password = params[1];
+			String Name = params[2];
+			String Phone = params[3];
+			String Birth = params[4];
 
 			try {
 				HttpClient client = new DefaultHttpClient();
@@ -96,6 +99,7 @@ public class SignupProcActivity extends Activity {
 				// 전달인자  
 				List params2 = new ArrayList();
 				params2.add(new BasicNameValuePair("email", Email));
+				params2.add(new BasicNameValuePair("password", Password));
 				params2.add(new BasicNameValuePair("name", Name));
 				params2.add(new BasicNameValuePair("phone", Phone));
 				params2.add(new BasicNameValuePair("birth", Birth));
@@ -110,10 +114,7 @@ public class SignupProcActivity extends Activity {
 					String resp = EntityUtils.toString(resEntity);
 					Log.w(TAG, resp);
 					if(resp.equals("true")){
-						for (int i = 0; i < ActivityReference.ActList.size(); i++){
-							Log.i(TAG, ActivityReference.ActList.size()+"  "+ActivityReference.ActList.get(i).getClass().toString());
-							ActivityReference.ActList.get(i).finish();
-						}
+						
 						SettingPreference setting = new SettingPreference(SignupProcActivity.this);
 						setting.setAutoLoginTrue();
 						setting.setID(Email);

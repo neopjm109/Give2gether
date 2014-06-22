@@ -2,27 +2,52 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:gravity="center" >
     
   <!--    <com.facebook.widget.LoginButton-->
+  
+  <ImageView
+      android:id="@+id/imgSignUpSelect"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+
+      android:src="@drawable/signup"/>
+  
   <Button
         android:id="@+id/signup_facebookButton" 
-        android:layout_width="wrap_content"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:text="Facebook Login"
+        android:textSize="20sp"
+        android:drawableLeft="@drawable/fb_icon"
+        android:layout_marginTop="50dp"
+        
+        android:background="#ffffff"
         />
     
-    <com.google.android.gms.common.SignInButton
+    <Button
         android:id="@+id/signup_googleButton"
-        android:layout_width="wrap_content"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
+        android:text="Google Login"
+        android:textSize="20sp"
+        android:drawableLeft="@drawable/google_icon"
+        android:layout_marginBottom="50dp"
+        
+        android:background="#ffffff"
+        />
+    
+    <TextView
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:text="You can sign up to simple"
         />
     
     <Button 
         android:id="@+id/signup_Give2Gether"
-        android:layout_width="wrap_content"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:text="Signup Give2Gether"/>
+        android:text="Sign Up to Email"/>
 
 </LinearLayout>

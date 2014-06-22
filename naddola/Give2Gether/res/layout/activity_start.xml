@@ -2,21 +2,33 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:gravity="center" >
+    
+    <ImageView
+        android:id="@+id/imgStart"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginBottom="15dp"
+        android:src="@drawable/app_icon"/>
     
     <Button
-        android:id="@+id/start_signup_bt"
-        android:layout_width="wrap_content"
+        android:id="@+id/btnSignUpStart"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:text="Sign Up"
        />
     
+    <TextView
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="If you have a ID"/>
+    
     <Button 
-        android:id="@+id/start_login_bt"
-        android:layout_width="wrap_content"
+        android:id="@+id/btnLoginStart"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:text="Log In"/>
     
-
 </LinearLayout>
