@@ -14,13 +14,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -34,6 +39,12 @@ public class AddFriendsActivity extends Activity{
 	Giv2DBManager dbManager;
 	ArrayList<Contact> mContactList;
 	ArrayList<MyFriend> mFriendList;
+
+	EditText et_search;
+	ArrayList<Contact> mSearchContactList;
+	TextWatcher textwatcher;
+
+	Button bt_confirm;
 	
 	
 	@Override
@@ -49,7 +60,19 @@ public class AddFriendsActivity extends Activity{
 		dbManager = new Giv2DBManager(getApplicationContext());
 		
 		list = (ListView)findViewById(R.id.AddFriends_list);
-		
+		et_search = (EditText)findViewById(R.id.AddFriend_et_search);
+		bt_confirm = (Button)findViewById(R.id.AddFriends_button);
+		bt_confirm.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+		});
+
+		mSearchContactList = new ArrayList<Contact>();
+		setTextWatcher();
+		et_search.addTextChangedListener(textwatcher);
+				
 		mFriendList = dbManager.getFriendsList();
 		mContactList = getContactList();
 		
@@ -71,6 +94,38 @@ public class AddFriendsActivity extends Activity{
 				adapter.notifyDataSetChanged();
 			}
 		});
+	}
+
+	public void setTextWatcher() {
+		textwatcher = new TextWatcher() {
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before,
+					int count) {
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				mSearchContactList.clear();
+				for (int i = 0; i < mContactList.size(); i++) {
+					Contact tempContact = mContactList.get(i);
+					if(tempContact.getName().matches(".*"+s.toString()+".*")){
+						mSearchContactList.add(tempContact);
+					}
+				}
+				
+				adapter = new ContactsAdapter(AddFriendsActivity.this,
+						R.layout.custom_addfriends_list, mSearchContactList);
+
+				list.setAdapter(adapter);
+				list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+			}
+		};
 	}
 	
 	private ArrayList<Contact> getContactList() {

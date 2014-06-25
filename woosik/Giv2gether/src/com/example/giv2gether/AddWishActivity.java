@@ -6,14 +6,18 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -67,6 +71,7 @@ public class AddWishActivity extends Activity {
 	boolean bAutoListClick;
 	
 	Handler mHandler;
+	SettingPreference setting;
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -77,6 +82,8 @@ public class AddWishActivity extends Activity {
 	}
 	
 	public void initViews() {
+		setting = new SettingPreference(this);
+		
 		searchList = new ArrayList<SearchData>();
 		bAutoListClick = false;
 		
@@ -154,6 +161,9 @@ public class AddWishActivity extends Activity {
 			public void onClick(View v) {
 				
 				if( editTitle.length() != 0 && editPrice.length() != 0) {
+					
+					new InsertWish(myWish).execute();
+					
 					Intent intent = new Intent();
 					
 					intent.putExtra("title", myWish.getTitle());
@@ -396,5 +406,46 @@ public class AddWishActivity extends Activity {
 			
 			image.setImageBitmap(result);
 		}
+	}
+	
+	/*
+	 * 		wish is inserted into WEB Database
+	 */
+	
+	private class InsertWish extends AsyncTask<String, String, Void> {
+		SearchData myWishWeb;
+		
+		public InsertWish(SearchData myWishWeb) {
+			this.myWishWeb = myWishWeb;
+		}
+		
+		protected Void doInBackground(String... params) {
+			
+			try {
+				HttpClient client = new DefaultHttpClient();
+				String postUrl;
+
+				postUrl = "http://naddola.cafe24.com/insertWish.php";
+				
+				HttpPost post = new HttpPost(postUrl);
+
+				// 전달인자
+				List params2 = new ArrayList();
+				params2.add(new BasicNameValuePair("email", setting.getID()));
+				params2.add(new BasicNameValuePair("title", myWishWeb.getTitle()));
+				params2.add(new BasicNameValuePair("price", myWishWeb.getPrice()+""));
+				params2.add(new BasicNameValuePair("wish", myWishWeb.getWish()+""));
+
+				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
+						HTTP.UTF_8);
+				post.setEntity(ent);
+				client.execute(post);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return null;
+		}
+
 	}
 }
