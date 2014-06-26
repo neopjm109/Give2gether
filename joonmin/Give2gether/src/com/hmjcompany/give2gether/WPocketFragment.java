@@ -3,6 +3,14 @@ package com.hmjcompany.give2gether;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -15,6 +23,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -144,13 +153,19 @@ public class WPocketFragment extends Fragment {
 				if (arrMyWishList.get(position).bookmarkOn.equals("true")) {
 					arrMyWishList.get(position).bookmarkOn = "false";
 					query = "false";
+					new UpdateBookmark(arrMyWishList.get(position).getWebId(), 0).execute();
 				} else {
 					arrMyWishList.get(position).bookmarkOn = "true";
 					query = "true";
+					new UpdateBookmark(arrMyWishList.get(position).getWebId(), 1).execute();
 				}
 				
 				updateWishlistData(0, arrMyWishList.get(position).getId(), query);
 				mAdapter.notifyDataSetChanged();
+				
+				Log.i("PJM", "zzz");
+				
+				Toast.makeText(mActivity.getApplicationContext(), arrMyWishList.get(position).getBookmarkOn(), Toast.LENGTH_SHORT).show();
 				return false;
 			}
 		});
@@ -165,8 +180,11 @@ public class WPocketFragment extends Fragment {
 			int price = Integer.parseInt(data.getStringExtra("price"));
 			int wish = Integer.parseInt(data.getStringExtra("wish"));
 			String imagePath = data.getStringExtra("image");
+			int webId = Integer.parseInt(data.getStringExtra("webId"));
 			
-			insertWishlistData(title, price, wish, imagePath);
+			Log.i("PJM", webId+"");
+			
+			insertWishlistData(title, price, wish, imagePath, webId);
 			
 			break;
 		default:
@@ -178,8 +196,8 @@ public class WPocketFragment extends Fragment {
 	 * 		DB Function
 	 */
 	
-	public void insertWishlistData (String title, int price, int wish, String imagePath) {
-		dbManager.insertWishlistData(title, price, wish, imagePath);
+	public void insertWishlistData (String title, int price, int wish, String imagePath, int webId) {
+		dbManager.insertWishlistData(title, price, wish, imagePath, webId);
 
 		selectWishAll();
 
@@ -199,8 +217,10 @@ public class WPocketFragment extends Fragment {
 			String date = result.getString(5);
 			String imagePath = result.getString(6);
 			String bookmarkOn = result.getString(7);
+			int webId = result.getInt(8);
 			
 			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			myWish.setWebId(webId);
 
 			Toast.makeText(mActivity.getApplicationContext(), myWish.getTitle(), Toast.LENGTH_SHORT).show();
 		}
@@ -224,8 +244,10 @@ public class WPocketFragment extends Fragment {
 			String date = result.getString(5);
 			String imagePath = result.getString(6);
 			String bookmarkOn = result.getString(7);
+			int webId = result.getInt(8);
 			
 			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			myWish.setWebId(webId);
 
 			new ImageThread().execute(myWish);
 	
@@ -340,6 +362,17 @@ public class WPocketFragment extends Fragment {
 				}
 				
 			}
+			
+			// Web ID Test
+			v.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					Toast.makeText(mActivity.getApplicationContext(), mData.getWebId()+"", Toast.LENGTH_SHORT).show();
+				}
+			});
+			
 			/*
 			v.setOnTouchListener(new View.OnTouchListener() {
 				
@@ -597,6 +630,46 @@ public class WPocketFragment extends Fragment {
 	private void removeLongPressCallback() {
 		if (longPress != null) {
 			mHandler.removeCallbacks(longPress);
+		}
+	}
+
+	/*
+	 * 		bookmark is updated in WEB Database
+	 */
+	
+	private class UpdateBookmark extends AsyncTask<String, String, Void> {
+		int id = 0;
+		int bookmark = 0;
+		
+		public UpdateBookmark(int id, int bookmark) {
+			this.id = id;
+			this.bookmark = bookmark;
+		}
+		
+		protected Void doInBackground(String... params) {
+			
+			try {
+				HttpClient client = new DefaultHttpClient();
+				String postUrl;
+
+				postUrl = "http://naddola.cafe24.com/updateWishBookmark.php";
+				
+				HttpPost post = new HttpPost(postUrl);
+
+				// 전달인자
+				List params2 = new ArrayList();
+				params2.add(new BasicNameValuePair("id", id+""));
+				params2.add(new BasicNameValuePair("title", bookmark+""));
+
+				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
+						HTTP.UTF_8);
+				post.setEntity(ent);
+				client.execute(post);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return null;
 		}
 	}
 }

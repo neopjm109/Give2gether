@@ -18,6 +18,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -407,6 +408,7 @@ public class AddWishActivity extends Activity {
 			image.setImageBitmap(result);
 		}
 	}
+
 	
 	/*
 	 * 		wish is inserted into WEB Database
@@ -414,6 +416,7 @@ public class AddWishActivity extends Activity {
 	
 	private class InsertWish extends AsyncTask<String, String, Void> {
 		SearchData myWishWeb;
+		String resp = null;
 		
 		public InsertWish(SearchData myWishWeb) {
 			this.myWishWeb = myWishWeb;
@@ -421,6 +424,9 @@ public class AddWishActivity extends Activity {
 		
 		protected Void doInBackground(String... params) {
 			
+			/*
+			 * 		Insert
+			 */
 			try {
 				HttpClient client = new DefaultHttpClient();
 				String postUrl;
@@ -439,12 +445,60 @@ public class AddWishActivity extends Activity {
 				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
 						HTTP.UTF_8);
 				post.setEntity(ent);
-				client.execute(post);
+				HttpResponse responsePost = client.execute(post);
+				HttpEntity resEntity = responsePost.getEntity();
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			
+			/*
+			 * 		Select
+			 */
+			try {
+				HttpClient client = new DefaultHttpClient();
+				String postUrl;
+
+				postUrl = "http://naddola.cafe24.com/getLastMyWish.php";
+				
+				HttpPost post = new HttpPost(postUrl);
+
+				// 전달인자
+				List params2 = new ArrayList();
+				params2.add(new BasicNameValuePair("email", setting.getID()));
+
+				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
+						HTTP.UTF_8);
+				post.setEntity(ent);
+				HttpResponse responsePost = client.execute(post);
+				HttpEntity resEntity = responsePost.getEntity();
+				
+				if ( resEntity != null ) {
+					resp = EntityUtils.toString(resEntity);	
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			
 			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+
+			Intent intent = new Intent();
+			
+			intent.putExtra("title", myWish.getTitle());
+			intent.putExtra("price", myWish.getPrice()+"");
+			intent.putExtra("wish", myWish.getWish()+"");
+			intent.putExtra("image", myWish.getImagePath());
+			intent.putExtra("webId", resp);
+			
+			setResult(1001, intent);
+			finish();
 		}
 
 	}

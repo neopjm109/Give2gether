@@ -56,7 +56,8 @@ public class Giv2DBManager {
 				+ " event text not null,"
 				+ " date text,"
 				+ " image text not null,"
-				+ " bookmark text not null)";
+				+ " bookmark text not null,"
+				+ " webId integer not null)";
 		
 		db.execSQL(sql);
 	}
@@ -150,13 +151,14 @@ public class Giv2DBManager {
 	
 	// Wishlist
 	
-	public void insertWishlistData(String title, int price, int wish, String imagePath) {
+	public void insertWishlistData(String title, int price, int wish, String imagePath, int webId) {
 		String wTitle = title;
 		int wPrice = price;
 		int wWish = wish;
 		String wImagePath = imagePath;
 		String wEvent = "false";
 		String wBookmark = "false";
+		int wWebId = webId;
 		
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date date = new Date(System.currentTimeMillis());
@@ -170,7 +172,8 @@ public class Giv2DBManager {
 				+ wEvent + "', '"
 				+ wDate + "','"
 				+ wImagePath + "','"
-				+ wBookmark + "');";
+				+ wBookmark + "','"
+				+ wWebId + "');";
 		
 		db.execSQL(sql);
 	}

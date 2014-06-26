@@ -3,6 +3,14 @@ package com.example.giv2gether;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -60,7 +68,6 @@ public class WPocketFragment extends Fragment {
 	int maxViewMovingX = 0;
 	
 	boolean bLongPress;
-	CheckForLongPress longPress = null;
 	Handler mHandler;
 		
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -165,8 +172,9 @@ public class WPocketFragment extends Fragment {
 			int price = Integer.parseInt(data.getStringExtra("price"));
 			int wish = Integer.parseInt(data.getStringExtra("wish"));
 			String imagePath = data.getStringExtra("image");
+			int webId = Integer.parseInt(data.getStringExtra("webId"));
 			
-			insertWishlistData(title, price, wish, imagePath);
+			insertWishlistData(title, price, wish, imagePath, webId);
 			
 			break;
 		default:
@@ -178,8 +186,8 @@ public class WPocketFragment extends Fragment {
 	 * 		DB Function
 	 */
 	
-	public void insertWishlistData (String title, int price, int wish, String imagePath) {
-		dbManager.insertWishlistData(title, price, wish, imagePath);
+	public void insertWishlistData (String title, int price, int wish, String imagePath, int webId) {
+		dbManager.insertWishlistData(title, price, wish, imagePath, webId);
 
 		selectWishAll();
 
@@ -509,94 +517,44 @@ public class WPocketFragment extends Fragment {
 		}
 	}	
 	
-	//		Long Click Runnable
-	class CheckForLongPress implements Runnable {
-		int pos;
+
+	/*
+	 * 		bookmark is updated in WEB Database
+	 */
+	
+	private class UpdateBookmark extends AsyncTask<String, String, Void> {
+		int id = 0;
+		int bookmark = 0;
 		
-		public CheckForLongPress(int pos) {
-			this.pos = pos;
+		public UpdateBookmark(int id, int bookmark) {
+			this.id = id;
+			this.bookmark = bookmark;
 		}
 		
-		public void run() {
-			bLongPress = true;
-			AlertDialog.Builder dialog = new AlertDialog.Builder(mActivity);
+		protected Void doInBackground(String... params) {
 			
-			ArrayList<String> menulist = new ArrayList<String>();
-			if ( arrMyWishList.get(pos).getBookmarkOn().equals("true"))
-				menulist.add("즐겨찾기 해제");
-			else
-				menulist.add("즐겨찾기 지정");
-			menulist.add("수정하기");
-			menulist.add("삭제");
-			
-			ArrayAdapter<String> dAdapter = new ArrayAdapter<String>(mActivity.getApplicationContext(), R.layout.dialog_menu, menulist);
-			
-			dialog.setTitle("메뉴");
-			
-			dialog.setAdapter(dAdapter, new DialogInterface.OnClickListener() {
+			try {
+				HttpClient client = new DefaultHttpClient();
+				String postUrl;
+
+				postUrl = "http://naddola.cafe24.com/updateWishBookmark.php";
 				
-				public void onClick(DialogInterface dialog, int which) {
+				HttpPost post = new HttpPost(postUrl);
 
-					switch(which) {
-					case 0:			// Bookmark Func
-						
-						String query = null;
-						
-						if (arrMyWishList.get(pos).bookmarkOn.equals("true")) {
-							arrMyWishList.get(pos).bookmarkOn = "false";
-							query = "false";
-						} else {
-							arrMyWishList.get(pos).bookmarkOn = "true";
-							query = "true";
-						}
-						
-						updateWishlistData(0, arrMyWishList.get(pos).getId(), query);
-						mAdapter.notifyDataSetChanged();
-						break;
-						
-					case 1:			// Modify Func
-						Toast.makeText(mActivity, pos+"", Toast.LENGTH_SHORT).show();
-//						Toast.makeText(mActivity.getApplicationContext(), "곧 나옵니다!", Toast.LENGTH_SHORT).show();
-						break;
-						
-					case 2:			// Remove Func
-						removeWishlistData(arrMyWishList.get(pos).getId());
+				// 전달인자
+				List params2 = new ArrayList();
+				params2.add(new BasicNameValuePair("id", id+""));
+				params2.add(new BasicNameValuePair("title", bookmark+""));
 
-						arrMyWishList.remove(pos);
-						break;
-					}
-					
-					longPress = null;
-				}
-			});
+				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
+						HTTP.UTF_8);
+				post.setEntity(ent);
+				client.execute(post);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			
-			dialog.setNegativeButton("취소", new DialogInterface.OnClickListener() {
-
-				public void onClick(DialogInterface dialog, int which) {
-
-					dialog.dismiss();
-					
-					longPress = null;
-				}
-			});
-			
-			dialog.show();
-		}
-	}
-	
-	private void postCheckForLongClick(int position, int delayOffset) {
-		bLongPress = false;
-		
-		if (longPress == null) {
-			longPress = new CheckForLongPress(position);
-		}
-		
-		mHandler.postDelayed(longPress, delayOffset);
-	}
-	
-	private void removeLongPressCallback() {
-		if (longPress != null) {
-			mHandler.removeCallbacks(longPress);
+			return null;
 		}
 	}
 }
