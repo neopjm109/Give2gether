@@ -440,7 +440,8 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener{
 		protected Long doInBackground(String... params) {
 			
 			jContactArr = new JSONArray();
-			for(int i=0; i<10; i++){
+			
+			for(int i=0; i<mContactList.size(); i++){
 				JSONObject obj = new JSONObject();
 				try {
 					obj.put("phone", mContactList.get(i).getPhonenum());
@@ -450,7 +451,7 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener{
 				}
 				jContactArr.put(obj);
 			}
-			
+			Log.i(TAG,jContactArr.length()+"    length");
 			long result;
 			
 
