@@ -37,6 +37,7 @@ public class MainActivity extends FragmentActivity {
 		dbManager = new Giv2DBManager(this);
 				
 		db = dbManager.getDatabase();
+		//dbManager.removeTable();
 
 	}
 

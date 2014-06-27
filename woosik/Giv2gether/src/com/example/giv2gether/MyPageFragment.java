@@ -35,6 +35,7 @@ public class MyPageFragment extends Fragment {
 	public void initViews() {
 
 		setting = new SettingPreference(getActivity());
+		mActivity = (MainActivity) getActivity();
 		
 		TextView tv = (TextView) rootView.findViewById(R.id.mText);
 		tv.setText("Welcome " + setting.getID());

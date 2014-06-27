@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -217,7 +218,8 @@ public class FriendsFragment extends Fragment {
 			if (mData != null) {
 				// new MyWishImageThread().execute(viewHolder);
 				mName.setText(mData.getName());
-				// mBirth.setText(mData.getBirth());
+				if(mData.getBirth() != null)
+					mBirth.setText(mData.getBirth());
 			}
 			return v;
 		}

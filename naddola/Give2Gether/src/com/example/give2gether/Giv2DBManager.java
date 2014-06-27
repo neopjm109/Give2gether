@@ -19,6 +19,7 @@ public class Giv2DBManager {
 	static final String DB_NAME = "give2gether.db";
 	static final String DB_TABLE_FRIENDS = "friends";
 	static final String DB_TABLE_WISHLIST = "wishlist";
+	static final String DB_TABLE_GIVFRIEND = "GivFriends";
 	static final String DB_TABLE_FRIENDS_WISHLIST = "friendswishlist";
 	
 	static final int DB_MODE = Context.MODE_PRIVATE;
@@ -45,7 +46,8 @@ public class Giv2DBManager {
 				+ " name text not null,"
 				+ " email text not null,"
 				+ " phone text not null,"
-				+ " birth text)";
+				+ " birth text,"
+				+ " signed integer not null)";
 		db.execSQL(sql);
 
 		sql = "create table if not exists " + DB_TABLE_WISHLIST
@@ -75,10 +77,11 @@ public class Giv2DBManager {
 		
 	// Friends
 	
-	public void insertFriendsData(String name, String email, String phone, String birth) {
+	public void insertFriendsData(String name, String email, String phone, String birth, int signed) {
 		String fName = name;
 		String fEmail = email;
 		String fPhone = phone;
+		int fSigned = signed; 
 		
 		DateFormat df = new SimpleDateFormat("EEE MMM dd kk:mm:ss zzz yyyy", Locale.KOREAN);
 		Date fBirth = null;
@@ -93,7 +96,33 @@ public class Giv2DBManager {
 				+ fName + "', '"
 				+ fEmail + "', '"
 				+ fPhone + "', '"
-				+ fBirth + "');";
+				+ fBirth + "', '"
+				+ fSigned + "');";
+		
+		db.execSQL(sql);
+	}
+	
+	public void insertFriend(MyFriend myFriend){
+		String fName = myFriend.getName();
+		String fEmail = myFriend.getEmail();
+		String fPhone = myFriend.getPhone();
+		int fSigned = myFriend.getSigned() ? 1 : 0; 
+		
+		DateFormat df = new SimpleDateFormat("EEE MMM dd kk:mm:ss zzz yyyy", Locale.KOREAN);
+		Date fBirth = null;
+		
+		try {
+			fBirth = df.parse(myFriend.getBirth());
+		} catch (Exception e) {
+			
+		}
+		String sql = "insert into " + DB_TABLE_FRIENDS
+				+ " values(NULL, '"
+				+ fName + "', '"
+				+ fEmail + "', '"
+				+ fPhone + "', '"
+				+ fBirth + "', '"
+				+ fSigned + "');";
 		
 		db.execSQL(sql);
 	}
@@ -117,9 +146,15 @@ public class Giv2DBManager {
 			String email = result.getString(2);
 			String phone = result.getString(3);
 			String birth = result.getString(4);
+			int tempSigned = result.getInt(5);
+			boolean signed;
+			if(tempSigned == 1)
+				signed = true;
+			else
+				signed = false;
 			//String imagePath = result.getString(5);
 			
-			MyFriend tempFriend= new MyFriend(id, name, email, phone, birth, null);
+			MyFriend tempFriend= new MyFriend(id, name, email, phone, birth, signed, null);
 			
 			fl.add(tempFriend);
 

@@ -32,12 +32,12 @@ public class MainActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		
 		initTabs();
 		
 		dbManager = new Giv2DBManager(this);
 				
 		db = dbManager.getDatabase();
-
 	}
 
 	public void initTabs() {
