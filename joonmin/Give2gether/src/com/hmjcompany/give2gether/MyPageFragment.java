@@ -5,15 +5,23 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class MyPageFragment extends Fragment {
 	
 	View rootView;
+	ListView optionsView;
+	ArrayAdapter<String> mAdapter;
+	
+	MainActivity mActivity;
 	SettingPreference setting;
+	
+	String[] menu = {"참여 내역", "받은 내역", "결제 내역", "설정"};
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -27,6 +35,7 @@ public class MyPageFragment extends Fragment {
 	public void initViews() {
 
 		setting = new SettingPreference(getActivity());
+		mActivity = (MainActivity) getActivity();
 		
 		TextView tv = (TextView) rootView.findViewById(R.id.mText);
 		tv.setText("Welcome " + setting.getID());
@@ -42,6 +51,11 @@ public class MyPageFragment extends Fragment {
 					setting.setAutoLoginFalse();
 			}
 		});
+		
+		optionsView = (ListView) rootView.findViewById(R.id.optionsView);
+		mAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_list_item_1, menu);
+		
+		optionsView.setAdapter(mAdapter);
 		
 	}
 	
