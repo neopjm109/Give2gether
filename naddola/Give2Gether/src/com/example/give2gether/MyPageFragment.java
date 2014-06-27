@@ -4,7 +4,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -14,6 +16,7 @@ public class MyPageFragment extends Fragment {
 	
 	View rootView;
 	SettingPreference setting;
+	Giv2DBManager dbManager;
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -40,6 +43,16 @@ public class MyPageFragment extends Fragment {
 					setting.setAutoLoginTrue();
 				else
 					setting.setAutoLoginFalse();
+			}
+		});
+		
+		Button bt_resetDB = (Button)rootView.findViewById(R.id.Setting_bt_resetDB);
+		bt_resetDB.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dbManager = new Giv2DBManager(getActivity());
+				dbManager.removeTable();
+				dbManager.createTable();
 			}
 		});
 		
