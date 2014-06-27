@@ -16,12 +16,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class LoginActivity extends Activity implements OnClickListener {
 
@@ -116,16 +116,21 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 		protected void onPostExecute(JSONObject result) {
 			
-			String chkPassword = "";
-			
 			try {
 				member = result.getJSONArray("member");
 				
 				if (member.length() > 0) {
+					JSONObject c = member.getJSONObject(0);
+					SettingPreference setting = new SettingPreference(LoginActivity.this);
+					setting.setAutoLoginTrue();
+					setting.setID(c.getString("email"));
+					setting.setName(c.getString("name"));
+					
 					Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 					startActivity(intent);
+					finish();
 				} else {
-					Toast.makeText(getApplicationContext(), loginPw.getText().toString() + "!=" + chkPassword, Toast.LENGTH_SHORT).show();
+					
 				}
 				
 			} catch (Exception e) {

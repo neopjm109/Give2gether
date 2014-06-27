@@ -12,9 +12,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -23,6 +21,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -151,13 +150,16 @@ public class WPocketFragment extends Fragment {
 				if (arrMyWishList.get(position).bookmarkOn.equals("true")) {
 					arrMyWishList.get(position).bookmarkOn = "false";
 					query = "false";
+					new UpdateBookmark(arrMyWishList.get(position).getWebId(), 0).execute();
 				} else {
 					arrMyWishList.get(position).bookmarkOn = "true";
 					query = "true";
+					new UpdateBookmark(arrMyWishList.get(position).getWebId(), 1).execute();
 				}
 				
 				updateWishlistData(0, arrMyWishList.get(position).getId(), query);
 				mAdapter.notifyDataSetChanged();
+				
 				return false;
 			}
 		});
@@ -207,8 +209,10 @@ public class WPocketFragment extends Fragment {
 			String date = result.getString(5);
 			String imagePath = result.getString(6);
 			String bookmarkOn = result.getString(7);
+			int webId = result.getInt(8);
 			
 			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			myWish.setWebId(webId);
 
 			Toast.makeText(mActivity.getApplicationContext(), myWish.getTitle(), Toast.LENGTH_SHORT).show();
 		}
@@ -232,8 +236,10 @@ public class WPocketFragment extends Fragment {
 			String date = result.getString(5);
 			String imagePath = result.getString(6);
 			String bookmarkOn = result.getString(7);
+			int webId = result.getInt(8);
 			
 			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			myWish.setWebId(webId);
 
 			new ImageThread().execute(myWish);
 	
@@ -248,9 +254,10 @@ public class WPocketFragment extends Fragment {
 		dbManager.updateWishlistData(flag, id, query);
 	}
 	
-	public void removeWishlistData(int index) {
+	public void removeWishlistData(int index, int webId) {
 		dbManager.removeWishlistData(index);
 		mAdapter.notifyDataSetChanged();
+		new RemoveMyWish(webId).execute();
 	}
 	
 	/*
@@ -340,7 +347,7 @@ public class WPocketFragment extends Fragment {
 						@Override
 						public void onClick(View v) {
 							// TODO Auto-generated method stub
-							removeWishlistData(arrMyWishList.get(pos).getId());
+							removeWishlistData(arrMyWishList.get(pos).getId(), arrMyWishList.get(pos).getWebId());
 
 							arrMyWishList.remove(pos);
 						}
@@ -348,140 +355,6 @@ public class WPocketFragment extends Fragment {
 				}
 				
 			}
-			/*
-			v.setOnTouchListener(new View.OnTouchListener() {
-				
-				@Override
-				public boolean onTouch(View v, MotionEvent event) {
-					// TODO Auto-generated method stub
-
-					switch(event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-
-						x = (int) event.getX();
-						y = (int) event.getY();
-						minViewMovingX = (int) event.getX();
-						maxViewMovingX = (int) event.getX();
-						
-						bLongPress = false;
-						postCheckForLongClick(pos, 1000);
-												
-						v.getParent().requestDisallowInterceptTouchEvent(true);
-						break;
-						
-					case MotionEvent.ACTION_UP:
-
-						removeLongPressCallback();
-						
-						v.setPadding(0, v.getPaddingTop(),
-								v.getPaddingRight(), v.getPaddingBottom());
-						
-						if ( (x - event.getX()) > 200 ) {
-							removeWishlistData(arrMyWishList.get(pos).getId());
-
-							arrMyWishList.remove(pos);
-						} else if ( (event.getX() - x) > 200) {
-							
-							String query = null;
-							
-							if (arrMyWishList.get(pos).bookmarkOn.equals("true")) {
-								arrMyWishList.get(pos).bookmarkOn = "false";
-								query = "false";
-							} else {
-								arrMyWishList.get(pos).bookmarkOn = "true";
-								query = "true";
-							}
-							
-							updateWishlistData(0, arrMyWishList.get(pos).getId(), query);
-							mAdapter.notifyDataSetChanged();
-						}
-
-						speed = 0;
-						speedJitter = 10;
-						minViewMovingX = 0;
-						maxViewMovingX = 0;
-						
-						break;
-						
-					case MotionEvent.ACTION_MOVE:
-						
-						int mTouchSlop = ViewConfiguration.get(mActivity).getScaledTouchSlop();
-						
-						int deltaX = Math.abs((int)(x - event.getX()));
-						
-						if (deltaX >= mTouchSlop) {
-							if (!bLongPress) {
-								removeLongPressCallback();
-							}
-						}
-						
-						if (x > event.getX()) {
-
-							maxViewMovingX = x;
-							
-							if (minViewMovingX > event.getX()) {
-								minViewMovingX = (int) event.getX();
-								
-								if (speed > -100) {
-									speed -= speedJitter;
-									
-									if(speedJitter > 0) {
-										speedJitter -= 0.5;
-									}
-								}
-								
-							} else {
-								if (speed < 0) {
-									speed += speedJitter;
-									
-									if (speedJitter < 10) {
-										speedJitter += 0.5;								
-									}
-								}
-							}
-							
-							v.setPadding((int)speed, v.getPaddingTop(),
-									v.getPaddingRight(), v.getPaddingBottom());
-							
-						} else {
-							
-							minViewMovingX = x;
-							
-							if (maxViewMovingX < event.getX()) {
-								maxViewMovingX = (int) event.getX();
-								
-								if (speed < 100) {
-									speed += speedJitter;
-
-									if(speedJitter > 0) {
-										speedJitter -= 0.5;
-									}
-								}
-								
-							} else {
-								if (speed > 0) {
-									speed -= speedJitter;
-
-									if (speedJitter < 10) {
-										speedJitter += 0.5;										
-									}
-								}
-							}
-							
-							v.setPadding((int)speed, v.getPaddingTop(),
-									v.getPaddingRight(), v.getPaddingBottom());
-							
-						}
-
-						if (speed == 10) {
-							x = (int) event.getX();
-						}
-						break;
-					}
-					
-					return true;
-				}
-			});*/
 			
 			return v;
 		}
@@ -516,15 +389,15 @@ public class WPocketFragment extends Fragment {
 			mAdapter.notifyDataSetChanged();
 		}
 	}	
-	
+
 
 	/*
 	 * 		bookmark is updated in WEB Database
 	 */
 	
 	private class UpdateBookmark extends AsyncTask<String, String, Void> {
-		int id = 0;
-		int bookmark = 0;
+		int id;
+		int bookmark;
 		
 		public UpdateBookmark(int id, int bookmark) {
 			this.id = id;
@@ -544,7 +417,44 @@ public class WPocketFragment extends Fragment {
 				// 전달인자
 				List params2 = new ArrayList();
 				params2.add(new BasicNameValuePair("id", id+""));
-				params2.add(new BasicNameValuePair("title", bookmark+""));
+				params2.add(new BasicNameValuePair("bookmark", bookmark+""));
+
+				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
+						HTTP.UTF_8);
+				post.setEntity(ent);
+				client.execute(post);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return null;
+		}
+	}
+
+	/*
+	 * 		Remove wish function
+	 */
+	
+	private class RemoveMyWish extends AsyncTask<String, String, Void> {
+		int id;
+		
+		public RemoveMyWish(int id) {
+			this.id = id;
+		}
+		
+		protected Void doInBackground(String... params) {
+			
+			try {
+				HttpClient client = new DefaultHttpClient();
+				String postUrl;
+
+				postUrl = "http://naddola.cafe24.com/removeMyWish.php";
+				
+				HttpPost post = new HttpPost(postUrl);
+
+				// 전달인자
+				List params2 = new ArrayList();
+				params2.add(new BasicNameValuePair("id", id+""));
 
 				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
 						HTTP.UTF_8);

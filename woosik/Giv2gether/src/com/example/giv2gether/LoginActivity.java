@@ -122,6 +122,12 @@ public class LoginActivity extends Activity implements OnClickListener {
 				member = result.getJSONArray("member");
 				
 				if (member.length() > 0) {
+					JSONObject c = member.getJSONObject(0);
+					SettingPreference setting = new SettingPreference(LoginActivity.this);
+					setting.setAutoLoginTrue();
+					setting.setID(c.getString("email"));
+					setting.setName(c.getString("name"));
+					
 					Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 					startActivity(intent);
 				} else {

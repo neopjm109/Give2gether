@@ -162,18 +162,9 @@ public class AddWishActivity extends Activity {
 			public void onClick(View v) {
 				
 				if( editTitle.length() != 0 && editPrice.length() != 0) {
-					
+
 					new InsertWish(myWish).execute();
 					
-					Intent intent = new Intent();
-					
-					intent.putExtra("title", myWish.getTitle());
-					intent.putExtra("price", myWish.getPrice()+"");
-					intent.putExtra("wish", myWish.getWish()+"");
-					intent.putExtra("image", myWish.getImagePath());
-					
-					setResult(1001, intent);
-					finish();
 				} else {
 					Toast.makeText(getApplicationContext(), "Put write", Toast.LENGTH_SHORT).show();
 				}

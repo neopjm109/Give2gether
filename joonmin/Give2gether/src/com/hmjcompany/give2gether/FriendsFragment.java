@@ -225,6 +225,7 @@ public class FriendsFragment extends Fragment {
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
+					
 					Intent intent = new Intent(mActivity, EventGenerationActivity.class);
 					intent.putExtra("name", mData.getName());
 					startActivity(intent);
