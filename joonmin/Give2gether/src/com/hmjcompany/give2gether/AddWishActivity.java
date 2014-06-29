@@ -30,6 +30,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -77,6 +78,11 @@ public class AddWishActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_wish);
+		
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+				.permitAll().build();
+
+		StrictMode.setThreadPolicy(policy);
 		
 		initViews();
 		
@@ -431,6 +437,7 @@ public class AddWishActivity extends Activity {
 				params2.add(new BasicNameValuePair("title", myWishWeb.getTitle()));
 				params2.add(new BasicNameValuePair("price", myWishWeb.getPrice()+""));
 				params2.add(new BasicNameValuePair("wish", myWishWeb.getWish()+""));
+				params2.add(new BasicNameValuePair("image", myWishWeb.getImagePath()+""));
 
 				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
 						HTTP.UTF_8);
@@ -469,8 +476,7 @@ public class AddWishActivity extends Activity {
 
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
-			
+			}			
 			
 			return null;
 		}

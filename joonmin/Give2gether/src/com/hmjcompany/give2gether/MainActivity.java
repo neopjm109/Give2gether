@@ -88,6 +88,5 @@ public class MainActivity extends FragmentActivity {
 	public Giv2DBManager getDBManager() {
 		return dbManager;
 	}
-	
-	
+
 }

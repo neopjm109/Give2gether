@@ -432,6 +432,7 @@ public class AddWishActivity extends Activity {
 				params2.add(new BasicNameValuePair("title", myWishWeb.getTitle()));
 				params2.add(new BasicNameValuePair("price", myWishWeb.getPrice()+""));
 				params2.add(new BasicNameValuePair("wish", myWishWeb.getWish()+""));
+				params2.add(new BasicNameValuePair("image", myWishWeb.getImagePath()+""));
 
 				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
 						HTTP.UTF_8);

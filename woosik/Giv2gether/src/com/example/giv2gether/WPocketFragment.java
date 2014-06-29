@@ -1,18 +1,27 @@
 package com.example.giv2gether;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -40,7 +49,7 @@ public class WPocketFragment extends Fragment {
 	/*
 	 * 		Views
 	 */
-	
+		
 	View rootView;
 	ListView listMyWish;
 	
@@ -58,6 +67,8 @@ public class WPocketFragment extends Fragment {
 	
 	boolean editOn = false;
 	
+	SettingPreference settings;
+	
 	//		Swipe
 	int x, y;
 	float speed = 0;
@@ -67,6 +78,7 @@ public class WPocketFragment extends Fragment {
 	int maxViewMovingX = 0;
 	
 	boolean bLongPress;
+	CheckForLongPress longPress = null;
 	Handler mHandler;
 		
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -75,6 +87,7 @@ public class WPocketFragment extends Fragment {
 		
 		initViews();
 		setHasOptionsMenu(true);
+		SyncWPocket();
 		
 		return rootView;
 	}	
@@ -126,6 +139,7 @@ public class WPocketFragment extends Fragment {
 	public void initViews() {
 		mActivity = (MainActivity) getActivity();
 		dbManager = mActivity.getDBManager();
+		settings = new SettingPreference(mActivity);
 		listMyWish = (ListView) rootView.findViewById(R.id.listMyWish);
 		
 		mHandler = new Handler();
@@ -146,7 +160,7 @@ public class WPocketFragment extends Fragment {
 					int position, long id) {
 				// TODO Auto-generated method stub
 				String query = null;
-				
+
 				if (arrMyWishList.get(position).bookmarkOn.equals("true")) {
 					arrMyWishList.get(position).bookmarkOn = "false";
 					query = "false";
@@ -187,9 +201,17 @@ public class WPocketFragment extends Fragment {
 	/*
 	 * 		DB Function
 	 */
-	
+
 	public void insertWishlistData (String title, int price, int wish, String imagePath, int webId) {
 		dbManager.insertWishlistData(title, price, wish, imagePath, webId);
+
+		selectWishAll();
+
+		mAdapter.notifyDataSetChanged();
+	}
+
+	public void insertWishlistData (String title, int price, int wish, String imagePath, String bookmark, int webId) {
+		dbManager.insertWishlistData(title, price, wish, imagePath, bookmark, webId);
 
 		selectWishAll();
 
@@ -218,6 +240,19 @@ public class WPocketFragment extends Fragment {
 		}
 		
 		result.close();
+	}
+	
+	public boolean checkWishlistData(int webId) {
+		Cursor result = dbManager.checkWishlistData(webId);
+		
+		Log.i("PJM", result.getCount()+"");
+		
+		if (result.getCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+		
 	}
 	
 	public void selectWishAll() {
@@ -389,7 +424,97 @@ public class WPocketFragment extends Fragment {
 			mAdapter.notifyDataSetChanged();
 		}
 	}	
+	
+	//		Long Click Runnable
+	class CheckForLongPress implements Runnable {
+		int pos;
+		
+		public CheckForLongPress(int pos) {
+			this.pos = pos;
+		}
+		
+		public void run() {
+			bLongPress = true;
+			AlertDialog.Builder dialog = new AlertDialog.Builder(mActivity);
+			
+			ArrayList<String> menulist = new ArrayList<String>();
+			if ( arrMyWishList.get(pos).getBookmarkOn().equals("true"))
+				menulist.add("즐겨찾기 해제");
+			else
+				menulist.add("즐겨찾기 지정");
+			menulist.add("수정하기");
+			menulist.add("삭제");
+			
+			ArrayAdapter<String> dAdapter = new ArrayAdapter<String>(mActivity.getApplicationContext(), R.layout.dialog_menu, menulist);
+			
+			dialog.setTitle("메뉴");
+			
+			dialog.setAdapter(dAdapter, new DialogInterface.OnClickListener() {
+				
+				public void onClick(DialogInterface dialog, int which) {
 
+					switch(which) {
+					case 0:			// Bookmark Func
+						
+						String query = null;
+						
+						if (arrMyWishList.get(pos).bookmarkOn.equals("true")) {
+							arrMyWishList.get(pos).bookmarkOn = "false";
+							query = "false";
+						} else {
+							arrMyWishList.get(pos).bookmarkOn = "true";
+							query = "true";
+						}
+						
+						updateWishlistData(0, arrMyWishList.get(pos).getId(), query);
+						mAdapter.notifyDataSetChanged();
+						break;
+						
+					case 1:			// Modify Func
+						Toast.makeText(mActivity, pos+"", Toast.LENGTH_SHORT).show();
+//						Toast.makeText(mActivity.getApplicationContext(), "곧 나옵니다!", Toast.LENGTH_SHORT).show();
+						break;
+						
+					case 2:			// Remove Func
+						removeWishlistData(arrMyWishList.get(pos).getId(), arrMyWishList.get(pos).getWebId());
+
+						arrMyWishList.remove(pos);
+						break;
+					}
+					
+					longPress = null;
+				}
+			});
+			
+			dialog.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+
+				public void onClick(DialogInterface dialog, int which) {
+
+					dialog.dismiss();
+					
+					longPress = null;
+				}
+			});
+			
+			dialog.show();
+		}
+	}
+	
+	private void postCheckForLongClick(int position, int delayOffset) {
+		bLongPress = false;
+		
+		if (longPress == null) {
+			longPress = new CheckForLongPress(position);
+		}
+		
+		mHandler.postDelayed(longPress, delayOffset);
+	}
+	
+	private void removeLongPressCallback() {
+		if (longPress != null) {
+			mHandler.removeCallbacks(longPress);
+		}
+	}
 
 	/*
 	 * 		bookmark is updated in WEB Database
@@ -431,6 +556,7 @@ public class WPocketFragment extends Fragment {
 		}
 	}
 
+
 	/*
 	 * 		Remove wish function
 	 */
@@ -467,4 +593,93 @@ public class WPocketFragment extends Fragment {
 			return null;
 		}
 	}
+
+	/*
+	 * 		Synchronize my wishlist
+	 */
+	
+	public void SyncWPocket() {
+		new AsyncTaskWPocketSynchronize(this).execute("http://naddola.cafe24.com/selectMyWishlist.php?email="+settings.getID());
+
+	}
+
+	static class AsyncTaskWPocketSynchronize extends AsyncTask<String, String, JSONObject> {
+		JSONObject jObj;
+		JSONArray wishlist;
+		WPocketFragment fragment;
+		
+		public AsyncTaskWPocketSynchronize(WPocketFragment fm) {
+			this.fragment = fm;
+		}
+		
+		@Override
+		protected JSONObject doInBackground(String... params) {
+			// TODO Auto-generated method stub
+			
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(params[0]);
+			
+			try {
+				HttpResponse response = httpClient.execute(httpPost);
+				HttpEntity httpEntity = response.getEntity();
+				InputStream is = httpEntity.getContent();
+				
+				BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+				StringBuilder builder = new StringBuilder();
+				String line = null;
+				
+				while ((line = reader.readLine()) != null) {
+					builder.append(line + "\n");
+				}
+				
+				is.close();
+				
+				jObj = new JSONObject(builder.toString());
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return jObj;
+		}
+
+		@Override
+		protected void onPostExecute(JSONObject result) {
+			// TODO Auto-generated method stub
+			
+			try {
+				wishlist = result.getJSONArray("wishlist");
+				
+				for(int i=0; i<wishlist.length(); i++) {
+					JSONObject c = wishlist.getJSONObject(i);
+					String title = c.getString("title");
+					int price = c.getInt("price");
+					int wish = c.getInt("wish");
+					int bookmarkOn = c.getInt("bookmark");
+					String bookmark;
+					int eventOn = c.getInt("event");
+					String date = c.getString("date");
+					String imagePath = c.getString("image");
+					int webId = c.getInt("id");
+					
+					if (bookmarkOn == 0) {
+						bookmark = "false";
+					} else {
+						bookmark = "true";
+					}
+					
+					if (!fragment.checkWishlistData(webId)) {
+						fragment.insertWishlistData(title, price, wish, imagePath, bookmark, webId);
+						
+					} else {
+					}
+					
+				}
+			} catch (Exception e) {
+				
+			}
+		}
+		
+	}
+
 }

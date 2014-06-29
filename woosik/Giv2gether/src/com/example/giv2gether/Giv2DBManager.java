@@ -186,9 +186,43 @@ public class Giv2DBManager {
 		
 		db.execSQL(sql);
 	}
+
+	public void insertWishlistData(String title, int price, int wish, String imagePath, String bookMark, int webId) {
+		String wTitle = title;
+		int wPrice = price;
+		int wWish = wish;
+		String wImagePath = imagePath;
+		String wEvent = "false";
+		String wBookmark = bookMark;
+		int wWebId = webId;
+		
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date date = new Date(System.currentTimeMillis());
+		String wDate = df.format(date);
+				
+		String sql = "insert into " + DB_TABLE_WISHLIST
+				+ " values(NULL, '"
+				+ wTitle + "', '"
+				+ wPrice + "', '"
+				+ wWish + "','"
+				+ wEvent + "', '"
+				+ wDate + "','"
+				+ wImagePath + "','"
+				+ wBookmark + "','"
+				+ wWebId + "');";
+		
+		db.execSQL(sql);
+	}
 	
 	public Cursor selectWishlistData(int index) {
 		String sql = "select * from " + DB_TABLE_WISHLIST + " where id=" + index + ";";
+		Cursor result = db.rawQuery(sql, null);
+		
+		return result;
+	}
+
+	public Cursor checkWishlistData(int webId) {
+		String sql = "select * from " + DB_TABLE_WISHLIST + " where webId='" + webId + "';";
 		Cursor result = db.rawQuery(sql, null);
 		
 		return result;
