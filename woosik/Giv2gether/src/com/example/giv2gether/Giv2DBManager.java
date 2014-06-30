@@ -81,13 +81,17 @@ public class Giv2DBManager {
 		String fName = name;
 		String fEmail = email;
 		String fPhone = phone;
+		String fBirth = "";
 		int fSigned = signed; 
 		
-		DateFormat df = new SimpleDateFormat("EEE MMM dd kk:mm:ss zzz yyyy", Locale.KOREAN);
-		Date fBirth = null;
+		//DateFormat df = new SimpleDateFormat("EEE MMM dd kk:mm:ss zzz yyyy", Locale.KOREAN);
+		DateFormat df = new SimpleDateFormat("yyyy-mm-dd", Locale.KOREAN);
+		DateFormat df2 = new SimpleDateFormat("mm/dd", Locale.KOREAN);
+		Date Birth = null;
 		
 		try {
-			fBirth = df.parse(birth);
+			Birth = df.parse(birth);
+			fBirth = df2.format(Birth);
 		} catch (Exception e) {
 			
 		}

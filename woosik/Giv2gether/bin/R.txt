@@ -220,10 +220,11 @@ int id Friend_list_Birth 0x7f060062
 int id Friend_list_Name 0x7f060061
 int id Friend_list_PhotoWish 0x7f060063
 int id Setting_AutoLogin 0x7f06006f
-int id action_settings 0x7f060075
+int id Setting_ResetDB 0x7f060070
+int id action_settings 0x7f060076
 int id book_now 0x7f060010
 int id btnAdd 0x7f06001e
-int id btnAddWish 0x7f060073
+int id btnAddWish 0x7f060074
 int id btnEventGenerate 0x7f060024
 int id btnEventPresent 0x7f06002a
 int id btnLogin 0x7f060035
@@ -272,7 +273,7 @@ int id eventGenerateFriendsName 0x7f06001f
 int id eventMessageFriendsName 0x7f060025
 int id fText 0x7f06006b
 int id facebookstatus 0x7f06002c
-int id feedList 0x7f060072
+int id feedList 0x7f060073
 int id findPw 0x7f060037
 int id friend_et_search 0x7f06006c
 int id friend_listview 0x7f06006d
@@ -288,7 +289,7 @@ int id imageList 0x7f060067
 int id imgSignUpSelect 0x7f060039
 int id imgStart 0x7f06003d
 int id large 0x7f060015
-int id listMyWish 0x7f060074
+int id listMyWish 0x7f060075
 int id list_header_title 0x7f06006a
 int id loginEmail 0x7f060033
 int id loginPw 0x7f060034
@@ -298,10 +299,10 @@ int id mText 0x7f06006e
 int id mTitle 0x7f06005f
 int id match_parent 0x7f06000c
 int id monochrome 0x7f060013
-int id noFeed 0x7f060071
+int id noFeed 0x7f060072
 int id none 0x7f060000
 int id normal 0x7f060001
-int id optionsView 0x7f060070
+int id optionsView 0x7f060071
 int id pager 0x7f060038
 int id picker_subtitle 0x7f06004f
 int id production 0x7f060007

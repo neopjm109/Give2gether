@@ -659,10 +659,11 @@ containing a value of this type.
         public static final int Friend_list_Name=0x7f060061;
         public static final int Friend_list_PhotoWish=0x7f060063;
         public static final int Setting_AutoLogin=0x7f06006f;
-        public static final int action_settings=0x7f060075;
+        public static final int Setting_ResetDB=0x7f060070;
+        public static final int action_settings=0x7f060076;
         public static final int book_now=0x7f060010;
         public static final int btnAdd=0x7f06001e;
-        public static final int btnAddWish=0x7f060073;
+        public static final int btnAddWish=0x7f060074;
         public static final int btnEventGenerate=0x7f060024;
         public static final int btnEventPresent=0x7f06002a;
         public static final int btnLogin=0x7f060035;
@@ -711,7 +712,7 @@ containing a value of this type.
         public static final int eventMessageFriendsName=0x7f060025;
         public static final int fText=0x7f06006b;
         public static final int facebookstatus=0x7f06002c;
-        public static final int feedList=0x7f060072;
+        public static final int feedList=0x7f060073;
         public static final int findPw=0x7f060037;
         public static final int friend_et_search=0x7f06006c;
         public static final int friend_listview=0x7f06006d;
@@ -727,7 +728,7 @@ containing a value of this type.
         public static final int imgSignUpSelect=0x7f060039;
         public static final int imgStart=0x7f06003d;
         public static final int large=0x7f060015;
-        public static final int listMyWish=0x7f060074;
+        public static final int listMyWish=0x7f060075;
         public static final int list_header_title=0x7f06006a;
         public static final int loginEmail=0x7f060033;
         public static final int loginPw=0x7f060034;
@@ -737,10 +738,10 @@ containing a value of this type.
         public static final int mTitle=0x7f06005f;
         public static final int match_parent=0x7f06000c;
         public static final int monochrome=0x7f060013;
-        public static final int noFeed=0x7f060071;
+        public static final int noFeed=0x7f060072;
         public static final int none=0x7f060000;
         public static final int normal=0x7f060001;
-        public static final int optionsView=0x7f060070;
+        public static final int optionsView=0x7f060071;
         public static final int pager=0x7f060038;
         public static final int picker_subtitle=0x7f06004f;
         public static final int production=0x7f060007;
