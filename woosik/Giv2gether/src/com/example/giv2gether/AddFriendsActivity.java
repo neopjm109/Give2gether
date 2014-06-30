@@ -33,7 +33,6 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
-import android.provider.ContactsContract.CommonDataKinds.Contactables;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -51,7 +50,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class AddFriendsActivity extends Activity implements OnItemClickListener{
+public class AddFriendsActivity extends Activity implements OnItemClickListener {
 
 	public static final String TAG = "naddola";
 
@@ -69,7 +68,6 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener{
 	TextWatcher textwatcher;
 
 	Button bt_confirm;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -100,35 +98,34 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener{
 
 		mFriendList = dbManager.getFriendsList();
 		mContactList = getContactList();
-		
+
 		postContactJsonArray();
 
 		baseAdapter = new SeparatedListAdapter(this);
-		
+
 		adapter = new ContactsAdapter(AddFriendsActivity.this,
 				R.layout.custom_addfriends_list, mGivFriendList);
 		baseAdapter.addSection("Giv2Gether 친구", adapter);
 		adapter2 = new ContactsAdapter(AddFriendsActivity.this,
 				R.layout.custom_addfriends_list, mContactList);
 		baseAdapter.addSection("전화번호 친구", adapter2);
-		
+
 		list.setAdapter(baseAdapter);
 		list.setOnItemClickListener(this);
 	}
-	
+
 	@Override
-	public void onItemClick(AdapterView<?> list, View v, int position, long resId) {
+	public void onItemClick(AdapterView<?> list, View v, int position,
+			long resId) {
 		ContactsAdapter tempAdapter = null;
 		ArrayList<Contact> tempContacts = null;
-		Log.i(TAG, adapter.checkbox.length+"");
-		Log.i(TAG, adapter2.checkbox.length+"");
-		switch(baseAdapter.getSectionFromPostion(position)){
-		
+		switch (baseAdapter.getSectionFromPostion(position)) {
+
 		case 0:
 			tempAdapter = adapter;
 			tempContacts = mGivFriendList;
 			break;
-			
+
 		case 1:
 			tempAdapter = adapter2;
 			tempContacts = mContactList;
@@ -136,20 +133,22 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener{
 		}
 		position = baseAdapter.getPosition(position);
 		tempAdapter.setChecked(position);
-		Contact tempFriend = tempContacts.get(position);
-		Log.i(TAG, tempFriend.getName());
+		Contact tempContact = tempContacts.get(position);
+		MyFriend tempFriend;
 		if (tempAdapter.isChecked(position)) {
-			if (checkFriendSigned(tempFriend)) {
-				dbManager.insertFriendsData(tempFriend.getName(), null,
-						tempFriend.getPhonenum(), null, 1);
+			tempFriend = getFriendSigned(tempContact);
+			if (tempFriend != null) {
+				Log.i(TAG,"insertFriendData : "+ tempFriend.getName() + tempFriend.getEmail()+
+						tempFriend.getPhone() + tempFriend.getBirth()+"signed");
+				dbManager.insertFriendsData(tempFriend.getName(), tempFriend.getEmail(),
+						tempFriend.getPhone(), tempFriend.getBirth(), 1);
 			} else {
-				dbManager.insertFriendsData(tempFriend.getName(), null,
-						tempFriend.getPhonenum(), null, 0);
+				dbManager.insertFriendsData(tempContact.getName(), null,
+						tempContact.getPhonenum(), null, 0);
 			}
 		}
 		baseAdapter.notifyDataSetChanged();
 	}
-
 
 	public void setTextWatcher() {
 		textwatcher = new TextWatcher() {
@@ -208,23 +207,20 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener{
 				String phonenumber = contactCursor.getString(1).replaceAll("-",
 						"");
 				/*
-				if (phonenumber.length() == 10) {
-					phonenumber = phonenumber.substring(0, 3) + "-"
-							+ phonenumber.substring(3, 6) + "-"
-							+ phonenumber.substring(6);
-				} else if (phonenumber.length() > 8) {
-					phonenumber = phonenumber.substring(0, 3) + "-"
-							+ phonenumber.substring(3, 7) + "-"
-							+ phonenumber.substring(7);
-				}
-				*/
+				 * if (phonenumber.length() == 10) { phonenumber =
+				 * phonenumber.substring(0, 3) + "-" + phonenumber.substring(3,
+				 * 6) + "-" + phonenumber.substring(6); } else if
+				 * (phonenumber.length() > 8) { phonenumber =
+				 * phonenumber.substring(0, 3) + "-" + phonenumber.substring(3,
+				 * 7) + "-" + phonenumber.substring(7); }
+				 */
 
 				Contact acontact = new Contact();
 				acontact.setPhotoid(contactCursor.getLong(0));
 				acontact.setPhonenum(phonenumber);
 				acontact.setName(contactCursor.getString(2));
-				
-				//이미 등록된 친구 패스 
+
+				// 이미 등록된 친구 패스
 				if (checkFriend(phonenumber))
 					continue;
 
@@ -343,13 +339,15 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener{
 		return false;
 	}
 
-	// 이미 가입된 친구 확
-	public boolean checkFriendSigned(Contact friend) {
+	// 이미 가입된 친구 확인
+	public MyFriend getFriendSigned(Contact friend) {
 
+		int id;
 		String name = friend.getName();
 		String email = null;
 		String phone = "";
 		String birth = null;
+		MyFriend myFriend = null;
 
 		Pattern p = Pattern.compile("\\d");
 		Matcher m = p.matcher(friend.getPhonenum());
@@ -362,33 +360,71 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener{
 
 		StrictMode.setThreadPolicy(policy);
 
-		HttpPostAsyncTask task = new HttpPostAsyncTask();
+		getSignedFriendHttpPostAsyncTask task = new getSignedFriendHttpPostAsyncTask();
 
-		if (task.doInBackground(name, email, phone, birth) == 1)
-			return true;
-		else
-			return false;
+		JSONObject jsonResult = task.doInBackground(name, email, phone, birth);
+		if (jsonResult != null) {
+			try {
+				JSONArray member;
+				member = jsonResult.getJSONArray("member");
+
+				for (int i = 0; i < member.length(); i++) {
+					JSONObject c = member.getJSONObject(i);
+					id = c.getInt("id");
+					email = c.getString("email");
+					birth = c.getString("birth");
+					myFriend = new MyFriend(id, name, email, phone, birth,
+							true, null);
+					Log.i(TAG, id+email);
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			return myFriend;
+		} else
+			return null;
 	}
 
-	public void postContactJsonArray(){
-		
+	public void postContactJsonArray() {
+
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
-		.permitAll().build();
+				.permitAll().build();
 
 		StrictMode.setThreadPolicy(policy);
 
 		HttpPostAsyncTaskJsonArray task = new HttpPostAsyncTaskJsonArray();
 
 		task.doInBackground();
-		
+
 	}
 
-	class HttpPostAsyncTask extends AsyncTask<String, Integer, Long>
+	class getSignedFriendHttpPostAsyncTask extends
+			AsyncTask<String, Integer, JSONObject>
 
 	{
 		@Override
-		protected Long doInBackground(String... params) {
-			long result;
+		protected void onPostExecute(JSONObject result) {
+			if (result == null)
+				return;
+			JSONArray member;
+			try {
+				member = result.getJSONArray("member");
+
+				for (int i = 0; i < member.length(); i++) {
+					JSONObject c = member.getJSONObject(i);
+					String email = c.getString("email");
+					String birth = c.getString("birth");
+				}
+			} catch (Exception e) {
+
+			}
+
+		}
+
+		@Override
+		protected JSONObject doInBackground(String... params) {
 			String name = params[0];
 			String email = params[1];
 			String phone = params[2];
@@ -416,10 +452,18 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener{
 					String resp = EntityUtils.toString(resEntity);
 
 					if (resp.equals("false")) {
-						return result = 0;
+						return null;
 					} else {
-						Log.i(TAG, resp);
-						return result = 1;
+						//Log.i(TAG, resp);
+						JSONObject jobj;
+						try {
+							jobj = new JSONObject(resp);
+							return jobj;
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
 					}
 				}
 
@@ -432,15 +476,16 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener{
 		}
 	}
 
-	class HttpPostAsyncTaskJsonArray extends AsyncTask<String, Integer, Long>
-	{
-		
+	class HttpPostAsyncTaskJsonArray extends AsyncTask<String, Integer, Long> {
+
 		JSONArray jContactArr;
+
 		@Override
 		protected Long doInBackground(String... params) {
-			
+
 			jContactArr = new JSONArray();
-			for(int i=0; i<mContactList.size(); i++){
+
+			for (int i = 0; i < mContactList.size(); i++) {
 				JSONObject obj = new JSONObject();
 				try {
 					obj.put("phone", mContactList.get(i).getPhonenum());
@@ -450,24 +495,22 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener{
 				}
 				jContactArr.put(obj);
 			}
-			
-			long result;
-			
 
 			try {
 				HttpClient client = new DefaultHttpClient();
 				String postUrl;
 
-				postUrl = "http://naddola.cafe24.com/test2.php";
+				postUrl = "http://naddola.cafe24.com/getGivFriendsList.php";
 
 				HttpPost post = new HttpPost(postUrl);
 
 				// 전달인자
 				List params2 = new ArrayList();
-				params2.add(new BasicNameValuePair("phone", jContactArr.toString()));
-				
-				//Log.i(TAG, "sendArray - " +jContactArr.toString());
-				
+				params2.add(new BasicNameValuePair("phone", jContactArr
+						.toString()));
+
+				// Log.i(TAG, "sendArray - " +jContactArr.toString());
+
 				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
 						HTTP.UTF_8);
 				post.setEntity(ent);
@@ -478,9 +521,10 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener{
 					String resp = EntityUtils.toString(resEntity);
 					try {
 						JSONArray jsonArr = new JSONArray(resp);
-						for(int i=0; i<jsonArr.length(); i++){
-							for(int j=0; j<mContactList.size(); j++){
-								if(mContactList.get(j).getPhonenum().equals(jsonArr.getString(i))){
+						for (int i = 0; i < jsonArr.length(); i++) {
+							for (int j = 0; j < mContactList.size(); j++) {
+								if (mContactList.get(j).getPhonenum()
+										.equals(jsonArr.getString(i))) {
 									mGivFriendList.add(mContactList.get(j));
 									mContactList.remove(j);
 								}

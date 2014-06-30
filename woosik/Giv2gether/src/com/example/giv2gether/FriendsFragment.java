@@ -1,14 +1,33 @@
 package com.example.giv2gether;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,17 +40,23 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class FriendsFragment extends Fragment {
 
 	public static final String TAG = "naddola";
 
 	View rootView;
-	MyFriendAdapter adapter;
 	MainActivity mActivity;
 	Giv2DBManager dbManager;
-	ArrayList<MyFriend> arrMyFriendList;
+
+	SeparatedListAdapter baseAdapter;
+	MyFriendAdapter EventFriendAdapter;
+	MyFriendAdapter GivFriendAdapter;
+	MyFriendAdapter ContactFriendAdapter;
+
+	ArrayList<MyFriend> arrEventFriendList;
+	ArrayList<MyFriend> arrGivFriendList;
+	ArrayList<MyFriend> arrContactFriendList;
 	ArrayList<MyFriend> arrSearchFriendList;
 
 	boolean editOn = false;
@@ -69,17 +94,39 @@ public class FriendsFragment extends Fragment {
 		dbManager = mActivity.getDBManager();
 		listFriend = (ListView) rootView.findViewById(R.id.friend_listview);
 
-		arrMyFriendList = new ArrayList<MyFriend>();
+		arrGivFriendList = new ArrayList<MyFriend>();
+		arrContactFriendList = new ArrayList<MyFriend>();
 		arrSearchFriendList = new ArrayList<MyFriend>();
-	
-		arrMyFriendList = dbManager.getFriendsList();
 
-		adapter = new MyFriendAdapter(getActivity().getApplicationContext(),
-				R.layout.custom_friend_list, arrMyFriendList);
+		ArrayList<MyFriend> arr = dbManager.getFriendsList();
+		for (int i = 0; i < arr.size(); i++) {
+			if (arr.get(i).getSigned())
+				arrGivFriendList.add(arr.get(i));
+			else
+				arrContactFriendList.add(arr.get(i));
+			
+		}
+		arrEventFriendList = getEventingFriendList();
+		baseAdapter = new SeparatedListAdapter(mActivity);
 
-		listFriend.setAdapter(adapter);
+		EventFriendAdapter = new MyFriendAdapter(getActivity()
+				.getApplicationContext(), R.layout.custom_friend_list,
+				arrEventFriendList);
+		if (arrEventFriendList.size() > 0)
+			baseAdapter.addSection("이벤트 중인 친구들", EventFriendAdapter);
+		GivFriendAdapter = new MyFriendAdapter(getActivity()
+				.getApplicationContext(), R.layout.custom_friend_list,
+				arrGivFriendList);
+		if (arrGivFriendList.size() > 0)
+			baseAdapter.addSection("Giv 친구들", GivFriendAdapter);
+		ContactFriendAdapter = new MyFriendAdapter(getActivity()
+				.getApplicationContext(), R.layout.custom_friend_list,
+				arrContactFriendList);
+		if (arrContactFriendList.size() > 0)
+			baseAdapter.addSection("나만 친구들", ContactFriendAdapter);
+
+		listFriend.setAdapter(baseAdapter);
 		listFriend.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-		
 	}
 
 	public void setTextWatcher() {
@@ -98,17 +145,19 @@ public class FriendsFragment extends Fragment {
 			@Override
 			public void afterTextChanged(Editable s) {
 				arrSearchFriendList.clear();
-				for (int i = 0; i < arrMyFriendList.size(); i++) {
-					MyFriend tempFriend = arrMyFriendList.get(i);
-					if(tempFriend.getName().matches(".*"+s.toString()+".*")){
+				for (int i = 0; i < arrGivFriendList.size(); i++) {
+					MyFriend tempFriend = arrGivFriendList.get(i);
+					if (tempFriend.getName()
+							.matches(".*" + s.toString() + ".*")) {
 						arrSearchFriendList.add(tempFriend);
 					}
 				}
-				
-				adapter = new MyFriendAdapter(getActivity().getApplicationContext(),
-						R.layout.custom_friend_list, arrSearchFriendList);
 
-				listFriend.setAdapter(adapter);
+				GivFriendAdapter = new MyFriendAdapter(getActivity()
+						.getApplicationContext(), R.layout.custom_friend_list,
+						arrSearchFriendList);
+
+				listFriend.setAdapter(GivFriendAdapter);
 				listFriend.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			}
 		};
@@ -135,7 +184,7 @@ public class FriendsFragment extends Fragment {
 		switch (item.getItemId()) {
 		case 0:
 			editOn = !editOn;
-			adapter.notifyDataSetChanged();
+			GivFriendAdapter.notifyDataSetChanged();
 			break;
 		case 1:
 			Intent intent = new Intent(getActivity(), AddFriendsActivity.class);
@@ -218,20 +267,120 @@ public class FriendsFragment extends Fragment {
 			if (mData != null) {
 				// new MyWishImageThread().execute(viewHolder);
 				mName.setText(mData.getName());
-				// mBirth.setText(mData.getBirth());
+				if (mData.getBirth() != null)
+					mBirth.setText(mData.getBirth());
 			}
-			
+
 			v.setOnClickListener(new View.OnClickListener() {
-				
+
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
-					Intent intent = new Intent(mActivity, EventGenerationActivity.class);
+					Intent intent = new Intent(mActivity,
+							EventGenerationActivity.class);
 					intent.putExtra("name", mData.getName());
 					startActivity(intent);
 				}
 			});
 			return v;
+		}
+	}
+
+	
+	public ArrayList<MyFriend> getEventingFriendList() {
+		ArrayList<MyFriend> myFriends = new ArrayList<MyFriend>();
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+				.permitAll().build();
+
+		StrictMode.setThreadPolicy(policy);
+
+		getEventingFriendsHttpPostAsyncTask task = new getEventingFriendsHttpPostAsyncTask();
+
+		JSONArray jsonArr = task.doInBackground();
+		for (int i = 0; i < jsonArr.length(); i++) {
+			JSONObject c;
+			try {
+				c = jsonArr.getJSONObject(i);
+				String email = c.getString("email");
+				for(int j=0; j<arrGivFriendList.size(); j++){
+					if(email.equals(arrGivFriendList.get(j).getEmail())){
+						myFriends.add(arrGivFriendList.get(j));
+						arrGivFriendList.remove(j);
+					}
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		return myFriends;
+
+	}
+
+	class getEventingFriendsHttpPostAsyncTask extends
+			AsyncTask<String, Integer, JSONArray> {
+		JSONArray jFriendArr;
+
+		@Override
+		protected JSONArray doInBackground(String... params) {
+
+			jFriendArr = new JSONArray();
+
+			for (int i = 0; i < arrGivFriendList.size(); i++) {
+				JSONObject obj = new JSONObject();
+				try {
+					obj.put("email", arrGivFriendList.get(i).getEmail());
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				jFriendArr.put(obj);
+			}
+
+			try {
+				HttpClient client = new DefaultHttpClient();
+				String postUrl;
+
+				postUrl = "http://naddola.cafe24.com/selectEventingFriendList.php";
+
+				HttpPost post = new HttpPost(postUrl);
+
+				// 전달인자
+				List params2 = new ArrayList();
+				params2.add(new BasicNameValuePair("friends", jFriendArr
+						.toString()));
+
+				// Log.i(TAG, "sendArray - " +jContactArr.toString());
+
+				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
+						HTTP.UTF_8);
+				post.setEntity(ent);
+				HttpResponse responsePost = client.execute(post);
+				HttpEntity resEntity = responsePost.getEntity();
+
+				if (resEntity != null) {
+					String resp = EntityUtils.toString(resEntity);
+					
+					try {
+						JSONArray jsonArr = new JSONArray(resp);
+						return jsonArr;
+						
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					Log.i(TAG, resp);
+				}
+				
+
+			} catch (MalformedURLException e) {
+				//
+			} catch (IOException e) {
+				//
+			}
+			return null;
 		}
 	}
 }
