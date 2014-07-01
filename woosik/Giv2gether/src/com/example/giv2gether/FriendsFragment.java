@@ -1,6 +1,9 @@
 package com.example.giv2gether;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +23,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -58,6 +62,8 @@ public class FriendsFragment extends Fragment {
 	ArrayList<MyFriend> arrGivFriendList;
 	ArrayList<MyFriend> arrContactFriendList;
 	ArrayList<MyFriend> arrSearchFriendList;
+	
+	ArrayList<MyFriendsWish> arrMyFriendsWishList;
 
 	boolean editOn = false;
 
@@ -84,6 +90,7 @@ public class FriendsFragment extends Fragment {
 	}
 
 	public void init() {
+		
 
 		et_SearchFriend = (EditText) rootView
 				.findViewById(R.id.friend_et_search);
@@ -97,6 +104,9 @@ public class FriendsFragment extends Fragment {
 		arrGivFriendList = new ArrayList<MyFriend>();
 		arrContactFriendList = new ArrayList<MyFriend>();
 		arrSearchFriendList = new ArrayList<MyFriend>();
+		
+		arrMyFriendsWishList = new ArrayList<MyFriendsWish>();
+		selectFWishAll();
 
 		ArrayList<MyFriend> arr = dbManager.getFriendsList();
 		for (int i = 0; i < arr.size(); i++) {
@@ -104,7 +114,6 @@ public class FriendsFragment extends Fragment {
 				arrGivFriendList.add(arr.get(i));
 			else
 				arrContactFriendList.add(arr.get(i));
-			
 		}
 		arrEventFriendList = getEventingFriendList();
 		baseAdapter = new SeparatedListAdapter(mActivity);
@@ -249,16 +258,8 @@ public class FriendsFragment extends Fragment {
 				mName = viewHolder.mName;
 				mBirth = viewHolder.mBirth;
 
-				viewHolder.imagePath = list.get(position).getImagePath(); // When
-																			// list
-																			// items
-																			// are
-																			// deleted
-																			// or
-																			// Added,
-																			// reinitialized
-																			// new
-																			// position
+				viewHolder.imagePath = list.get(position).getImagePath(); 
+				
 				viewHolder.mImage.setImageResource(R.drawable.image_loading);
 			}
 
@@ -271,15 +272,29 @@ public class FriendsFragment extends Fragment {
 					mBirth.setText(mData.getBirth());
 			}
 
+			selectFWishlistData(mData.getPhone());
+			
+			new AsyncFriendsWish(FriendsFragment.this).execute("http://naddola.cafe24.com/getFriendWish.php?phone="+mData.getPhone());
+
 			v.setOnClickListener(new View.OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
+					
+					for (int i=0; i<arrMyFriendsWishList.size(); i++) {
+						if (mData.getPhone().equals(arrMyFriendsWishList.get(i).phone)) {
+							Log.i("PJM", arrMyFriendsWishList.get(i).getTitle());
+							break;
+						}
+					}
+					
+					/*
 					Intent intent = new Intent(mActivity,
 							EventGenerationActivity.class);
 					intent.putExtra("name", mData.getName());
 					startActivity(intent);
+					*/
 				}
 			});
 			return v;
@@ -381,6 +396,224 @@ public class FriendsFragment extends Fragment {
 				//
 			}
 			return null;
+		}
+	}
+
+
+	/*
+	 * 		DB Function
+	 */
+
+	public void insertFWishlistData (String phone, String title, int price, int wish, String date, String imagePath, String bookmark, String event, int webId) {
+		dbManager.insertFWishlistData(phone, title, price, wish, date, imagePath, bookmark, event, webId);
+
+		selectFWishAll();
+
+		EventFriendAdapter.notifyDataSetChanged();
+		GivFriendAdapter.notifyDataSetChanged();
+	}
+	
+	public void selectFWishlistData(int index) {
+		Cursor result = dbManager.selectFWishlistData(index);
+		
+		if (result.moveToFirst()) {
+			
+			int id = result.getInt(0);
+			String phone = result.getString(1);
+			String title = result.getString(2);
+			int price = result.getInt(3);
+			int wish = result.getInt(4);
+			String eventOn = result.getString(5);
+			String date = result.getString(6);
+			String imagePath = result.getString(7);
+			String bookmarkOn = result.getString(8);
+			int webId = result.getInt(9);
+			
+			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			myWish.setWebId(webId);
+		}
+		
+		result.close();
+	}
+	
+	public void selectFWishlistData(String phone_index) {
+		Cursor result = dbManager.selectFWishlistData(phone_index);
+		
+		if (result.moveToFirst()) {
+
+			int id = result.getInt(0);
+			String phone = result.getString(1);
+			String title = result.getString(2);
+			int price = result.getInt(3);
+			int wish = result.getInt(4);
+			String eventOn = result.getString(5);
+			String date = result.getString(6);
+			String imagePath = result.getString(7);
+			String bookmarkOn = result.getString(8);
+			int webId = result.getInt(9);
+			
+			MyFriendsWish myFWish = new MyFriendsWish(id, phone, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			myFWish.setWebId(webId);
+		}
+		
+		result.close();
+	}
+
+	public boolean checkFWishlistData(int webId) {
+		Cursor result = dbManager.checkFWishlistData(webId);
+		
+		if (result.getCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean checkFWishlistData(String phone) {
+		Cursor result = dbManager.checkFWishlistData(phone);
+		
+		if (result.getCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public void selectFWishAll() {
+		Cursor result = dbManager.selectFWishAll();
+		
+		arrMyFriendsWishList.clear();
+		
+		result.moveToFirst();
+		
+		while (!result.isAfterLast()) {
+			
+			int id = result.getInt(0);
+			String phone = result.getString(1);
+			String title = result.getString(2);
+			int price = result.getInt(3);
+			int wish = result.getInt(4);
+			String eventOn = result.getString(5);
+			String date = result.getString(6);
+			String imagePath = result.getString(7);
+			String bookmarkOn = result.getString(8);
+			int webId = result.getInt(9);
+			
+			
+			MyFriendsWish myFWish = new MyFriendsWish(id, phone, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			myFWish.setWebId(webId);
+			
+			arrMyFriendsWishList.add(myFWish);
+
+//			new ImageThread().execute(myWish);
+	
+			result.moveToNext();
+		}
+		
+		Log.i("PJM", arrMyFriendsWishList.size()+"");
+
+		result.close();
+		
+	}
+	
+	public void updateFWishlistData(int flag, int id, String query) {
+		dbManager.updateFWishlistData(flag, id, query);
+	}
+	
+	public void removeFWishlistData(int index, int webId) {
+		dbManager.removeFWishlistData(index);
+	}
+
+	/*
+	 * 		Async access Friend's wish
+	 */
+	
+	class AsyncFriendsWish extends AsyncTask<String, String, JSONObject> {
+
+		JSONObject jObj;
+		JSONArray friendsWish;
+		FriendsFragment fragment;
+		
+		public AsyncFriendsWish(FriendsFragment fm) {
+			this.fragment = fm;
+		}
+		
+		@Override
+		protected JSONObject doInBackground(String... params) {
+			// TODO Auto-generated method stub
+
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(params[0]);
+			
+			try {
+				HttpResponse response = httpClient.execute(httpPost);
+				HttpEntity httpEntity = response.getEntity();
+				InputStream is = httpEntity.getContent();
+				
+				BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+				StringBuilder builder = new StringBuilder();
+				String line = null;
+				
+				while ((line = reader.readLine()) != null) {
+					builder.append(line + "\n");
+				}
+				
+				is.close();
+				
+				jObj = new JSONObject(builder.toString());
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return jObj;
+			
+		}
+
+		protected void onPostExecute(JSONObject result) {
+			
+			try {
+				friendsWish = result.getJSONArray("wishlist");
+				
+				for(int i=0; i<friendsWish.length(); i++) {
+					JSONObject c = friendsWish.getJSONObject(i);
+					String phone = c.getString("phone");
+					String title = c.getString("title");
+					int price = c.getInt("price");
+					int wish = c.getInt("wish");
+					int bookmarkOn = c.getInt("bookmark");
+					String bookmark;
+					int eventOn = c.getInt("event");
+					String event;
+					String date = c.getString("date");
+					String imagePath = c.getString("image");
+					int webId = c.getInt("id");
+
+					if (bookmarkOn == 0) {
+						bookmark = "false";
+					} else {
+						bookmark = "true";
+					}
+					
+					if (eventOn == 0) {
+						event = "false";
+					} else {
+						event = "true";
+					}
+										
+					if (!fragment.checkFWishlistData(phone)) {
+						fragment.insertFWishlistData(phone, title, price, wish, date, imagePath, bookmark, event, webId);						
+						Log.i("PJM", "insert");
+					} else {
+						Log.i("PJM", "Not insert");
+					}
+				
+				}
+				
+			} catch (Exception e) {
+				
+			}
+			
 		}
 	}
 }

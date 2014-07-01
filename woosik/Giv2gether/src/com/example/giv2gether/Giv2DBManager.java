@@ -27,11 +27,13 @@ public class Giv2DBManager {
 
 	public Giv2DBManager(Context context) {
 		db = context.openOrCreateDatabase(DB_NAME, DB_MODE, null);
+		removeTable();
 		createTable();
 	}
 
 	public Giv2DBManager(Context context, String dbName, int dbMode) {
 		db = context.openOrCreateDatabase(dbName, dbMode, null);
+		removeTable();
 		createTable();
 	}
 	
@@ -51,6 +53,20 @@ public class Giv2DBManager {
 
 		sql = "create table if not exists " + DB_TABLE_WISHLIST
 				+ " (id integer primary key autoincrement,"
+				+ " title text not null,"
+				+ " price integer not null,"
+				+ " wish integer not null,"
+				+ " event text not null,"
+				+ " date text,"
+				+ " image text not null,"
+				+ " bookmark text not null,"
+				+ " webId integer not null)";
+		
+		db.execSQL(sql);
+		
+		sql = "create table if not exists " + DB_TABLE_FRIENDS_WISHLIST
+				+ " (id integer primary key autoincrement,"
+				+ " phone text not null,"
 				+ " title text not null,"
 				+ " price integer not null,"
 				+ " wish integer not null,"
@@ -254,6 +270,99 @@ public class Giv2DBManager {
 	
 	public void removeWishlistData(int index) {
 		String sql = "delete from " + DB_TABLE_WISHLIST + " where id = " + index + ";";
+		db.execSQL(sql);
+	}
+
+	// Friends Wishlist
+	
+	public void insertFWishlistData(String phone, String title, int price, int wish, String date, String imagePath, String bookmark, String event, int webId) {
+		String wPhone = phone;
+		String wTitle = title;
+		int wPrice = price;
+		int wWish = wish;
+		String wDate = date;
+		String wImagePath = imagePath;
+		String wEvent = event;
+		String wBookmark = bookmark;
+		int wWebId = webId;
+
+		if (wEvent.equals("0")) {
+			wEvent = "false";
+		} else {
+			wEvent = "true";			
+		}
+		
+		if (wBookmark.equals("0")) {
+			wEvent = "false";			
+		} else {
+			wEvent = "true";			
+		}
+				
+		String sql = "insert into " + DB_TABLE_FRIENDS_WISHLIST
+				+ " values(NULL, '"
+				+ wPhone +"', '"
+				+ wTitle + "', '"
+				+ wPrice + "', '"
+				+ wWish + "','"
+				+ wEvent + "', '"
+				+ wDate + "','"
+				+ wImagePath + "','"
+				+ wBookmark + "','"
+				+ wWebId + "');";
+		
+		db.execSQL(sql);
+	}
+	
+	public Cursor selectFWishlistData(int index) {
+		String sql = "select * from " + DB_TABLE_FRIENDS_WISHLIST + " where id='" + index + "';";
+		Cursor result = db.rawQuery(sql, null);
+		
+		return result;
+	}
+
+	public Cursor selectFWishlistData(String phone) {
+		String sql = "select * from " + DB_TABLE_FRIENDS_WISHLIST + " where phone='" + phone + "';";
+		Cursor result = db.rawQuery(sql, null);
+		
+		return result;
+	}
+
+	public Cursor checkFWishlistData(int webId) {
+		String sql = "select * from " + DB_TABLE_FRIENDS_WISHLIST + " where webId='" + webId + "';";
+		Cursor result = db.rawQuery(sql, null);
+		
+		return result;
+	}
+
+	public Cursor checkFWishlistData(String phone) {
+		String sql = "select * from " + DB_TABLE_FRIENDS_WISHLIST + " where phone='" + phone + "';";
+		Cursor result = db.rawQuery(sql, null);
+		
+		return result;
+	}
+	
+	public Cursor selectFWishAll() {
+		String sql = "select * from " + DB_TABLE_FRIENDS_WISHLIST + ";";
+		Cursor result = db.rawQuery(sql, null);
+		
+		return result;
+	}
+	
+	public void updateFWishlistData(int flag, int id, String query) {
+		
+		String set = null;
+		switch(flag) {
+		case 0:
+			set = "bookmark";
+			break;
+		}
+		
+		String sql = "update " + DB_TABLE_FRIENDS_WISHLIST + " set " + set +" = '" + query + "' where id = " + id + ";";
+		db.execSQL(sql);
+	}
+	
+	public void removeFWishlistData(int index) {
+		String sql = "delete from " + DB_TABLE_FRIENDS_WISHLIST + " where id = " + index + ";";
 		db.execSQL(sql);
 	}
 

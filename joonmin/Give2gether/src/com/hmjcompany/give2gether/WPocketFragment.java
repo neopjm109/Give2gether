@@ -190,8 +190,6 @@ public class WPocketFragment extends Fragment {
 			String imagePath = data.getStringExtra("image");
 			int webId = Integer.parseInt(data.getStringExtra("webId"));
 			
-			Log.i("PJM", webId+"");
-			
 			insertWishlistData(title, price, wish, imagePath, webId);
 			
 			break;
@@ -247,8 +245,6 @@ public class WPocketFragment extends Fragment {
 	public boolean checkWishlistData(int webId) {
 		Cursor result = dbManager.checkWishlistData(webId);
 		
-		Log.i("PJM", result.getCount()+"");
-		
 		if (result.getCount() > 0) {
 			return true;
 		} else {
@@ -279,8 +275,6 @@ public class WPocketFragment extends Fragment {
 			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
 			myWish.setWebId(webId);
 
-			Log.i("PJM", myWish.getImagePath());
-			
 			new ImageThread().execute(myWish);
 	
 			result.moveToNext();
