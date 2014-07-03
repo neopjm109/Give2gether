@@ -29,11 +29,13 @@ public class Giv2DBManager {
 
 	public Giv2DBManager(Context context) {
 		db = context.openOrCreateDatabase(DB_NAME, DB_MODE, null);
+		removeFWTable();
 		createTable();
 	}
 
 	public Giv2DBManager(Context context, String dbName, int dbMode) {
 		db = context.openOrCreateDatabase(dbName, dbMode, null);
+		removeFWTable();
 		createTable();
 	}
 	
@@ -84,6 +86,14 @@ public class Giv2DBManager {
 		db.execSQL(sql);
 
 		sql = "drop table " + DB_TABLE_WISHLIST;
+		db.execSQL(sql);
+
+		sql = "drop table " + DB_TABLE_FRIENDS_WISHLIST;
+		db.execSQL(sql);
+	}
+	
+	public void removeFWTable() {
+		String sql = "drop table " + DB_TABLE_FRIENDS_WISHLIST;
 		db.execSQL(sql);
 	}
 	

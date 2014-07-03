@@ -422,7 +422,7 @@ public class WPocketFragment extends Fragment {
 			
 			mAdapter.notifyDataSetChanged();
 		}
-	}	
+	}
 	
 	//		Long Click Runnable
 	class CheckForLongPress implements Runnable {

@@ -27,7 +27,7 @@
         >
         
 	    <ImageView
-	        android:id="@+id/wishImage"
+	        android:id="@+id/eventGenerateImage"
 	        android:layout_width="100dp"
 	        android:layout_height="100dp"
 	        android:padding="10dp"
@@ -44,7 +44,7 @@
 	        >
 	        
 	        <TextView
-	            android:id="@+id/wishTitle"
+	            android:id="@+id/eventGenerateTitle"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:text="Title"
@@ -53,7 +53,7 @@
 	            />
 	        
 	        <TextView
-	            android:id="@+id/wishPrice"
+	            android:id="@+id/eventGeneratePrice"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:text="Low Price"
