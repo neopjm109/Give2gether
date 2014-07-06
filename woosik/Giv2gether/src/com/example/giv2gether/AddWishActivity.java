@@ -35,6 +35,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -92,6 +93,8 @@ public class AddWishActivity extends Activity {
 
 		editImage = (ImageView) findViewById (R.id.editImage);
 		editTitle = (AutoCompleteTextView) findViewById (R.id.editTitle);
+		editTitle.requestFocus();
+		getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 		
 		editTitle.addTextChangedListener(new TextWatcher() {
 			Timer timer = new Timer();

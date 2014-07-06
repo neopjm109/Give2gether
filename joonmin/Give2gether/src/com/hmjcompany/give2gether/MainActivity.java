@@ -85,6 +85,10 @@ public class MainActivity extends FragmentActivity {
 		}
 	}
 	
+	public ViewPager getViewPager() {
+		return viewPager;
+	}
+	
 	public Giv2DBManager getDBManager() {
 		return dbManager;
 	}

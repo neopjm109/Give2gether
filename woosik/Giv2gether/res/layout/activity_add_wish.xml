@@ -9,6 +9,8 @@
 	     android:id="@+id/editTitle"
 	     android:layout_width="match_parent"
 	     android:layout_height="wrap_content"
+	     android:singleLine="true"
+	     android:focusableInTouchMode="true"
 	     android:hint="Goods Name"
 	     />
     

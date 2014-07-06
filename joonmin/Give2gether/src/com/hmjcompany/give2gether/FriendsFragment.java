@@ -790,14 +790,12 @@ public class FriendsFragment extends Fragment {
 					} else {
 						event = "true";
 					}
-										
+
 					if (!fragment.checkFWishlistData(phone)) {
-						fragment.insertFWishlistData(phone, title, price, wish, date, imagePath, bookmark, event, webId);	
-						new ImageThread(image).execute(imagePath);					
-						Log.i("PJM", "insert"+i);
-					} else {
-						Log.i("PJM", "Not insert"+i);
+						fragment.insertFWishlistData(phone, title, price, wish, date, imagePath, bookmark, event, webId);					
 					}
+					
+					new ImageThread(image).execute(imagePath);
 
 				}
 				

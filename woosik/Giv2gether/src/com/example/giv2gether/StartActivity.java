@@ -1,15 +1,22 @@
 package com.example.giv2gether;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class StartActivity extends Activity implements OnClickListener{
 	
 	static SettingPreference setting;
+	ConnectivityManager cManager;
+	NetworkInfo mobile;
+	NetworkInfo wifi;
 	
 	Button btnSignup;
 	Button btnLogin;
@@ -22,9 +29,18 @@ public class StartActivity extends Activity implements OnClickListener{
 		 * 		AutoLogin
 		 */
 		setting = new SettingPreference(this);
-		if(setting.isLogin()){
-			Intent intent = new Intent(StartActivity.this, MainActivity.class);
-			startActivity(intent);
+		cManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		mobile = cManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+		wifi = cManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		
+		if (wifi.isConnected() || mobile.isConnected()) {
+			if(setting.isLogin()){
+				Intent intent = new Intent(StartActivity.this, MainActivity.class);
+				startActivity(intent);
+				finish();
+			}
+		} else {
+			Toast.makeText(getApplicationContext(), "Check your network state", Toast.LENGTH_SHORT).show();
 			finish();
 		}
 		
