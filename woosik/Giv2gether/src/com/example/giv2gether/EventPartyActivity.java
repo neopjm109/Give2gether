@@ -15,15 +15,20 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,6 +36,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class EventPartyActivity extends Activity {
 
@@ -42,7 +48,8 @@ public class EventPartyActivity extends Activity {
 	
 	Intent intent;
 	String name, title, imagePath;
-	int wish, webId;
+	int wish, webId, chkPay;
+	boolean bPayCheck = false;
 	
 	SettingPreference setting;
 	
@@ -65,7 +72,7 @@ public class EventPartyActivity extends Activity {
 	
 	public void initViews() {
 		setting = new SettingPreference(this);
-				
+
 		friendName = (TextView) findViewById(R.id.eventFriendsName);		
 		wishTitle = (TextView) findViewById(R.id.eventTitle);
 		wishPrice = (TextView) findViewById(R.id.eventPrice);
@@ -75,13 +82,67 @@ public class EventPartyActivity extends Activity {
 		eventProgressText = (TextView) findViewById(R.id.eventProgressText);
 		payPresent = (EditText) findViewById(R.id.editEventPay);
 		
+		payPresent.addTextChangedListener(new TextWatcher() {
+			
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				// TODO Auto-generated method stub
+				if(count > 0) {
+					btnPresent.setEnabled(true);
+				} else {
+					btnPresent.setEnabled(false);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 		btnPresent = (Button) findViewById(R.id.btnEventPresent);
+		btnPresent.setEnabled(false);
 		btnPresent.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				new AsyncPresentEvent().execute();
+				AlertDialog.Builder abDialog = new AlertDialog.Builder(EventPartyActivity.this);
+				
+				abDialog.setMessage("선물하실 건가요?");
+				abDialog.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						int thisPay = Integer.parseInt(payPresent.getText().toString());
+						if (thisPay < chkPay) {
+							dialog.dismiss();
+							Toast.makeText(EventPartyActivity.this, "더 높은 숫자를 입력하세요", Toast.LENGTH_SHORT).show();
+						} else {
+							new AsyncPresentEvent().execute();
+						}
+					}
+				});
+				
+				abDialog.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						dialog.dismiss();
+					}
+				});
+				
+				abDialog.show();
 			}
 		});
 
@@ -89,6 +150,8 @@ public class EventPartyActivity extends Activity {
 		wishTitle.setText(title);
 		wishPrice.setText(wish+" Wish");
 		eventProgress.setMax(wish);
+
+		new AsyncCheckMyPay().execute();
 		
 		new AsyncGetEventProgress().execute();
 		
@@ -233,6 +296,107 @@ public class EventPartyActivity extends Activity {
 				wishImage.setImageResource(R.drawable.ic_launcher);
 
 		}
+	}
+
+	class AsyncCheckMyPay extends AsyncTask<String, Void, Void> {
+
+		@Override
+		protected Void doInBackground(String... arg0) {
+			// TODO Auto-generated method stub
+			try {
+				HttpClient client = new DefaultHttpClient();
+				String postUrl;
+
+				postUrl = "http://naddola.cafe24.com/checkMyPay.php";
+				
+				HttpPost post = new HttpPost(postUrl);
+
+				// 전달인자
+				List params2 = new ArrayList();
+				params2.add(new BasicNameValuePair("wish_id", webId+""));
+				params2.add(new BasicNameValuePair("email", setting.getID()));
+
+				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
+						HTTP.UTF_8);
+				post.setEntity(ent);
+
+				HttpResponse response = client.execute(post);
+				HttpEntity httpEntity = response.getEntity();
+
+				if (httpEntity != null) {
+					String resp = EntityUtils.toString(httpEntity);
+					
+					if (resp.equals("true")) {
+						bPayCheck = true;
+					}
+					
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			
+			if(bPayCheck) {
+				payPresent.setHint("이미 지불하신 상태입니다.");
+			}
+			
+			new AsyncGetMyPay().execute();
+			
+			super.onPostExecute(result);
+		}
+				
+	}
+	
+	class AsyncGetMyPay extends AsyncTask<String, Void, Void> {
+
+		@Override
+		protected Void doInBackground(String... arg0) {
+			// TODO Auto-generated method stub
+			try {
+				HttpClient client = new DefaultHttpClient();
+				String postUrl;
+
+				postUrl = "http://naddola.cafe24.com/getMyPay.php";
+				
+				HttpPost post = new HttpPost(postUrl);
+
+				// 전달인자
+				List params2 = new ArrayList();
+				params2.add(new BasicNameValuePair("wish_id", webId+""));
+				params2.add(new BasicNameValuePair("email", setting.getID()));
+
+				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
+						HTTP.UTF_8);
+				post.setEntity(ent);
+
+				HttpResponse response = client.execute(post);
+				HttpEntity httpEntity = response.getEntity();
+
+				if (httpEntity != null) {
+					String resp = EntityUtils.toString(httpEntity);
+					chkPay = Integer.parseInt(resp);
+					Log.i("PJM", chkPay+"");
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			
+			super.onPostExecute(result);
+		}
+				
 	}
 
 }
