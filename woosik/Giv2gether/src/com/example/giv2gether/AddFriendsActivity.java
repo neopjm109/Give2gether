@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
@@ -37,6 +38,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -68,6 +70,7 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 	TextWatcher textwatcher;
 
 	Button bt_confirm;
+	ActionBar actionBar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +81,19 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 
 	}
 
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO Auto-generated method stub
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish();
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
 	public void init() {
+		actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		dbManager = new Giv2DBManager(getApplicationContext());
 
 		list = (ListView) findViewById(R.id.AddFriends_list);

@@ -19,6 +19,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -30,6 +31,8 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -51,6 +54,7 @@ public class EventPartyActivity extends Activity {
 	int wish, webId, chkPay;
 	boolean bPayCheck = false;
 	
+	ActionBar actionBar;
 	SettingPreference setting;
 	
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +63,60 @@ public class EventPartyActivity extends Activity {
 
 		initIntent();		
 		initViews();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// TODO Auto-generated method stub
+		MenuItem item1 = menu.add(0, 0, 0, "Present Pay");
+		item1.setIcon(android.R.drawable.ic_menu_add);
+		item1.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO Auto-generated method stub
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish();
+			break;
+		case 0:
+			AlertDialog.Builder abDialog = new AlertDialog.Builder(EventPartyActivity.this);
+			
+			abDialog.setMessage("선물하실 건가요?");
+			abDialog.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					int thisPay = Integer.parseInt(payPresent.getText().toString());
+					if (thisPay < chkPay) {
+						dialog.dismiss();
+						Toast.makeText(EventPartyActivity.this, "더 높은 숫자를 입력하세요", Toast.LENGTH_SHORT).show();
+					} else {
+						new AsyncPresentEvent().execute();
+					}
+				}
+			});
+			
+			abDialog.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					dialog.dismiss();
+				}
+			});
+			
+			abDialog.show();
+			
+			break;
+		default:
+			break;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 	
 	public void initIntent() {
@@ -71,6 +129,8 @@ public class EventPartyActivity extends Activity {
 	}
 	
 	public void initViews() {
+		actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		setting = new SettingPreference(this);
 
 		friendName = (TextView) findViewById(R.id.eventFriendsName);		

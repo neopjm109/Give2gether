@@ -9,6 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:textSize="20sp"
         android:text="Friends Name" />
     
     <TextView
@@ -16,14 +17,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:textSize="20sp"
         android:text="Event D-Day"
         />
     
     <LinearLayout
-        android:layout_width="250dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="100"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:orientation="horizontal"
         android:layout_gravity="center"
+        android:gravity="center_vertical"
         >
         
 	    <ImageView
@@ -56,6 +62,7 @@
 	            android:id="@+id/eventGeneratePrice"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
+        		android:textSize="20sp"
 	            android:text="Low Price"
 	            />
 	        
@@ -67,7 +74,7 @@
         android:id="@+id/btnEventGenerate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Event Generate"
+        android:text="이벤트 발생하기"
         />
     
 </LinearLayout>

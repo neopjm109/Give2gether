@@ -2,16 +2,21 @@ package com.example.giv2gether;
 
 import java.net.URL;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class EventGenerationActivity extends Activity {
 
@@ -19,6 +24,7 @@ public class EventGenerationActivity extends Activity {
 	ImageView wishImage;
 	Button btnGenerate;
 	
+	ActionBar actionBar;
 	Intent intent;
 	String name, title, imagePath;
 	int wish, webId;
@@ -27,8 +33,39 @@ public class EventGenerationActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_event_generate);
 		
-		initIntent();		
+		initIntent();
 		initViews();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// TODO Auto-generated method stub
+		MenuItem item1 = menu.add(0, 0, 0, "Generate Event");
+		item1.setIcon(android.R.drawable.ic_menu_add);
+		item1.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO Auto-generated method stub
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish();
+			break;
+		case 0:
+			Intent intent = new Intent(EventGenerationActivity.this, EventMessageActivity.class);
+			intent.putExtra("name", name);
+			intent.putExtra("webId", webId);
+			startActivity(intent);
+			finish();
+			
+			break;
+		default:
+			break;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 	
 	public void initIntent() {
@@ -41,6 +78,8 @@ public class EventGenerationActivity extends Activity {
 	}
 	
 	public void initViews() {
+		actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		btnGenerate = (Button) findViewById(R.id.btnEventGenerate);
 		
 		btnGenerate.setOnClickListener(new View.OnClickListener() {

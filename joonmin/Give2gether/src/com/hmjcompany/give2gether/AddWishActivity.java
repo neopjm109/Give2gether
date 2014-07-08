@@ -22,8 +22,11 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -34,16 +37,16 @@ import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class AddWishActivity extends Activity {
 
@@ -51,10 +54,8 @@ public class AddWishActivity extends Activity {
 	 * 		Views
 	 */
 	
-	AutoCompleteTextView editTitle;
-	ImageView editImage;
-	TextView editPrice, editWish;
-	Button btnAdd;
+	EditText editTitle;
+	ListView itemList;
 	
 	/*
 	 * 		Variables
@@ -75,6 +76,7 @@ public class AddWishActivity extends Activity {
 	
 	Handler mHandler;
 	SettingPreference setting;
+	ActionBar actionBar;
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -89,7 +91,19 @@ public class AddWishActivity extends Activity {
 		
 	}
 	
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO Auto-generated method stub
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish();
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}	
+	
 	public void initViews() {
+		actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		setting = new SettingPreference(this);
 		
 		searchList = new ArrayList<SearchData>();
@@ -97,8 +111,7 @@ public class AddWishActivity extends Activity {
 		
 		mHandler = new Handler();
 
-		editImage = (ImageView) findViewById (R.id.editImage);
-		editTitle = (AutoCompleteTextView) findViewById (R.id.editTitle);
+		editTitle = (EditText) findViewById (R.id.editTitle);
 		editTitle.requestFocus();
 		getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 		
@@ -141,45 +154,60 @@ public class AddWishActivity extends Activity {
 			}
 		});
 		
-		editTitle.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		itemList = (ListView) findViewById(R.id.itemList);
+				
+		itemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
 				
-				myWish = new SearchData(searchList.get(position).getTitle(),
-						searchList.get(position).getPrice(),
-						searchList.get(position).getWish(),
-						searchList.get(position).getImagePath());
+				final int pos = position;
+				AlertDialog.Builder mDialog = new AlertDialog.Builder(AddWishActivity.this);
+				View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_wish, null);
+				
+				mDialog.setView(dialogView);
 
-				new ImageThread(editImage).execute(searchList.get(position).getImagePath());
+				ImageView image = (ImageView) dialogView.findViewById(R.id.dialogImage);
+				TextView price = (TextView) dialogView.findViewById(R.id.dialogPrice);
+
+				new ImageThread(image).execute(searchList.get(pos).getImagePath());
 				
-				editTitle.setText(searchList.get(position).getTitle());
-				editPrice.setText(df.format(searchList.get(position).getPrice())+" 원");
-				editWish.setText(searchList.get(position).getWish()+" Wish");
+				price.setText("쇼핑몰 최저가 : " + df.format(searchList.get(pos).getPrice()) + " 원\n"
+						+ "Wish : " + df.format(searchList.get(pos).getWish()) + " \n");
 				
-				bAutoListClick = true;
+				mDialog.setTitle(searchList.get(pos).getTitle());
+				mDialog.setPositiveButton("이거 사줘", new DialogInterface.OnClickListener(){
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+
+						myWish = new SearchData(searchList.get(pos).getTitle(),
+								searchList.get(pos).getPrice(),
+								searchList.get(pos).getWish(),
+								searchList.get(pos).getImagePath());
+
+						new InsertWish(myWish).execute();
+
+						bAutoListClick = true;
+					}
+					
+				});
+				
+				mDialog.setNegativeButton("아니", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						dialog.dismiss();
+					}
+				});
+				
+				mDialog.show();
 			}
 			
 		});
-
-		editPrice = (TextView) findViewById (R.id.editPrice);
-		editWish = (TextView) findViewById (R.id.editWish);
-		btnAdd = (Button) findViewById (R.id.btnAdd);
 		
-		btnAdd.setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View v) {
-				
-				if( editTitle.length() != 0 && editPrice.length() != 0) {
-					
-					new InsertWish(myWish).execute();
-					
-				} else {
-					Toast.makeText(getApplicationContext(), "Put write", Toast.LENGTH_SHORT).show();
-				}
-				
-			}
-		});
 	}
 	
 	/*
@@ -243,10 +271,9 @@ public class AddWishActivity extends Activity {
 				sAdapter = new SearchAdapter(AddWishActivity.this, R.layout.custom_auto_list, searchList);
 						
 				sAdapter.notifyDataSetChanged();
-
-				editTitle.setAdapter(sAdapter);
-				editTitle.showDropDown();
 				
+				itemList.setAdapter(sAdapter);
+
 			} catch (Exception e) {
 				
 			}
@@ -338,7 +365,7 @@ public class AddWishActivity extends Activity {
 			
 			if (sData != null) {
 
-				new SearchImageThread().execute(viewHolder);
+				new SearchImageThread(mImage).execute(sData.getImagePath());
 				
 				mTitle.setText(sData.getTitle());
 				mPrice.setText("쇼핑몰 최저가 : " + df.format(sData.getPrice()) + " 원\n"
@@ -351,29 +378,34 @@ public class AddWishActivity extends Activity {
 		
 	}
 	
-	class SearchImageThread extends AsyncTask<SearchViewHolder, Void, SearchViewHolder> {
+	class SearchImageThread extends AsyncTask<String, Void, Bitmap> {
 
-		SearchViewHolder viewHolder;
+		Bitmap bmp;
+		ImageView image;
 		
-		protected SearchViewHolder doInBackground(SearchViewHolder... params) {
+		public SearchImageThread(ImageView image) {
+			this.image = image;
+			bmp = null;
+		}
+		
+		protected Bitmap doInBackground(String... params) {
 			try {
-				viewHolder = params[0];
-				URL url = new URL(viewHolder.imagePath);
-				viewHolder.bmp = BitmapFactory.decodeStream(url.openStream());
+				URL url = new URL(params[0]);
+				this.bmp = BitmapFactory.decodeStream(url.openStream());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			
-			return viewHolder;
+			return this.bmp;
 		}
 
-		protected void onPostExecute(SearchViewHolder result) {
+		protected void onPostExecute(Bitmap result) {
 			super.onPostExecute(result);
 			
-			if (result.bmp != null)
-				result.mImage.setImageBitmap(result.bmp);
+			if (result != null)
+				image.setImageBitmap(result);
 			else
-				result.mImage.setImageResource(R.drawable.image_loading);
+				image.setImageResource(R.drawable.image_loading);
 		}
 	}
 	
