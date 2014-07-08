@@ -30,7 +30,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -116,7 +115,6 @@ public class WPocketFragment extends Fragment {
 				item.setIcon(android.R.drawable.ic_menu_save);
 			} else {
 				item.setIcon(android.R.drawable.ic_menu_edit);
-				
 			}
 			
 			mAdapter.notifyDataSetChanged();
@@ -245,8 +243,6 @@ public class WPocketFragment extends Fragment {
 	public boolean checkWishlistData(int webId) {
 		Cursor result = dbManager.checkWishlistData(webId);
 		
-		Log.i("PJM", result.getCount()+"");
-		
 		if (result.getCount() > 0) {
 			return true;
 		} else {
@@ -272,6 +268,7 @@ public class WPocketFragment extends Fragment {
 			String imagePath = result.getString(6);
 			String bookmarkOn = result.getString(7);
 			int webId = result.getInt(8);
+			
 			
 			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
 			myWish.setWebId(webId);
@@ -423,7 +420,7 @@ public class WPocketFragment extends Fragment {
 			
 			mAdapter.notifyDataSetChanged();
 		}
-	}	
+	}
 	
 	//		Long Click Runnable
 	class CheckForLongPress implements Runnable {

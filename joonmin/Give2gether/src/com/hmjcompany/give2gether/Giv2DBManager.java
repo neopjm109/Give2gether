@@ -186,6 +186,10 @@ public class Giv2DBManager {
 		db.execSQL(sql);
 	}
 	
+	public void removeFriendsData(String phone) {
+		String sql = "delete from " + DB_TABLE_FRIENDS + " where phone = '" + phone + "';";
+		db.execSQL(sql);
+	}
 	
 	
 	// Wishlist

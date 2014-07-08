@@ -15,6 +15,7 @@
         android:id="@+id/eventCongratulation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="10"
         android:gravity="center"
         android:text="축하합니다!"
         />
@@ -23,6 +24,7 @@
         android:id="@+id/eventMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="10"
         android:gravity="center"
         android:text="Blah Blah Blah"
         />

@@ -92,7 +92,7 @@ public class FriendsFragment extends Fragment {
 	}
 
 	public void init() {
-		
+
 		et_SearchFriend = (EditText) rootView
 				.findViewById(R.id.friend_et_search);
 		setTextWatcher();
@@ -194,9 +194,20 @@ public class FriendsFragment extends Fragment {
 		switch (item.getItemId()) {
 		case 0:
 			editOn = !editOn;
-			GivFriendAdapter.notifyDataSetChanged();
+			
+			if (editOn) {
+				item.setIcon(android.R.drawable.ic_menu_save);
+			} else {
+				item.setIcon(android.R.drawable.ic_menu_edit);
+			}
+
+			baseAdapter.notifyDataSetChanged();
+			
 			break;
 		case 1:
+			editOn = false;
+			
+			baseAdapter.notifyDataSetChanged();
 			Intent intent = new Intent(getActivity(), AddFriendsActivity.class);
 			startActivity(intent);
 			break;
@@ -228,7 +239,7 @@ public class FriendsFragment extends Fragment {
 
 		protected void onPostExecute(Bitmap result) {
 			super.onPostExecute(result);
-			
+
 			image.setImageBitmap(result);
 
 			EventFriendAdapter.notifyDataSetChanged();
@@ -251,7 +262,7 @@ public class FriendsFragment extends Fragment {
 			this.imagePath = imagePath;
 		}
 	}
-
+	
 	class MyEventFriendAdapter extends ArrayAdapter<MyFriend> {
 
 		ArrayList<MyFriend> list = new ArrayList<MyFriend>();
@@ -298,11 +309,22 @@ public class FriendsFragment extends Fragment {
 				if (mData.getBirth() != null)
 					mBirth.setText(mData.getBirth());
 			}
+			
+			mImage.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					if(editOn) {
+						removeFriendsData(mData.getPhone());
+					}
+				}
+			});
 
 			selectFWishlistData(mData.getPhone());
 			
 			new AsyncFriendsWish(FriendsFragment.this, mImage).execute("http://naddola.cafe24.com/getFriendWish.php?phone="+mData.getPhone());
-				
+
 			v.setOnClickListener(new View.OnClickListener() {
 
 				@Override
@@ -383,9 +405,19 @@ public class FriendsFragment extends Fragment {
 				mName.setText(mData.getName());
 				if (mData.getBirth() != null)
 					mBirth.setText(mData.getBirth());
-
 			}
-
+			
+			mImage.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					if(editOn) {
+						dbManager.removeFriendsData(mData.getPhone());
+					}
+				}
+			});
+			
 			selectFWishlistData(mData.getPhone());
 			
 			new AsyncFriendsWish(FriendsFragment.this, mImage).execute("http://naddola.cafe24.com/getFriendWish.php?phone="+mData.getPhone());
@@ -476,6 +508,23 @@ public class FriendsFragment extends Fragment {
 				if (mData.getBirth() != null)
 					mBirth.setText(mData.getBirth());
 			}
+
+			if(editOn) {
+				viewHolder.mImage.setImageResource(android.R.drawable.ic_menu_delete);
+			} else {
+				viewHolder.mImage.setImageResource(R.drawable.image_loading);
+			}
+			
+			mImage.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					if(editOn) {
+						removeFriendsData(mData.getPhone());
+					}
+				}
+			});
 
 			selectFWishlistData(mData.getPhone());
 			
@@ -593,6 +642,34 @@ public class FriendsFragment extends Fragment {
 	 * 		DB Function
 	 */
 
+	public void removeFriendsData(String phone) {
+		Log.i("PJM", "DEL");
+		dbManager.removeFriendsData(phone);
+		
+		for(int i=0; i<arrEventFriendList.size(); i++) {
+			if(arrEventFriendList.get(i).getPhone().equals(phone)) {
+				arrEventFriendList.remove(i);
+				break;
+			}
+		}
+		
+		for(int i=0; i<arrGivFriendList.size(); i++) {
+			if(arrGivFriendList.get(i).getPhone().equals(phone)) {
+				arrGivFriendList.remove(i);
+				break;
+			}
+		}
+		
+		for(int i=0; i<arrContactFriendList.size(); i++) {
+			if(arrContactFriendList.get(i).getPhone().equals(phone)) {
+				arrContactFriendList.remove(i);
+				break;
+			}
+		}
+		
+		baseAdapter.notifyDataSetChanged();
+	}
+
 	public void insertFWishlistData (String phone, String title, int price, int wish, String date, String imagePath, String bookmark, String event, int webId) {
 		dbManager.insertFWishlistData(phone, title, price, wish, date, imagePath, bookmark, event, webId);
 
@@ -699,8 +776,6 @@ public class FriendsFragment extends Fragment {
 			result.moveToNext();
 		}
 		
-		Log.i("PJM", arrMyFriendsWishList.size()+"");
-
 		result.close();
 		
 	}
@@ -712,7 +787,7 @@ public class FriendsFragment extends Fragment {
 	public void removeFWishlistData(int index, int webId) {
 		dbManager.removeFWishlistData(index);
 	}
-	
+
 	/*
 	 * 		Async access Friend's wish
 	 */
@@ -792,12 +867,15 @@ public class FriendsFragment extends Fragment {
 					} else {
 						event = "true";
 					}
-										
+
 					if (!fragment.checkFWishlistData(phone)) {
 						fragment.insertFWishlistData(phone, title, price, wish, date, imagePath, bookmark, event, webId);					
 					}
-					
-					new ImageThread(image).execute(imagePath);
+
+					if(!editOn)
+						new ImageThread(image).execute(imagePath);
+					else
+						image.setImageResource(android.R.drawable.ic_menu_delete);
 
 				}
 				

@@ -10,6 +10,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+
+
 public class Giv2DBManager {
 	
 	/*
@@ -63,7 +65,7 @@ public class Giv2DBManager {
 				+ " webId integer not null)";
 		
 		db.execSQL(sql);
-		
+
 		sql = "create table if not exists " + DB_TABLE_FRIENDS_WISHLIST
 				+ " (id integer primary key autoincrement,"
 				+ " phone text not null,"
@@ -85,8 +87,11 @@ public class Giv2DBManager {
 
 		sql = "drop table " + DB_TABLE_WISHLIST;
 		db.execSQL(sql);
-	}
 
+		sql = "drop table " + DB_TABLE_FRIENDS_WISHLIST;
+		db.execSQL(sql);
+	}
+	
 	public void removeFWTable() {
 		String sql = "drop table " + DB_TABLE_FRIENDS_WISHLIST;
 		db.execSQL(sql);
@@ -181,6 +186,10 @@ public class Giv2DBManager {
 		db.execSQL(sql);
 	}
 	
+	public void removeFriendsData(String phone) {
+		String sql = "delete from " + DB_TABLE_FRIENDS + " where phone = '" + phone + "';";
+		db.execSQL(sql);
+	}
 	
 	
 	// Wishlist
@@ -277,6 +286,7 @@ public class Giv2DBManager {
 		String sql = "delete from " + DB_TABLE_WISHLIST + " where id = " + index + ";";
 		db.execSQL(sql);
 	}
+	
 
 	// Friends Wishlist
 	

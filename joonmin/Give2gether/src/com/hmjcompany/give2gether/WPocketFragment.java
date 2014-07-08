@@ -30,7 +30,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -116,7 +115,6 @@ public class WPocketFragment extends Fragment {
 				item.setIcon(android.R.drawable.ic_menu_save);
 			} else {
 				item.setIcon(android.R.drawable.ic_menu_edit);
-				
 			}
 			
 			mAdapter.notifyDataSetChanged();
