@@ -1,7 +1,11 @@
 package com.example.give2gether;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,11 +22,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.example.give2gether.AddFriendsActivity.HttpPostAsyncTaskJsonArray;
-
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -52,14 +56,16 @@ public class FriendsFragment extends Fragment {
 	Giv2DBManager dbManager;
 
 	SeparatedListAdapter baseAdapter;
-	MyFriendAdapter EventFriendAdapter;
-	MyFriendAdapter GivFriendAdapter;
-	MyFriendAdapter ContactFriendAdapter;
+	MyEventFriendAdapter EventFriendAdapter;
+	MyGivFriendAdapter GivFriendAdapter;
+	MyContactFriendAdapter ContactFriendAdapter;
 
 	ArrayList<MyFriend> arrEventFriendList;
 	ArrayList<MyFriend> arrGivFriendList;
 	ArrayList<MyFriend> arrContactFriendList;
 	ArrayList<MyFriend> arrSearchFriendList;
+	
+	ArrayList<MyFriendsWish> arrMyFriendsWishList;
 
 	boolean editOn = false;
 
@@ -99,6 +105,9 @@ public class FriendsFragment extends Fragment {
 		arrGivFriendList = new ArrayList<MyFriend>();
 		arrContactFriendList = new ArrayList<MyFriend>();
 		arrSearchFriendList = new ArrayList<MyFriend>();
+		
+		arrMyFriendsWishList = new ArrayList<MyFriendsWish>();
+		selectFWishAll();
 
 		ArrayList<MyFriend> arr = dbManager.getFriendsList();
 		for (int i = 0; i < arr.size(); i++) {
@@ -106,22 +115,21 @@ public class FriendsFragment extends Fragment {
 				arrGivFriendList.add(arr.get(i));
 			else
 				arrContactFriendList.add(arr.get(i));
-			
 		}
 		arrEventFriendList = getEventingFriendList();
 		baseAdapter = new SeparatedListAdapter(mActivity);
 
-		EventFriendAdapter = new MyFriendAdapter(getActivity()
+		EventFriendAdapter = new MyEventFriendAdapter(getActivity()
 				.getApplicationContext(), R.layout.custom_friend_list,
 				arrEventFriendList);
 		if (arrEventFriendList.size() > 0)
 			baseAdapter.addSection("이벤트 중인 친구들", EventFriendAdapter);
-		GivFriendAdapter = new MyFriendAdapter(getActivity()
+		GivFriendAdapter = new MyGivFriendAdapter(getActivity()
 				.getApplicationContext(), R.layout.custom_friend_list,
 				arrGivFriendList);
 		if (arrGivFriendList.size() > 0)
 			baseAdapter.addSection("Giv 친구들", GivFriendAdapter);
-		ContactFriendAdapter = new MyFriendAdapter(getActivity()
+		ContactFriendAdapter = new MyContactFriendAdapter(getActivity()
 				.getApplicationContext(), R.layout.custom_friend_list,
 				arrContactFriendList);
 		if (arrContactFriendList.size() > 0)
@@ -155,7 +163,7 @@ public class FriendsFragment extends Fragment {
 					}
 				}
 
-				GivFriendAdapter = new MyFriendAdapter(getActivity()
+				GivFriendAdapter = new MyGivFriendAdapter(getActivity()
 						.getApplicationContext(), R.layout.custom_friend_list,
 						arrSearchFriendList);
 
@@ -186,9 +194,20 @@ public class FriendsFragment extends Fragment {
 		switch (item.getItemId()) {
 		case 0:
 			editOn = !editOn;
-			GivFriendAdapter.notifyDataSetChanged();
+			
+			if (editOn) {
+				item.setIcon(android.R.drawable.ic_menu_save);
+			} else {
+				item.setIcon(android.R.drawable.ic_menu_edit);
+			}
+
+			baseAdapter.notifyDataSetChanged();
+			
 			break;
 		case 1:
+			editOn = false;
+			
+			baseAdapter.notifyDataSetChanged();
 			Intent intent = new Intent(getActivity(), AddFriendsActivity.class);
 			startActivity(intent);
 			break;
@@ -197,6 +216,37 @@ public class FriendsFragment extends Fragment {
 		return super.onOptionsItemSelected(item);
 	}
 
+	// 		Get a Image by url
+	class ImageThread extends AsyncTask<String, Void, Bitmap> {
+
+		ImageView image;
+		Bitmap bmp;
+		
+		public ImageThread(ImageView image){
+			this.image = image;
+		}
+		
+		protected Bitmap doInBackground(String... params) {
+			try {
+				URL url = new URL(params[0]);
+				bmp = BitmapFactory.decodeStream(url.openStream());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return bmp;
+		}
+
+		protected void onPostExecute(Bitmap result) {
+			super.onPostExecute(result);
+
+			image.setImageBitmap(result);
+
+			EventFriendAdapter.notifyDataSetChanged();
+			GivFriendAdapter.notifyDataSetChanged();
+		}
+	}
+	
 	class MyFriendViewHolder {
 		ImageView mImage = null;
 		TextView mName = null;
@@ -212,12 +262,207 @@ public class FriendsFragment extends Fragment {
 			this.imagePath = imagePath;
 		}
 	}
-
-	class MyFriendAdapter extends ArrayAdapter<MyFriend> {
+	
+	class MyEventFriendAdapter extends ArrayAdapter<MyFriend> {
 
 		ArrayList<MyFriend> list = new ArrayList<MyFriend>();
 
-		public MyFriendAdapter(Context context, int resource,
+		public MyEventFriendAdapter(Context context, int resource,
+				ArrayList<MyFriend> objects) {
+			super(context, resource, objects);
+
+			list = objects;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View v = convertView;
+			final MyFriendViewHolder viewHolder;
+			ImageView mImage = null;
+			TextView mName = null, mBirth = null;
+
+			final int pos = position;
+
+			if (v == null) {
+				LayoutInflater inflater = (LayoutInflater) mActivity
+						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				v = inflater.inflate(R.layout.custom_friend_list, null);
+
+				mImage = (ImageView) v.findViewById(R.id.Friend_list_PhotoWish);
+				mName = (TextView) v.findViewById(R.id.Friend_list_Name);
+				mBirth = (TextView) v.findViewById(R.id.Friend_list_Birth);
+
+				viewHolder = new MyFriendViewHolder(mImage, mName, mBirth, list
+						.get(position).getImagePath());
+				v.setTag(viewHolder);
+			} else {
+				viewHolder = (MyFriendViewHolder) v.getTag();
+				mImage = viewHolder.mImage;
+				mName = viewHolder.mName;
+				mBirth = viewHolder.mBirth;
+			}
+
+			final MyFriend mData = list.get(position);
+
+			if (mData != null) {
+				mName.setText(mData.getName());
+				if (mData.getBirth() != null)
+					mBirth.setText(mData.getBirth());
+			}
+			
+			mImage.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					if(editOn) {
+						removeFriendsData(mData.getPhone());
+					}
+				}
+			});
+
+			selectFWishlistData(mData.getPhone());
+			
+			new AsyncFriendsWish(FriendsFragment.this, mImage).execute("http://naddola.cafe24.com/getFriendWish.php?phone="+mData.getPhone());
+
+			v.setOnClickListener(new View.OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					
+					String title = null;
+					int wish = 0;
+					String imagePath = null;
+					int webId = 0;
+					
+					for (int i=0; i<arrMyFriendsWishList.size(); i++) {
+						if (mData.getPhone().equals(arrMyFriendsWishList.get(i).phone)) {
+							title = arrMyFriendsWishList.get(i).getTitle();
+							wish = arrMyFriendsWishList.get(i).getWish();
+							imagePath = arrMyFriendsWishList.get(i).getImagePath();
+							webId = arrMyFriendsWishList.get(i).getWebId();
+							break;
+						}
+					}
+					
+					Intent intent = new Intent(mActivity, EventPartyActivity.class);
+					intent.putExtra("name", mData.getName());
+					intent.putExtra("title",title);
+					intent.putExtra("wish", wish);
+					intent.putExtra("imagePath", imagePath);
+					intent.putExtra("webId", webId);
+					startActivity(intent);
+					
+				}
+			});
+			return v;
+		}
+	}
+
+	class MyGivFriendAdapter extends ArrayAdapter<MyFriend> {
+
+		ArrayList<MyFriend> list = new ArrayList<MyFriend>();
+
+		public MyGivFriendAdapter(Context context, int resource,
+				ArrayList<MyFriend> objects) {
+			super(context, resource, objects);
+
+			list = objects;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View v = convertView;
+			final MyFriendViewHolder viewHolder;
+			ImageView mImage = null;
+			TextView mName = null, mBirth = null;
+
+			final int pos = position;
+
+			if (v == null) {
+				LayoutInflater inflater = (LayoutInflater) mActivity
+						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				v = inflater.inflate(R.layout.custom_friend_list, null);
+
+				mImage = (ImageView) v.findViewById(R.id.Friend_list_PhotoWish);
+				mName = (TextView) v.findViewById(R.id.Friend_list_Name);
+				mBirth = (TextView) v.findViewById(R.id.Friend_list_Birth);
+
+				viewHolder = new MyFriendViewHolder(mImage, mName, mBirth, list
+						.get(position).getImagePath());
+				v.setTag(viewHolder);
+			} else {
+				viewHolder = (MyFriendViewHolder) v.getTag();
+				mImage = viewHolder.mImage;
+				mName = viewHolder.mName;
+				mBirth = viewHolder.mBirth;
+			}
+
+			final MyFriend mData = list.get(position);
+
+			if (mData != null) {
+				mName.setText(mData.getName());
+				if (mData.getBirth() != null)
+					mBirth.setText(mData.getBirth());
+			}
+			
+			mImage.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					if(editOn) {
+						dbManager.removeFriendsData(mData.getPhone());
+					}
+				}
+			});
+			
+			selectFWishlistData(mData.getPhone());
+			
+			new AsyncFriendsWish(FriendsFragment.this, mImage).execute("http://naddola.cafe24.com/getFriendWish.php?phone="+mData.getPhone());
+						
+			v.setOnClickListener(new View.OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					
+					String title = null;
+					int wish = 0;
+					String imagePath = null;
+					int webId = 0;
+					
+					for (int i=0; i<arrMyFriendsWishList.size(); i++) {
+						if (mData.getPhone().equals(arrMyFriendsWishList.get(i).phone)) {
+							title = arrMyFriendsWishList.get(i).getTitle();
+							wish = arrMyFriendsWishList.get(i).getWish();
+							imagePath = arrMyFriendsWishList.get(i).getImagePath();
+							webId = arrMyFriendsWishList.get(i).getWebId();
+							break;
+						}
+					}
+					
+					Intent intent = new Intent(mActivity, EventGenerationActivity.class);
+					intent.putExtra("email", mData.getEmail());
+					intent.putExtra("name", mData.getName());
+					intent.putExtra("title",title);
+					intent.putExtra("wish", wish);
+					intent.putExtra("imagePath", imagePath);
+					intent.putExtra("webId", webId);
+					startActivity(intent);
+					
+				}
+			});
+			return v;
+		}
+	}
+
+	class MyContactFriendAdapter extends ArrayAdapter<MyFriend> {
+
+		ArrayList<MyFriend> list = new ArrayList<MyFriend>();
+
+		public MyContactFriendAdapter(Context context, int resource,
 				ArrayList<MyFriend> objects) {
 			super(context, resource, objects);
 
@@ -251,16 +496,8 @@ public class FriendsFragment extends Fragment {
 				mName = viewHolder.mName;
 				mBirth = viewHolder.mBirth;
 
-				viewHolder.imagePath = list.get(position).getImagePath(); // When
-																			// list
-																			// items
-																			// are
-																			// deleted
-																			// or
-																			// Added,
-																			// reinitialized
-																			// new
-																			// position
+				viewHolder.imagePath = list.get(position).getImagePath(); 
+				
 				viewHolder.mImage.setImageResource(R.drawable.image_loading);
 			}
 
@@ -273,21 +510,36 @@ public class FriendsFragment extends Fragment {
 					mBirth.setText(mData.getBirth());
 			}
 
+			if(editOn) {
+				viewHolder.mImage.setImageResource(android.R.drawable.ic_menu_delete);
+			} else {
+				viewHolder.mImage.setImageResource(R.drawable.image_loading);
+			}
+			
+			mImage.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					if(editOn) {
+						removeFriendsData(mData.getPhone());
+					}
+				}
+			});
+
+			selectFWishlistData(mData.getPhone());
+			
 			v.setOnClickListener(new View.OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
-					Intent intent = new Intent(mActivity,
-							EventGenerationActivity.class);
-					intent.putExtra("name", mData.getName());
-					startActivity(intent);
+					
 				}
 			});
 			return v;
 		}
 	}
-
 	
 	public ArrayList<MyFriend> getEventingFriendList() {
 		ArrayList<MyFriend> myFriends = new ArrayList<MyFriend>();
@@ -383,6 +635,254 @@ public class FriendsFragment extends Fragment {
 				//
 			}
 			return null;
+		}
+	}
+
+
+	/*
+	 * 		DB Function
+	 */
+
+	public void removeFriendsData(String phone) {
+		Log.i("PJM", "DEL");
+		dbManager.removeFriendsData(phone);
+		
+		for(int i=0; i<arrEventFriendList.size(); i++) {
+			if(arrEventFriendList.get(i).getPhone().equals(phone)) {
+				arrEventFriendList.remove(i);
+				break;
+			}
+		}
+		
+		for(int i=0; i<arrGivFriendList.size(); i++) {
+			if(arrGivFriendList.get(i).getPhone().equals(phone)) {
+				arrGivFriendList.remove(i);
+				break;
+			}
+		}
+		
+		for(int i=0; i<arrContactFriendList.size(); i++) {
+			if(arrContactFriendList.get(i).getPhone().equals(phone)) {
+				arrContactFriendList.remove(i);
+				break;
+			}
+		}
+		
+		baseAdapter.notifyDataSetChanged();
+	}
+
+	public void insertFWishlistData (String phone, String title, int price, int wish, String date, String imagePath, String bookmark, String event, int webId) {
+		dbManager.insertFWishlistData(phone, title, price, wish, date, imagePath, bookmark, event, webId);
+
+		selectFWishAll();
+
+		EventFriendAdapter.notifyDataSetChanged();
+		GivFriendAdapter.notifyDataSetChanged();
+	}
+	
+	public void selectFWishlistData(int index) {
+		Cursor result = dbManager.selectFWishlistData(index);
+		
+		if (result.moveToFirst()) {
+			
+			int id = result.getInt(0);
+			String phone = result.getString(1);
+			String title = result.getString(2);
+			int price = result.getInt(3);
+			int wish = result.getInt(4);
+			String eventOn = result.getString(5);
+			String date = result.getString(6);
+			String imagePath = result.getString(7);
+			String bookmarkOn = result.getString(8);
+			int webId = result.getInt(9);
+
+			MyFriendsWish myFWish = new MyFriendsWish(id, phone, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			myFWish.setWebId(webId);
+		}
+		
+		result.close();
+	}
+	
+	public void selectFWishlistData(String phone_index) {
+		Cursor result = dbManager.selectFWishlistData(phone_index);
+		
+		if (result.moveToFirst()) {
+
+			int id = result.getInt(0);
+			String phone = result.getString(1);
+			String title = result.getString(2);
+			int price = result.getInt(3);
+			int wish = result.getInt(4);
+			String eventOn = result.getString(5);
+			String date = result.getString(6);
+			String imagePath = result.getString(7);
+			String bookmarkOn = result.getString(8);
+			int webId = result.getInt(9);
+			
+			MyFriendsWish myFWish = new MyFriendsWish(id, phone, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			myFWish.setWebId(webId);
+		}
+		
+		result.close();
+	}
+
+	public boolean checkFWishlistData(int webId) {
+		Cursor result = dbManager.checkFWishlistData(webId);
+		
+		if (result.getCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean checkFWishlistData(String phone) {
+		Cursor result = dbManager.checkFWishlistData(phone);
+		
+		if (result.getCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public void selectFWishAll() {
+		Cursor result = dbManager.selectFWishAll();
+		
+		arrMyFriendsWishList.clear();
+		
+		result.moveToFirst();
+		
+		while (!result.isAfterLast()) {
+			
+			int id = result.getInt(0);
+			String phone = result.getString(1);
+			String title = result.getString(2);
+			int price = result.getInt(3);
+			int wish = result.getInt(4);
+			String eventOn = result.getString(5);
+			String date = result.getString(6);
+			String imagePath = result.getString(7);
+			String bookmarkOn = result.getString(8);
+			int webId = result.getInt(9);
+			
+			
+			MyFriendsWish myFWish = new MyFriendsWish(id, phone, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			myFWish.setWebId(webId);
+			
+			arrMyFriendsWishList.add(myFWish);
+
+//			new ImageThread().execute(myWish);
+	
+			result.moveToNext();
+		}
+		
+		result.close();
+		
+	}
+	
+	public void updateFWishlistData(int flag, int id, String query) {
+		dbManager.updateFWishlistData(flag, id, query);
+	}
+	
+	public void removeFWishlistData(int index, int webId) {
+		dbManager.removeFWishlistData(index);
+	}
+
+	/*
+	 * 		Async access Friend's wish
+	 */
+	
+	class AsyncFriendsWish extends AsyncTask<String, String, JSONObject> {
+
+		JSONObject jObj;
+		JSONArray friendsWish;
+		FriendsFragment fragment;
+		
+		ImageView image;
+		
+		public AsyncFriendsWish(FriendsFragment fm, ImageView image) {
+			this.fragment = fm;
+			this.image = image;
+		}
+		
+		@Override
+		protected JSONObject doInBackground(String... params) {
+			// TODO Auto-generated method stub
+
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(params[0]);
+			
+			try {
+				HttpResponse response = httpClient.execute(httpPost);
+				HttpEntity httpEntity = response.getEntity();
+				InputStream is = httpEntity.getContent();
+				
+				BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+				StringBuilder builder = new StringBuilder();
+				String line = null;
+				
+				while ((line = reader.readLine()) != null) {
+					builder.append(line + "\n");
+				}
+				
+				is.close();
+				
+				jObj = new JSONObject(builder.toString());
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return jObj;
+			
+		}
+
+		protected void onPostExecute(JSONObject result) {
+			
+			try {
+				friendsWish = result.getJSONArray("wishlist");
+				
+				for(int i=0; i<friendsWish.length(); i++) {
+					JSONObject c = friendsWish.getJSONObject(i);
+					String phone = c.getString("phone");
+					String title = c.getString("title");
+					int price = c.getInt("price");
+					int wish = c.getInt("wish");
+					int bookmarkOn = c.getInt("bookmark");
+					String bookmark;
+					int eventOn = c.getInt("event");
+					String event;
+					String date = c.getString("date");
+					String imagePath = c.getString("image");
+					int webId = c.getInt("id");
+
+					if (bookmarkOn == 0) {
+						bookmark = "false";
+					} else {
+						bookmark = "true";
+					}
+					
+					if (eventOn == 0) {
+						event = "false";
+					} else {
+						event = "true";
+					}
+
+					if (!fragment.checkFWishlistData(phone)) {
+						fragment.insertFWishlistData(phone, title, price, wish, date, imagePath, bookmark, event, webId);					
+					}
+
+					if(!editOn)
+						new ImageThread(image).execute(imagePath);
+					else
+						image.setImageResource(android.R.drawable.ic_menu_delete);
+
+				}
+				
+			} catch (Exception e) {
+				
+			}
 		}
 	}
 }

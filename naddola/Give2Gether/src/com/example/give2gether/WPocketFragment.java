@@ -1,8 +1,23 @@
 package com.example.give2gether;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -33,7 +48,7 @@ public class WPocketFragment extends Fragment {
 	/*
 	 * 		Views
 	 */
-	
+		
 	View rootView;
 	ListView listMyWish;
 	
@@ -50,6 +65,8 @@ public class WPocketFragment extends Fragment {
 	DecimalFormat df = new DecimalFormat("#,##0");
 	
 	boolean editOn = false;
+	
+	SettingPreference settings;
 	
 	//		Swipe
 	int x, y;
@@ -69,6 +86,7 @@ public class WPocketFragment extends Fragment {
 		
 		initViews();
 		setHasOptionsMenu(true);
+		SyncWPocket();
 		
 		return rootView;
 	}	
@@ -97,7 +115,6 @@ public class WPocketFragment extends Fragment {
 				item.setIcon(android.R.drawable.ic_menu_save);
 			} else {
 				item.setIcon(android.R.drawable.ic_menu_edit);
-				
 			}
 			
 			mAdapter.notifyDataSetChanged();
@@ -120,6 +137,7 @@ public class WPocketFragment extends Fragment {
 	public void initViews() {
 		mActivity = (MainActivity) getActivity();
 		dbManager = mActivity.getDBManager();
+		settings = new SettingPreference(mActivity);
 		listMyWish = (ListView) rootView.findViewById(R.id.listMyWish);
 		
 		mHandler = new Handler();
@@ -140,17 +158,20 @@ public class WPocketFragment extends Fragment {
 					int position, long id) {
 				// TODO Auto-generated method stub
 				String query = null;
-				
+
 				if (arrMyWishList.get(position).bookmarkOn.equals("true")) {
 					arrMyWishList.get(position).bookmarkOn = "false";
 					query = "false";
+					new UpdateBookmark(arrMyWishList.get(position).getWebId(), 0).execute();
 				} else {
 					arrMyWishList.get(position).bookmarkOn = "true";
 					query = "true";
+					new UpdateBookmark(arrMyWishList.get(position).getWebId(), 1).execute();
 				}
 				
 				updateWishlistData(0, arrMyWishList.get(position).getId(), query);
 				mAdapter.notifyDataSetChanged();
+				
 				return false;
 			}
 		});
@@ -165,8 +186,9 @@ public class WPocketFragment extends Fragment {
 			int price = Integer.parseInt(data.getStringExtra("price"));
 			int wish = Integer.parseInt(data.getStringExtra("wish"));
 			String imagePath = data.getStringExtra("image");
+			int webId = Integer.parseInt(data.getStringExtra("webId"));
 			
-			insertWishlistData(title, price, wish, imagePath);
+			insertWishlistData(title, price, wish, imagePath, webId);
 			
 			break;
 		default:
@@ -177,9 +199,17 @@ public class WPocketFragment extends Fragment {
 	/*
 	 * 		DB Function
 	 */
-	
-	public void insertWishlistData (String title, int price, int wish, String imagePath) {
-		dbManager.insertWishlistData(title, price, wish, imagePath);
+
+	public void insertWishlistData (String title, int price, int wish, String imagePath, int webId) {
+		dbManager.insertWishlistData(title, price, wish, imagePath, webId);
+
+		selectWishAll();
+
+		mAdapter.notifyDataSetChanged();
+	}
+
+	public void insertWishlistData (String title, int price, int wish, String imagePath, String bookmark, int webId) {
+		dbManager.insertWishlistData(title, price, wish, imagePath, bookmark, webId);
 
 		selectWishAll();
 
@@ -199,13 +229,26 @@ public class WPocketFragment extends Fragment {
 			String date = result.getString(5);
 			String imagePath = result.getString(6);
 			String bookmarkOn = result.getString(7);
+			int webId = result.getInt(8);
 			
 			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			myWish.setWebId(webId);
 
 			Toast.makeText(mActivity.getApplicationContext(), myWish.getTitle(), Toast.LENGTH_SHORT).show();
 		}
 		
 		result.close();
+	}
+	
+	public boolean checkWishlistData(int webId) {
+		Cursor result = dbManager.checkWishlistData(webId);
+		
+		if (result.getCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+		
 	}
 	
 	public void selectWishAll() {
@@ -224,8 +267,11 @@ public class WPocketFragment extends Fragment {
 			String date = result.getString(5);
 			String imagePath = result.getString(6);
 			String bookmarkOn = result.getString(7);
+			int webId = result.getInt(8);
+			
 			
 			MyWish myWish = new MyWish(id, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			myWish.setWebId(webId);
 
 			new ImageThread().execute(myWish);
 	
@@ -240,9 +286,10 @@ public class WPocketFragment extends Fragment {
 		dbManager.updateWishlistData(flag, id, query);
 	}
 	
-	public void removeWishlistData(int index) {
+	public void removeWishlistData(int index, int webId) {
 		dbManager.removeWishlistData(index);
 		mAdapter.notifyDataSetChanged();
+		new RemoveMyWish(webId).execute();
 	}
 	
 	/*
@@ -312,7 +359,7 @@ public class WPocketFragment extends Fragment {
 			if (mData != null) {
 				mImage.setImageBitmap(viewHolder.bmp);
 				mTitle.setText(mData.getTitle());
-				mPrice.setText(df.format(mData.getPrice()) + " Wish");
+				mPrice.setText(df.format(mData.getWish()) + " Wish");
 				
 				if (!editOn) {
 					if (mData.getBookmarkOn().equals("true")) {
@@ -332,7 +379,7 @@ public class WPocketFragment extends Fragment {
 						@Override
 						public void onClick(View v) {
 							// TODO Auto-generated method stub
-							removeWishlistData(arrMyWishList.get(pos).getId());
+							removeWishlistData(arrMyWishList.get(pos).getId(), arrMyWishList.get(pos).getWebId());
 
 							arrMyWishList.remove(pos);
 						}
@@ -340,140 +387,6 @@ public class WPocketFragment extends Fragment {
 				}
 				
 			}
-			/*
-			v.setOnTouchListener(new View.OnTouchListener() {
-				
-				@Override
-				public boolean onTouch(View v, MotionEvent event) {
-					// TODO Auto-generated method stub
-
-					switch(event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-
-						x = (int) event.getX();
-						y = (int) event.getY();
-						minViewMovingX = (int) event.getX();
-						maxViewMovingX = (int) event.getX();
-						
-						bLongPress = false;
-						postCheckForLongClick(pos, 1000);
-												
-						v.getParent().requestDisallowInterceptTouchEvent(true);
-						break;
-						
-					case MotionEvent.ACTION_UP:
-
-						removeLongPressCallback();
-						
-						v.setPadding(0, v.getPaddingTop(),
-								v.getPaddingRight(), v.getPaddingBottom());
-						
-						if ( (x - event.getX()) > 200 ) {
-							removeWishlistData(arrMyWishList.get(pos).getId());
-
-							arrMyWishList.remove(pos);
-						} else if ( (event.getX() - x) > 200) {
-							
-							String query = null;
-							
-							if (arrMyWishList.get(pos).bookmarkOn.equals("true")) {
-								arrMyWishList.get(pos).bookmarkOn = "false";
-								query = "false";
-							} else {
-								arrMyWishList.get(pos).bookmarkOn = "true";
-								query = "true";
-							}
-							
-							updateWishlistData(0, arrMyWishList.get(pos).getId(), query);
-							mAdapter.notifyDataSetChanged();
-						}
-
-						speed = 0;
-						speedJitter = 10;
-						minViewMovingX = 0;
-						maxViewMovingX = 0;
-						
-						break;
-						
-					case MotionEvent.ACTION_MOVE:
-						
-						int mTouchSlop = ViewConfiguration.get(mActivity).getScaledTouchSlop();
-						
-						int deltaX = Math.abs((int)(x - event.getX()));
-						
-						if (deltaX >= mTouchSlop) {
-							if (!bLongPress) {
-								removeLongPressCallback();
-							}
-						}
-						
-						if (x > event.getX()) {
-
-							maxViewMovingX = x;
-							
-							if (minViewMovingX > event.getX()) {
-								minViewMovingX = (int) event.getX();
-								
-								if (speed > -100) {
-									speed -= speedJitter;
-									
-									if(speedJitter > 0) {
-										speedJitter -= 0.5;
-									}
-								}
-								
-							} else {
-								if (speed < 0) {
-									speed += speedJitter;
-									
-									if (speedJitter < 10) {
-										speedJitter += 0.5;								
-									}
-								}
-							}
-							
-							v.setPadding((int)speed, v.getPaddingTop(),
-									v.getPaddingRight(), v.getPaddingBottom());
-							
-						} else {
-							
-							minViewMovingX = x;
-							
-							if (maxViewMovingX < event.getX()) {
-								maxViewMovingX = (int) event.getX();
-								
-								if (speed < 100) {
-									speed += speedJitter;
-
-									if(speedJitter > 0) {
-										speedJitter -= 0.5;
-									}
-								}
-								
-							} else {
-								if (speed > 0) {
-									speed -= speedJitter;
-
-									if (speedJitter < 10) {
-										speedJitter += 0.5;										
-									}
-								}
-							}
-							
-							v.setPadding((int)speed, v.getPaddingTop(),
-									v.getPaddingRight(), v.getPaddingBottom());
-							
-						}
-
-						if (speed == 10) {
-							x = (int) event.getX();
-						}
-						break;
-					}
-					
-					return true;
-				}
-			});*/
 			
 			return v;
 		}
@@ -507,7 +420,7 @@ public class WPocketFragment extends Fragment {
 			
 			mAdapter.notifyDataSetChanged();
 		}
-	}	
+	}
 	
 	//		Long Click Runnable
 	class CheckForLongPress implements Runnable {
@@ -560,7 +473,7 @@ public class WPocketFragment extends Fragment {
 						break;
 						
 					case 2:			// Remove Func
-						removeWishlistData(arrMyWishList.get(pos).getId());
+						removeWishlistData(arrMyWishList.get(pos).getId(), arrMyWishList.get(pos).getWebId());
 
 						arrMyWishList.remove(pos);
 						break;
@@ -599,4 +512,171 @@ public class WPocketFragment extends Fragment {
 			mHandler.removeCallbacks(longPress);
 		}
 	}
+
+	/*
+	 * 		bookmark is updated in WEB Database
+	 */
+	
+	private class UpdateBookmark extends AsyncTask<String, String, Void> {
+		int id;
+		int bookmark;
+		
+		public UpdateBookmark(int id, int bookmark) {
+			this.id = id;
+			this.bookmark = bookmark;
+		}
+		
+		protected Void doInBackground(String... params) {
+			
+			try {
+				HttpClient client = new DefaultHttpClient();
+				String postUrl;
+
+				postUrl = "http://naddola.cafe24.com/updateWishBookmark.php";
+				
+				HttpPost post = new HttpPost(postUrl);
+
+				// 전달인자
+				List params2 = new ArrayList();
+				params2.add(new BasicNameValuePair("id", id+""));
+				params2.add(new BasicNameValuePair("bookmark", bookmark+""));
+
+				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
+						HTTP.UTF_8);
+				post.setEntity(ent);
+				client.execute(post);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return null;
+		}
+	}
+
+
+	/*
+	 * 		Remove wish function
+	 */
+	
+	private class RemoveMyWish extends AsyncTask<String, String, Void> {
+		int id;
+		
+		public RemoveMyWish(int id) {
+			this.id = id;
+		}
+		
+		protected Void doInBackground(String... params) {
+			
+			try {
+				HttpClient client = new DefaultHttpClient();
+				String postUrl;
+
+				postUrl = "http://naddola.cafe24.com/removeMyWish.php";
+				
+				HttpPost post = new HttpPost(postUrl);
+
+				// 전달인자
+				List params2 = new ArrayList();
+				params2.add(new BasicNameValuePair("id", id+""));
+
+				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
+						HTTP.UTF_8);
+				post.setEntity(ent);
+				client.execute(post);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return null;
+		}
+	}
+
+	/*
+	 * 		Synchronize my wishlist
+	 */
+	
+	public void SyncWPocket() {
+		new AsyncTaskWPocketSynchronize(this).execute("http://naddola.cafe24.com/selectMyWishlist.php?email="+settings.getID());
+
+	}
+
+	static class AsyncTaskWPocketSynchronize extends AsyncTask<String, String, JSONObject> {
+		JSONObject jObj;
+		JSONArray wishlist;
+		WPocketFragment fragment;
+		
+		public AsyncTaskWPocketSynchronize(WPocketFragment fm) {
+			this.fragment = fm;
+		}
+		
+		@Override
+		protected JSONObject doInBackground(String... params) {
+			// TODO Auto-generated method stub
+			
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(params[0]);
+			
+			try {
+				HttpResponse response = httpClient.execute(httpPost);
+				HttpEntity httpEntity = response.getEntity();
+				InputStream is = httpEntity.getContent();
+				
+				BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+				StringBuilder builder = new StringBuilder();
+				String line = null;
+				
+				while ((line = reader.readLine()) != null) {
+					builder.append(line + "\n");
+				}
+				
+				is.close();
+				
+				jObj = new JSONObject(builder.toString());
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return jObj;
+		}
+
+		@Override
+		protected void onPostExecute(JSONObject result) {
+			// TODO Auto-generated method stub
+			
+			try {
+				wishlist = result.getJSONArray("wishlist");
+				
+				for(int i=0; i<wishlist.length(); i++) {
+					JSONObject c = wishlist.getJSONObject(i);
+					String title = c.getString("title");
+					int price = c.getInt("price");
+					int wish = c.getInt("wish");
+					int bookmarkOn = c.getInt("bookmark");
+					String bookmark;
+					int eventOn = c.getInt("event");
+					String date = c.getString("date");
+					String imagePath = c.getString("image");
+					int webId = c.getInt("id");
+					
+					if (bookmarkOn == 0) {
+						bookmark = "false";
+					} else {
+						bookmark = "true";
+					}
+					
+					if (!fragment.checkWishlistData(webId)) {
+						fragment.insertWishlistData(title, price, wish, imagePath, bookmark, webId);
+						
+					} else {
+					}
+					
+				}
+			} catch (Exception e) {
+				
+			}
+		}
+		
+	}
+
 }

@@ -3,14 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="true"
-    android:focusableInTouchMode="true"
+	android:focusableInTouchMode="true"
     android:orientation="vertical" >
-
-    <TextView
-        android:id="@+id/AddFriends_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Friends : " />
 
     <EditText
         android:id="@+id/AddFriend_et_search"
@@ -27,8 +21,7 @@
     <Button
         android:id="@+id/AddFriends_button"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="4"
+        android:layout_height="wrap_content"
         android:text="확   인" />
 
 </LinearLayout>

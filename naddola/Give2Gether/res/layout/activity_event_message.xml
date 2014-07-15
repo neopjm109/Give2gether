@@ -15,14 +15,16 @@
         android:id="@+id/eventCongratulation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="10"
         android:gravity="center"
-        android:text="Congratulation"
+        android:text="축하합니다!"
         />
     
     <TextView
-        android:id="@+id/eventCongratulation"
+        android:id="@+id/eventMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="10"
         android:gravity="center"
         android:text="Blah Blah Blah"
         />
@@ -31,7 +33,7 @@
         android:id="@+id/sendMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Send Message"
+        android:text="메세지 전송하기"
         />
 
 </LinearLayout>
