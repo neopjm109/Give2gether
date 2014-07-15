@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -40,6 +41,7 @@
         <activity android:name="com.example.giv2gether.SignUpSelectActivity" />
         <activity android:name="com.example.giv2gether.EventGenerationActivity" />
         <activity android:name="com.example.giv2gether.EventPartyActivity" />
+        <activity android:name="com.example.giv2gether.EventMessageActivity" />
         
          <meta-data
             android:name="com.google.android.gms.version"

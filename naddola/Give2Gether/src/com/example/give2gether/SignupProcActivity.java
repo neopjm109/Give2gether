@@ -25,9 +25,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
 public class SignupProcActivity extends Activity {
 
 	public static String TAG = "naddola";
+	GoogleCloudMessaging gcm;
+	private static String regId;
+	private static final String PROJECT_NUMBER = "878204860398";
+	
+	String Email;
+	String Password;
+	String Name;
+	String Phone;
+	String Birth;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,11 +47,11 @@ public class SignupProcActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		Intent intent = getIntent();
-		String Email = intent.getStringExtra("email");
-		String Password = intent.getStringExtra("password");
-		String Name = intent.getStringExtra("name");
-		String Phone = intent.getStringExtra("phone");
-		String Birth = intent.getStringExtra("birth");
+		Email = intent.getStringExtra("email");
+		Password = intent.getStringExtra("password");
+		Name = intent.getStringExtra("name");
+		Phone = intent.getStringExtra("phone");
+		Birth = intent.getStringExtra("birth");
 
 		Log.v(TAG, "SignupProcActivity - email:" + Email + "  Name:" + Name
 				+ "  Phone:" + Phone + "  Birth:" + Birth);
@@ -48,9 +60,7 @@ public class SignupProcActivity extends Activity {
 				.permitAll().build();
 		StrictMode.setThreadPolicy(policy);
 
-		HttpPostAsyncTask task = new HttpPostAsyncTask();
-
-		task.doInBackground(Email, Password, Name, Phone, Birth);
+		registerGcm();
 	}
 
 	@Override
@@ -73,8 +83,46 @@ public class SignupProcActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	class HttpPostAsyncTask extends AsyncTask<String, Integer, Long>
+	public void registerGcm() {
 
+		/*
+		 * GCMRegistrar.checkDevice(this); GCMRegistrar.checkManifest(this);
+		 * 
+		 * regId = GCMRegistrar.getRegistrationId(this);
+		 * 
+		 * if (regId.equals("")) { GCMRegistrar.register(this, "151587715641");
+		 * } else { Log.e("naddola", regId); }
+		 */
+
+		new AsyncTask<Void, Void, String>() {
+			@Override
+			protected String doInBackground(Void... params) {
+				String msg = "";
+				try {
+					if (gcm == null) {
+						gcm = GoogleCloudMessaging
+								.getInstance(getApplicationContext());
+					}
+					regId = gcm.register(PROJECT_NUMBER);
+					msg = "Device registered, registration ID=" + regId;
+
+				} catch (IOException ex) {
+					msg = "Error :" + ex.getMessage();
+
+				}
+				return msg;
+			}
+
+			@Override
+			protected void onPostExecute(String msg) {
+				Log.i(TAG, regId);
+				HttpPostAsyncTask task = new HttpPostAsyncTask();
+				task.doInBackground(Email, Password, Name, Phone, Birth, regId);
+			}
+		}.execute(null, null, null);
+	}
+	
+	class HttpPostAsyncTask extends AsyncTask<String, Integer, Long>
 	{
 		@Override
 		protected Long doInBackground(String... params) {
@@ -83,6 +131,7 @@ public class SignupProcActivity extends Activity {
 			String Name = params[2];
 			String Phone = params[3];
 			String Birth = params[4];
+			String regId = params[5];
 
 			try {
 				HttpClient client = new DefaultHttpClient();
@@ -105,6 +154,7 @@ public class SignupProcActivity extends Activity {
 				params2.add(new BasicNameValuePair("name", Name));
 				params2.add(new BasicNameValuePair("phone", Phone));
 				params2.add(new BasicNameValuePair("birth", Birth));
+				params2.add(new BasicNameValuePair("regId", regId));
 
 				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
 						HTTP.UTF_8);

@@ -2,8 +2,9 @@ package com.example.give2gether;
 
 import android.graphics.Bitmap;
 
-public class MyWish {
+public class MyFriendsWish {
 	int id, webId;
+	String phone;
 	String title;
 	int price, wish;
 	String eventOn;
@@ -12,8 +13,9 @@ public class MyWish {
 	String bookmarkOn;
 	Bitmap bmp;
 	
-	public MyWish(int id, String title, int price, int wish, String eventOn, String date, String imagePath, String bookmarkOn, Bitmap bmp) {
+	public MyFriendsWish(int id, String phone, String title, int price, int wish, String eventOn, String date, String imagePath, String bookmarkOn, Bitmap bmp) {
 		this.id = id;
+		this.phone = phone;
 		this.title = title;
 		this.price = price;
 		this.wish = wish;
@@ -28,7 +30,11 @@ public class MyWish {
 	public int getId() {
 		return id;
 	}
-	
+
+	public String getPhone() {
+		return phone;
+	}
+
 	public String getTitle() {
 		return title;
 	}

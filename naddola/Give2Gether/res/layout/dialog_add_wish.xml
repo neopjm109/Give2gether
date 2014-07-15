@@ -3,19 +3,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-        
-    <EditText 
-        android:id="@+id/friend_et_search"
+    
+    <ImageView
+        android:id="@+id/dialogImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Search"
         />
     
-    <ListView
-        android:id="@+id/friend_listview"
+    <TextView
+        android:id="@+id/dialogPrice"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1" 
-        ></ListView>
-    
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:gravity="center"
+        />
+
 </LinearLayout>
