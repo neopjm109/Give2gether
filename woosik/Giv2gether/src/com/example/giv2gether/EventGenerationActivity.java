@@ -26,7 +26,7 @@ public class EventGenerationActivity extends Activity {
 	
 	ActionBar actionBar;
 	Intent intent;
-	String name, title, imagePath;
+	String email, name, title, imagePath;
 	int wish, webId;
 	
 	protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +70,7 @@ public class EventGenerationActivity extends Activity {
 	
 	public void initIntent() {
 		intent = getIntent();
+		email = intent.getStringExtra("email");
 		name = intent.getStringExtra("name");
 		title = intent.getStringExtra("title");
 		wish = intent.getIntExtra("wish", 0);
@@ -88,6 +89,7 @@ public class EventGenerationActivity extends Activity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				Intent intent = new Intent(EventGenerationActivity.this, EventMessageActivity.class);
+				intent.putExtra("email", email);
 				intent.putExtra("name", name);
 				intent.putExtra("webId", webId);
 				startActivity(intent);

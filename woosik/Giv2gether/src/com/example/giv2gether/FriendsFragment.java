@@ -444,6 +444,7 @@ public class FriendsFragment extends Fragment {
 					}
 					
 					Intent intent = new Intent(mActivity, EventGenerationActivity.class);
+					intent.putExtra("email", mData.getEmail());
 					intent.putExtra("name", mData.getName());
 					intent.putExtra("title",title);
 					intent.putExtra("wish", wish);

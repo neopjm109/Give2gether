@@ -1,4 +1,4 @@
-package com.example.give2gether;
+package com.example.giv2gether;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
