@@ -29,7 +29,7 @@ public class Giv2DBManager {
 
 	public Giv2DBManager(Context context) {
 		db = context.openOrCreateDatabase(DB_NAME, DB_MODE, null);
-		removeFWTable();
+		//removeFWTable();
 		createTable();
 	}
 

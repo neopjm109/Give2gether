@@ -166,7 +166,8 @@ public class EventMessageActivity extends Activity {
 				HttpClient client = new DefaultHttpClient();
 				String postUrl;
 
-				postUrl = "http://naddola.cafe24.com/gcmtest02.php";
+				//postUrl = "http://naddola.cafe24.com/gcmtest02.php";
+				postUrl = "http://naddola.cafe24.com/pushEventGeneration.php";
 
 				HttpPost post = new HttpPost(postUrl);
 
