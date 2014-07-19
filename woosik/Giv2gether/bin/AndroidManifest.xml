@@ -39,6 +39,7 @@
             android:label="@string/app_name" >
         </activity>
         <activity android:name="com.example.giv2gether.LoginActivity" />
+        <activity android:name="com.example.giv2gether.LoadingActivity"/>
         <activity android:name="com.example.giv2gether.AddFriendsActivity" />
         <activity android:name="com.example.giv2gether.AddWishActivity" />
         <activity android:name="com.example.giv2gether.FacebookLoginActivity" />

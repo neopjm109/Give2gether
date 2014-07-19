@@ -40,7 +40,6 @@ public class SignupProcActivity extends Activity {
 	String Phone;
 	String Birth;
 
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -123,6 +122,7 @@ public class SignupProcActivity extends Activity {
 	}
 	
 	class HttpPostAsyncTask extends AsyncTask<String, Integer, Long>
+
 	{
 		@Override
 		protected Long doInBackground(String... params) {
@@ -131,7 +131,6 @@ public class SignupProcActivity extends Activity {
 			String Name = params[2];
 			String Phone = params[3];
 			String Birth = params[4];
-			String regId = params[5];
 
 			try {
 				HttpClient client = new DefaultHttpClient();
@@ -154,7 +153,6 @@ public class SignupProcActivity extends Activity {
 				params2.add(new BasicNameValuePair("name", Name));
 				params2.add(new BasicNameValuePair("phone", Phone));
 				params2.add(new BasicNameValuePair("birth", Birth));
-				params2.add(new BasicNameValuePair("regId", regId));
 
 				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
 						HTTP.UTF_8);

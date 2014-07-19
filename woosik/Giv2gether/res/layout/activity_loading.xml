@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center" >
+    
+    <ImageView
+        android:id="@+id/loadingLogo"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:src="@drawable/app_icon" />
+    
+    <ProgressBar 
+        android:id="@+id/loadingProgress"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="100dp"
+        android:layout_marginRight="100dp"
+        style="?android:attr/progressBarStyleHorizontal"
+        />
+    
+    <TextView
+        android:id="@+id/loadingName"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:text="기다려주세요"
+        />
+    
+
+</LinearLayout>

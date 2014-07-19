@@ -3,22 +3,16 @@ package com.hmjcompany.give2gether;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -29,7 +23,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,6 +40,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.hmjcompany.give2gether.async.ImageThread;
+import com.hmjcompany.give2gether.async.InsertWish;
 
 public class AddWishActivity extends Activity {
 
@@ -170,7 +166,18 @@ public class AddWishActivity extends Activity {
 				ImageView image = (ImageView) dialogView.findViewById(R.id.dialogImage);
 				TextView price = (TextView) dialogView.findViewById(R.id.dialogPrice);
 
-				new ImageThread(image).execute(searchList.get(pos).getImagePath());
+				try {
+					Bitmap bmp = new ImageThread().execute(searchList.get(pos).getImagePath()).get();
+					
+					if(bmp != null) {
+						image.setImageBitmap(bmp);
+					} else {
+						image.setImageResource(R.drawable.image_loading);
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				
 				price.setText("쇼핑몰 최저가 : " + df.format(searchList.get(pos).getPrice()) + " 원\n"
 						+ "Wish : " + df.format(searchList.get(pos).getWish()) + " \n");
@@ -187,9 +194,29 @@ public class AddWishActivity extends Activity {
 								searchList.get(pos).getWish(),
 								searchList.get(pos).getImagePath());
 
-						new InsertWish(myWish).execute();
-
 						bAutoListClick = true;
+						
+						try {
+							String resp = new InsertWish(myWish, setting).execute().get();
+							
+							if(resp != null) {
+
+								Intent intent = new Intent();
+								
+								intent.putExtra("title", myWish.getTitle());
+								intent.putExtra("price", myWish.getPrice()+"");
+								intent.putExtra("wish", myWish.getWish()+"");
+								intent.putExtra("image", myWish.getImagePath());
+								intent.putExtra("webId", resp);
+								
+								setResult(1001, intent);
+								finish();
+							}
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
 					}
 					
 				});
@@ -365,7 +392,14 @@ public class AddWishActivity extends Activity {
 			
 			if (sData != null) {
 
-				new SearchImageThread(mImage).execute(sData.getImagePath());
+				try {
+					Bitmap bmp = new ImageThread().execute(sData.getImagePath()).get();
+					viewHolder.bmp = bmp;
+					mImage.setImageBitmap(viewHolder.bmp);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				
 				mTitle.setText(sData.getTitle());
 				mPrice.setText("쇼핑몰 최저가 : " + df.format(sData.getPrice()) + " 원\n"
@@ -377,160 +411,9 @@ public class AddWishActivity extends Activity {
 		}
 		
 	}
-	
-	class SearchImageThread extends AsyncTask<String, Void, Bitmap> {
-
-		Bitmap bmp;
-		ImageView image;
-		
-		public SearchImageThread(ImageView image) {
-			this.image = image;
-			bmp = null;
-		}
-		
-		protected Bitmap doInBackground(String... params) {
-			try {
-				URL url = new URL(params[0]);
-				this.bmp = BitmapFactory.decodeStream(url.openStream());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 			
-			return this.bmp;
-		}
-
-		protected void onPostExecute(Bitmap result) {
-			super.onPostExecute(result);
-			
-			if (result != null)
-				image.setImageBitmap(result);
-			else
-				image.setImageResource(R.drawable.image_loading);
-		}
-	}
-	
-	/*
-	 * 		ImageView. get a bitmap of image's url.
-	 */
-		
-	class ImageThread extends AsyncTask<String, Void, Bitmap> {
-
-		ImageView image;
-		Bitmap bmp;
-		
-		public ImageThread(ImageView imageView) {
-			this.image = imageView;
-			bmp = null;
-		}
-		
-		protected Bitmap doInBackground(String... params) {
-			try {
-				URL url = new URL(params[0]);
-				bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			return bmp;
-		}
-
-		protected void onPostExecute(Bitmap result) {
-			super.onPostExecute(result);
-			
-			image.setImageBitmap(result);
-		}
-	}
-	
 	/*
 	 * 		wish is inserted into WEB Database
 	 */
 	
-	private class InsertWish extends AsyncTask<String, String, Void> {
-		SearchData myWishWeb;
-		String resp = null;
-		
-		public InsertWish(SearchData myWishWeb) {
-			this.myWishWeb = myWishWeb;
-		}
-		
-		protected Void doInBackground(String... params) {
-			
-			/*
-			 * 		Insert
-			 */
-			try {
-				HttpClient client = new DefaultHttpClient();
-				String postUrl;
-
-				postUrl = "http://naddola.cafe24.com/insertWish.php";
-				
-				HttpPost post = new HttpPost(postUrl);
-
-				// 전달인자
-				List params2 = new ArrayList();
-				params2.add(new BasicNameValuePair("email", setting.getID()));
-				params2.add(new BasicNameValuePair("title", myWishWeb.getTitle()));
-				params2.add(new BasicNameValuePair("price", myWishWeb.getPrice()+""));
-				params2.add(new BasicNameValuePair("wish", myWishWeb.getWish()+""));
-				params2.add(new BasicNameValuePair("image", myWishWeb.getImagePath()+""));
-
-				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
-						HTTP.UTF_8);
-				post.setEntity(ent);
-				HttpResponse responsePost = client.execute(post);
-				HttpEntity resEntity = responsePost.getEntity();
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			/*
-			 * 		Select
-			 */
-			try {
-				HttpClient client = new DefaultHttpClient();
-				String postUrl;
-
-				postUrl = "http://naddola.cafe24.com/getLastMyWish.php";
-				
-				HttpPost post = new HttpPost(postUrl);
-
-				// 전달인자
-				List params2 = new ArrayList();
-				params2.add(new BasicNameValuePair("email", setting.getID()));
-
-				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
-						HTTP.UTF_8);
-				post.setEntity(ent);
-				HttpResponse responsePost = client.execute(post);
-				HttpEntity resEntity = responsePost.getEntity();
-				
-				if ( resEntity != null ) {
-					resp = EntityUtils.toString(resEntity);	
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}			
-			
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			// TODO Auto-generated method stub
-
-			Intent intent = new Intent();
-			
-			intent.putExtra("title", myWish.getTitle());
-			intent.putExtra("price", myWish.getPrice()+"");
-			intent.putExtra("wish", myWish.getWish()+"");
-			intent.putExtra("image", myWish.getImagePath());
-			intent.putExtra("webId", resp);
-			
-			setResult(1001, intent);
-			finish();
-		}
-
-	}
 }

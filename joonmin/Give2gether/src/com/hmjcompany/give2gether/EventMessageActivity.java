@@ -14,6 +14,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -24,7 +25,7 @@ public class EventMessageActivity extends Activity {
 	Button sendMessage;
 	
 	Intent intent;
-	String name;
+	String email, name;
 	int webId;
 
 	@Override
@@ -40,6 +41,7 @@ public class EventMessageActivity extends Activity {
 	public void initIntent() {
 		intent = getIntent();
 		
+		email = intent.getStringExtra("email");
 		name = intent.getStringExtra("name");
 		webId = intent.getIntExtra("webId", 0);
 	}
@@ -145,6 +147,50 @@ public class EventMessageActivity extends Activity {
 		protected void onPostExecute(Void result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
+			new AsyncPushEventFriend(email).execute();
+		}
+		
+	}
+	
+	class AsyncPushEventFriend extends AsyncTask<String, Void, String> {
+		String email;
+		
+		public AsyncPushEventFriend(String email) {
+			this.email = email;
+		}
+		
+		protected String doInBackground(String... params) {
+			
+			try {
+				/* Update event column */
+				HttpClient client = new DefaultHttpClient();
+				String postUrl;
+
+//				postUrl = "http://naddola.cafe24.com/gcmtest02.php";
+				postUrl = "http://naddola.cafe24.com/pushEventGeneration.php";
+
+				HttpPost post = new HttpPost(postUrl);
+
+				// 전달인자
+				List params2 = new ArrayList();
+				params2.add(new BasicNameValuePair("email", email));
+
+				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
+						HTTP.UTF_8);
+				post.setEntity(ent);
+				client.execute(post);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			Log.i("naddola", email+result);
 			finish();
 		}
 		

@@ -1,21 +1,12 @@
 package com.example.giv2gether;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.database.Cursor;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -28,6 +19,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.hmjcompany.give2gether.async.AsyncCheckNewsFeed;
 
 public class NewsFeedFragment extends Fragment {
 
@@ -45,9 +38,6 @@ public class NewsFeedFragment extends Fragment {
 	ArrayList<String> feedlist;
 	
 	ArrayList<MyFriend> arrMyFriendList;
-	
-	JSONObject jObj = null;
-	JSONArray feed = null;
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -81,6 +71,8 @@ public class NewsFeedFragment extends Fragment {
 		mActivity = (MainActivity) getActivity();
 		dbManager = mActivity.getDBManager();
 		
+		feedlist = (ArrayList<String>) mActivity.getIntent().getSerializableExtra("feedlist");
+		
 		noFeed = (TextView) rootView.findViewById(R.id.noFeed);
 		feedListView = (ListView) rootView.findViewById(R.id.feedList);
 		
@@ -105,10 +97,44 @@ public class NewsFeedFragment extends Fragment {
 		} else {
 			noFeed.setVisibility(View.INVISIBLE);
 		}
+
+		if (feedlist.size() > 0) {
+			noFeed.setVisibility(View.INVISIBLE);
+		}
 		
-		selectFriendsAll();
-		
-		new AsyncCheckNewsFeed().execute("http://naddola.cafe24.com/getNewsFeedDDays.php");
+//		selectFriendsAll();
+		/*
+		try {
+			JSONObject jObj = new AsyncCheckNewsFeed().execute("http://naddola.cafe24.com/getNewsFeedDDays.php").get();
+			JSONArray feed = jObj.getJSONArray("feed");
+			
+			
+			for(int i=0; i<feed.length(); i++) {
+				JSONObject c = feed.getJSONObject(i);
+				
+				String name = c.getString("name");
+				String phone = c.getString("phone");
+				String birth = c.getString("birth");
+				int dday = c.getInt("dday");
+				
+				for(int j=0; j<arrMyFriendList.size(); j++) {
+					if (phone.equals(arrMyFriendList.get(j).getPhone())) {
+						if (dday < 16)
+							feedlist.add(arrMyFriendList.get(j).getName()+"님의 생일이 " + dday + "일 전입니다");
+					}
+				}
+				
+			}
+
+			if (feedlist.size() > 0) {
+				noFeed.setVisibility(View.INVISIBLE);
+				mAdapter.notifyDataSetChanged();
+			}
+			
+		} catch (Exception e) {
+			
+		}
+		*/
 	}
 	
 	/*
@@ -134,8 +160,6 @@ public class NewsFeedFragment extends Fragment {
 				sign = true;
 			}
 			
-			Log.i("PJM", id+" "+name+" "+email+" "+phone+" "+birth+" "+signed);
-			
 			MyFriend mf = new MyFriend(id, name, email, phone, birth, sign, "");
 			arrMyFriendList.add(mf);			
 			
@@ -145,74 +169,4 @@ public class NewsFeedFragment extends Fragment {
 		result.close();
 	}
 	
-	class AsyncCheckNewsFeed extends AsyncTask<String, Void, JSONObject> {
-
-		@Override
-		protected JSONObject doInBackground(String... params) {
-			// TODO Auto-generated method stub
-
-			HttpClient httpClient = new DefaultHttpClient();
-			HttpPost httpPost = new HttpPost(params[0]);
-			
-			try {
-				HttpResponse response = httpClient.execute(httpPost);
-				HttpEntity httpEntity = response.getEntity();
-				InputStream is = httpEntity.getContent();
-				
-				BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-				StringBuilder builder = new StringBuilder();
-				String line = null;
-				
-				while ((line = reader.readLine()) != null) {
-					builder.append(line + "\n");
-				}
-				
-				is.close();
-				
-				jObj = new JSONObject(builder.toString());
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			return jObj;
-		}
-
-		@Override
-		protected void onPostExecute(JSONObject result) {
-			// TODO Auto-generated method stub
-			
-			try {
-				feed = result.getJSONArray("feed");
-				
-				
-				for(int i=0; i<feed.length(); i++) {
-					JSONObject c = feed.getJSONObject(i);
-					
-					String name = c.getString("name");
-					String phone = c.getString("phone");
-					String birth = c.getString("birth");
-					int dday = c.getInt("dday");
-					
-					for(int j=0; j<arrMyFriendList.size(); j++) {
-						if (phone.equals(arrMyFriendList.get(j).getPhone())) {
-							Log.i("PJM", arrMyFriendList.get(j).getPhone()+" "+phone+" "+dday+"");
-							
-							if (dday < 16)
-								feedlist.add(arrMyFriendList.get(j).getName()+"님의 생일이 " + dday + "일 전입니다");
-						}
-					}
-				}
-
-				if (feedlist.size() > 0) {
-					noFeed.setVisibility(View.INVISIBLE);
-					mAdapter.notifyDataSetChanged();
-				}
-				
-			} catch (Exception e) {
-				
-			}
-		}
-		
-	}
 }

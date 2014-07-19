@@ -1,22 +1,11 @@
 package com.hmjcompany.give2gether;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +18,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.provider.ContactsContract;
@@ -51,6 +39,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.hmjcompany.give2gether.async.HttpPostAsyncTaskJsonArray;
+import com.hmjcompany.give2gether.async.getSignedFriendHttpPostAsyncTask;
 
 public class AddFriendsActivity extends Activity implements OnItemClickListener {
 
@@ -374,191 +365,69 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 				.permitAll().build();
 
 		StrictMode.setThreadPolicy(policy);
+		
+		String signedTask[] = {name, email, phone, birth};
 
-		getSignedFriendHttpPostAsyncTask task = new getSignedFriendHttpPostAsyncTask();
-
-		JSONObject jsonResult = task.doInBackground(name, email, phone, birth);
-		if (jsonResult != null) {
-			try {
-				JSONArray member;
-				member = jsonResult.getJSONArray("member");
-
-				for (int i = 0; i < member.length(); i++) {
-					JSONObject c = member.getJSONObject(i);
-					id = c.getInt("id");
-					email = c.getString("email");
-					birth = c.getString("birth");
-					myFriend = new MyFriend(id, name, email, phone, birth,
-							true, null);
-					Log.i(TAG, id+email);
+		try {
+			JSONObject jsonResult = new getSignedFriendHttpPostAsyncTask().execute(signedTask).get();
+			if (jsonResult != null) {
+				try {
+					JSONArray member;
+					member = jsonResult.getJSONArray("member");
+	
+					for (int i = 0; i < member.length(); i++) {
+						JSONObject c = member.getJSONObject(i);
+						id = c.getInt("id");
+						email = c.getString("email");
+						birth = c.getString("birth");
+						myFriend = new MyFriend(id, name, email, phone, birth,
+								true, null);
+						Log.i(TAG, id+email);
+					}
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			return myFriend;
-		} else
-			return null;
+	
+				return myFriend;
+			} else
+				return null;
+		} catch (Exception e){
+			
+		}
+		return null;
 	}
-
+	
 	public void postContactJsonArray() {
 
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
 				.permitAll().build();
 
 		StrictMode.setThreadPolicy(policy);
-
-		HttpPostAsyncTaskJsonArray task = new HttpPostAsyncTaskJsonArray();
-
-		task.doInBackground();
-
-	}
-
-	class getSignedFriendHttpPostAsyncTask extends
-			AsyncTask<String, Integer, JSONObject>
-
-	{
-		@Override
-		protected void onPostExecute(JSONObject result) {
-			if (result == null)
-				return;
-			JSONArray member;
+		
+		try {
+			String resp = new HttpPostAsyncTaskJsonArray(mContactList).execute().get();
+			
 			try {
-				member = result.getJSONArray("member");
-
-				for (int i = 0; i < member.length(); i++) {
-					JSONObject c = member.getJSONObject(i);
-					String email = c.getString("email");
-					String birth = c.getString("birth");
-				}
-			} catch (Exception e) {
-
-			}
-
-		}
-
-		@Override
-		protected JSONObject doInBackground(String... params) {
-			String name = params[0];
-			String email = params[1];
-			String phone = params[2];
-			String birth = params[3];
-
-			try {
-				HttpClient client = new DefaultHttpClient();
-				String postUrl;
-
-				postUrl = "http://naddola.cafe24.com/checkSignedMember.php";
-
-				HttpPost post = new HttpPost(postUrl);
-
-				// 전달인자
-				List params2 = new ArrayList();
-				params2.add(new BasicNameValuePair("phone", phone));
-
-				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
-						HTTP.UTF_8);
-				post.setEntity(ent);
-				HttpResponse responsePost = client.execute(post);
-				HttpEntity resEntity = responsePost.getEntity();
-
-				if (resEntity != null) {
-					String resp = EntityUtils.toString(resEntity);
-
-					if (resp.equals("false")) {
-						return null;
-					} else {
-						//Log.i(TAG, resp);
-						JSONObject jobj;
-						try {
-							jobj = new JSONObject(resp);
-							return jobj;
-						} catch (JSONException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+				JSONArray jsonArr = new JSONArray(resp);
+				for (int i = 0; i < jsonArr.length(); i++) {
+					for (int j = 0; j < mContactList.size(); j++) {
+						if (mContactList.get(j).getPhonenum()
+								.equals(jsonArr.getString(i))) {
+							mGivFriendList.add(mContactList.get(j));
+							mContactList.remove(j);
 						}
-
 					}
 				}
-
-			} catch (MalformedURLException e) {
-				//
-			} catch (IOException e) {
-				//
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			return null;
+		} catch (Exception e) {
+			
 		}
+
 	}
 
-	class HttpPostAsyncTaskJsonArray extends AsyncTask<String, Integer, Long> {
 
-		JSONArray jContactArr;
-
-		@Override
-		protected Long doInBackground(String... params) {
-
-			jContactArr = new JSONArray();
-
-			for (int i = 0; i < mContactList.size(); i++) {
-				JSONObject obj = new JSONObject();
-				try {
-					obj.put("phone", mContactList.get(i).getPhonenum());
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				jContactArr.put(obj);
-			}
-
-			try {
-				HttpClient client = new DefaultHttpClient();
-				String postUrl;
-
-				postUrl = "http://naddola.cafe24.com/getGivFriendsList.php";
-
-				HttpPost post = new HttpPost(postUrl);
-
-				// 전달인자
-				List params2 = new ArrayList();
-				params2.add(new BasicNameValuePair("phone", jContactArr
-						.toString()));
-
-				// Log.i(TAG, "sendArray - " +jContactArr.toString());
-
-				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
-						HTTP.UTF_8);
-				post.setEntity(ent);
-				HttpResponse responsePost = client.execute(post);
-				HttpEntity resEntity = responsePost.getEntity();
-
-				if (resEntity != null) {
-					String resp = EntityUtils.toString(resEntity);
-					try {
-						JSONArray jsonArr = new JSONArray(resp);
-						for (int i = 0; i < jsonArr.length(); i++) {
-							for (int j = 0; j < mContactList.size(); j++) {
-								if (mContactList.get(j).getPhonenum()
-										.equals(jsonArr.getString(i))) {
-									mGivFriendList.add(mContactList.get(j));
-									mContactList.remove(j);
-								}
-							}
-						}
-					} catch (JSONException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-					Log.i(TAG, resp);
-				}
-
-			} catch (MalformedURLException e) {
-				//
-			} catch (IOException e) {
-				//
-			}
-			return null;
-		}
-	}
 }

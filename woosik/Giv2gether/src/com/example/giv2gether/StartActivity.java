@@ -35,7 +35,7 @@ public class StartActivity extends Activity implements OnClickListener{
 		
 		if (wifi.isConnected() || mobile.isConnected()) {
 			if(setting.isLogin()){
-				Intent intent = new Intent(StartActivity.this, MainActivity.class);
+				Intent intent = new Intent(StartActivity.this, LoadingActivity.class);
 				startActivity(intent);
 				finish();
 			}

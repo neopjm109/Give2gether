@@ -12,7 +12,7 @@ import android.content.SharedPreferences;
 public class SettingPreference {
 
 	static SharedPreferences setting;
-	static boolean mIslogin;		//save autologin
+	static boolean mIslogin;				//save autologin
 	static String mId = null;				//save login id
 	static String mName = null;
 	
