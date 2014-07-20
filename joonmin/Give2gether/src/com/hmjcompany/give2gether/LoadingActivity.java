@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Html;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -195,7 +197,8 @@ public class LoadingActivity extends Activity {
 			}
 		});
 		selectFriendsAll();
-		
+
+		// 생일
 		try {
 			JSONObject jObj = new AsyncCheckNewsFeed().execute("http://naddola.cafe24.com/getNewsFeedDDays.php").get();
 			JSONArray feed = jObj.getJSONArray("feed");
@@ -213,7 +216,7 @@ public class LoadingActivity extends Activity {
 				for(int j=0; j<arrMyFriendList.size(); j++) {
 					if (phone.equals(arrMyFriendList.get(j).getPhone())) {
 						if (dday < 16)
-							arrNewsFeedList.add(arrMyFriendList.get(j).getName()+"님의 생일이 " + dday + "일 전입니다");
+							arrNewsFeedList.add(name +"님의 생일이 " + dday + "일 전입니다");
 					}
 				}
 				
@@ -222,7 +225,37 @@ public class LoadingActivity extends Activity {
 		} catch (Exception e) {
 			
 		}
-		progressBar.setProgress(progress+=50);
+
+		// 시작된 이벤트
+		try {
+			JSONObject jObj = new AsyncCheckNewsFeed().execute("http://naddola.cafe24.com/getNewsFeedEvent.php").get();
+			JSONArray feed = jObj.getJSONArray("feed");
+
+			progressBar.setProgress(progress+=10);
+			
+			for(int i=0; i<feed.length(); i++) {
+				JSONObject c = feed.getJSONObject(i);
+
+				String name = c.getString("name");
+				String title = c.getString("title");
+				String phone = c.getString("phone");
+				int dday = c.getInt("dday");
+
+				for(int j=0; j<arrMyFriendList.size(); j++) {
+					if (phone.equals(arrMyFriendList.get(j).getPhone())) {
+						if (dday > -3) {
+							arrNewsFeedList.add(name + "님의 " + title + 
+									" 이벤트가 시작되었습니다. (NEW)");
+						}
+					}
+				}
+				
+			}
+			
+		} catch (Exception e) {
+			
+		}
+		progressBar.setProgress(progress+=40);
 	}
 
 }

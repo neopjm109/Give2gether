@@ -26,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hmjcompany.give2gether.async.AsyncFriendsWish;
 import com.hmjcompany.give2gether.async.ImageThread;
@@ -273,17 +274,18 @@ public class FriendsFragment extends Fragment {
 			});
 
 			selectFWishlistData(mData.getPhone());
-			
+
 			try {
 				JSONObject jObj = new AsyncFriendsWish().
 						execute("http://naddola.cafe24.com/getFriendWish.php?phone="+mData.getPhone()).get();
 				JSONArray friendsWish;
 
 				if(jObj != null) {
-					friendsWish = jObj.getJSONArray("wishlist");
 					
+					friendsWish = jObj.getJSONArray("wishlist");
 
 					for(int i=0; i<friendsWish.length(); i++) {
+						
 						JSONObject c = friendsWish.getJSONObject(i);
 						String phone = c.getString("phone");
 						String title = c.getString("title");
@@ -477,6 +479,7 @@ public class FriendsFragment extends Fragment {
 					int wish = 0;
 					String imagePath = null;
 					int webId = 0;
+					boolean bNull = false;
 					
 					for (int i=0; i<arrMyFriendsWishList.size(); i++) {
 						if (mData.getPhone().equals(arrMyFriendsWishList.get(i).phone)) {
@@ -486,16 +489,29 @@ public class FriendsFragment extends Fragment {
 							webId = arrMyFriendsWishList.get(i).getWebId();
 							break;
 						}
+						
+						if ( i == (arrMyFriendsWishList.size()-1) &&
+								!mData.getPhone().equals(arrMyFriendsWishList.get(i).phone)) {
+							bNull = true;
+						}
 					}
 					
-					Intent intent = new Intent(mActivity, EventGenerationActivity.class);
-					intent.putExtra("email", mData.getEmail());
-					intent.putExtra("name", mData.getName());
-					intent.putExtra("title",title);
-					intent.putExtra("wish", wish);
-					intent.putExtra("imagePath", imagePath);
-					intent.putExtra("webId", webId);
-					startActivity(intent);
+					if (!bNull) {
+					
+						Intent intent = new Intent(mActivity, EventGenerationActivity.class);
+						intent.putExtra("email", mData.getEmail());
+						intent.putExtra("name", mData.getName());
+						intent.putExtra("title",title);
+						intent.putExtra("wish", wish);
+						intent.putExtra("imagePath", imagePath);
+						intent.putExtra("webId", webId);
+						startActivity(intent);
+						
+					} else {
+						
+						Toast.makeText(mActivity.getApplicationContext(), "친구의 위시가 없네요", Toast.LENGTH_SHORT).show();
+						
+					}
 					
 				}
 			});

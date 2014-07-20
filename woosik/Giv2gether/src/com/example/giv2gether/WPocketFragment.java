@@ -18,7 +18,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,7 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hmjcompany.give2gether.async.AsyncTaskWPocketSynchronize;
-import com.hmjcompany.give2gether.async.ImageThread;
+import com.hmjcompany.give2gether.async.ImageViewThread;
 import com.hmjcompany.give2gether.async.RemoveMyWish;
 import com.hmjcompany.give2gether.async.UpdateBookmark;
 
@@ -161,13 +160,8 @@ public class WPocketFragment extends Fragment {
 				TextView price = (TextView) dialogView.findViewById(R.id.dialogPrice);
 
 				try {
-					Bitmap bmp = new ImageThread().execute(arrMyWishList.get(pos).getImagePath()).get();
+					new ImageViewThread(image).execute(arrMyWishList.get(pos).getImagePath());
 					
-					if(bmp != null) {
-						image.setImageBitmap(bmp);
-					} else {
-						image.setImageResource(R.drawable.image_loading);
-					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -591,7 +585,13 @@ public class WPocketFragment extends Fragment {
 			super.onPostExecute(result);
 
 			myWish.setBmp(result);
-			arrMyWishList.add(myWish);
+			
+			if(myWish.getBookmarkOn().equals("true")) {
+				arrMyWishList.add(0, myWish);
+			} else {
+				arrMyWishList.add(myWish);
+			}
+			
 			mAdapter.notifyDataSetChanged();
 			
 		}

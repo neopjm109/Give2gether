@@ -14,7 +14,6 @@ import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hmjcompany.give2gether.async.AsyncFriendsWish;
 import com.hmjcompany.give2gether.async.ImageThread;
@@ -479,6 +479,7 @@ public class FriendsFragment extends Fragment {
 					int wish = 0;
 					String imagePath = null;
 					int webId = 0;
+					boolean bNull = false;
 					
 					for (int i=0; i<arrMyFriendsWishList.size(); i++) {
 						if (mData.getPhone().equals(arrMyFriendsWishList.get(i).phone)) {
@@ -488,16 +489,29 @@ public class FriendsFragment extends Fragment {
 							webId = arrMyFriendsWishList.get(i).getWebId();
 							break;
 						}
+						
+						if ( i == (arrMyFriendsWishList.size()-1) &&
+								!mData.getPhone().equals(arrMyFriendsWishList.get(i).phone)) {
+							bNull = true;
+						}
 					}
 					
-					Intent intent = new Intent(mActivity, EventGenerationActivity.class);
-					intent.putExtra("email", mData.getEmail());
-					intent.putExtra("name", mData.getName());
-					intent.putExtra("title",title);
-					intent.putExtra("wish", wish);
-					intent.putExtra("imagePath", imagePath);
-					intent.putExtra("webId", webId);
-					startActivity(intent);
+					if (!bNull) {
+					
+						Intent intent = new Intent(mActivity, EventGenerationActivity.class);
+						intent.putExtra("email", mData.getEmail());
+						intent.putExtra("name", mData.getName());
+						intent.putExtra("title",title);
+						intent.putExtra("wish", wish);
+						intent.putExtra("imagePath", imagePath);
+						intent.putExtra("webId", webId);
+						startActivity(intent);
+						
+					} else {
+						
+						Toast.makeText(mActivity.getApplicationContext(), "친구의 위시가 없네요", Toast.LENGTH_SHORT).show();
+						
+					}
 					
 				}
 			});
