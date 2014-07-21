@@ -139,6 +139,13 @@ public class Giv2DBManager {
 		return result;
 	}
 	
+	public Cursor selectGivFriendsAll() {
+		String sql = "select * from " + DB_TABLE_FRIENDS + " where signed = 1;";
+		Cursor result = db.rawQuery(sql, null);
+		
+		return result;
+	}
+	
 	public ArrayList<MyFriend> getFriendsList(){
 		Cursor result = selectFriendsAll();
 		ArrayList<MyFriend> fl = new ArrayList<MyFriend>();
@@ -169,6 +176,40 @@ public class Giv2DBManager {
 		}
 		return fl;
 	}
+	
+
+	public ArrayList<MyFriend> getGivFriendsList(){
+		Cursor result = selectGivFriendsAll();
+		ArrayList<MyFriend> fl = new ArrayList<MyFriend>();
+		
+		result.moveToFirst();
+		
+		while (!result.isAfterLast()) {
+			int id = result.getInt(0);
+			String name = result.getString(1);
+			String email = result.getString(2);
+			String phone = result.getString(3);
+			String birth = result.getString(4);
+			int tempSigned = result.getInt(5);
+			boolean signed;
+			if(tempSigned == 1)
+				signed = true;
+			else
+				signed = false;
+			//String imagePath = result.getString(5);
+			
+			MyFriend tempFriend= new MyFriend(id, name, email, phone, birth, signed, null);
+			
+			fl.add(tempFriend);
+
+			//new ImageThread().execute(tempFriend);
+	
+			result.moveToNext();
+		}
+		return fl;
+	}
+	
+	
 	
 	public Cursor selectFriendsData(int index) {
 		String sql = "select * from " + DB_TABLE_FRIENDS + " where id=" + index + ";";
