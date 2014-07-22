@@ -59,13 +59,7 @@ public class LoadingActivity extends Activity {
 		timer = new Thread() {
 			public void run() {
 				try {
-					SyncWPocket();
 					
-					sleep(500);
-					
-					GetNewsFeed();
-					
-					sleep(500);
 					
 				} catch(Exception e) {
 					
@@ -83,7 +77,13 @@ public class LoadingActivity extends Activity {
 		
 		handler.postDelayed(new Runnable() {
 			public void run() {
+				
+				SyncWPocket();
+				
+				
+				GetNewsFeed();
 				timer.start();
+				
 			}
 		}, 1000);
 

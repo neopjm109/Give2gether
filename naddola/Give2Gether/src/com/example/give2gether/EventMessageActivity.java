@@ -182,7 +182,6 @@ public class EventMessageActivity extends Activity {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
 			return null;
 		}
 
@@ -193,6 +192,5 @@ public class EventMessageActivity extends Activity {
 			Log.i("naddola", email+result);
 			finish();
 		}
-		
 	}
 }

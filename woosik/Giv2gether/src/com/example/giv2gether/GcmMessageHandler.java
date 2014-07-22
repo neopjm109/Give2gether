@@ -7,12 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.hmjcompany.give2gether.async.*;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 public class GcmMessageHandler extends IntentService {
 
 
@@ -87,8 +89,15 @@ public class GcmMessageHandler extends IntentService {
 					}
 				}
 				Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
-				// Post notification of received message.
-				sendNotification(extras.getString("Notice"));
+				
+				String tag = extras.getString("Tag");
+				if (tag.equals("pushEventGeneration")) {
+					Log.i(TAG, "Receive : pushEventGeneration");
+					postFriendList();
+				} else if (tag.equals("pushEventToFriends")) {
+					sendNotification(extras.getString("Notice"));
+					Log.i(TAG, "Receive : pushEventToFriends");
+				}
 				Log.i(TAG, "Received: " + extras.toString());
 			}
 		}
@@ -116,7 +125,20 @@ public class GcmMessageHandler extends IntentService {
 
 		mBuilder.setContentIntent(contentIntent);
 		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+	}
+	
+	public void postFriendList() {
 		
+		SettingPreference setting = new SettingPreference(getApplicationContext());
+		Giv2DBManager dbManager = new Giv2DBManager(getApplicationContext());
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+				.permitAll().build();
+
+		StrictMode.setThreadPolicy(policy);
+
+		AsyncTaskPostFriendList task = new AsyncTaskPostFriendList(setting, dbManager);
+
+		task.doInBackground();
 	}
 
 }
