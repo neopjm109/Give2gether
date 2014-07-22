@@ -390,7 +390,7 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 					birth = c.getString("birth");
 					myFriend = new MyFriend(id, name, email, phone, birth,
 							true, null);
-					Log.i(TAG, id+email);
+					//Log.i(TAG, id+email);
 				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -550,7 +550,7 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 						e.printStackTrace();
 					}
 
-					Log.i(TAG, resp);
+					//Log.i(TAG, resp);
 				}
 
 			} catch (MalformedURLException e) {
