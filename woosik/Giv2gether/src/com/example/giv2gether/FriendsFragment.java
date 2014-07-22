@@ -496,6 +496,7 @@ public class FriendsFragment extends Fragment {
 						}
 					}
 					
+					/*
 					Intent intent = new Intent(mActivity, EventGenerationActivity.class);
 					intent.putExtra("email", mData.getEmail());
 					intent.putExtra("name", mData.getName());
@@ -504,9 +505,9 @@ public class FriendsFragment extends Fragment {
 					intent.putExtra("imagePath", imagePath);
 					intent.putExtra("webId", webId);
 					startActivity(intent);
-					
+					*/
 				
-					/*
+					
 					if (!bNull) {
 					
 						Intent intent = new Intent(mActivity, EventGenerationActivity.class);
@@ -523,7 +524,7 @@ public class FriendsFragment extends Fragment {
 						Toast.makeText(mActivity.getApplicationContext(), "친구의 위시가 없네요", Toast.LENGTH_SHORT).show();
 						
 					}
-					*/
+					
 					
 				}
 			});

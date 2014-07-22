@@ -149,7 +149,6 @@ public class EventMessageActivity extends Activity {
 			super.onPostExecute(result);
 			new AsyncPushEventFriend(email).execute();
 		}
-		
 	}
 	
 	class AsyncPushEventFriend extends AsyncTask<String, Void, String> {
