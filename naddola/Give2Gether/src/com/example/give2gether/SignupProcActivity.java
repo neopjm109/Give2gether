@@ -40,7 +40,6 @@ public class SignupProcActivity extends Activity {
 	String Phone;
 	String Birth;
 
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

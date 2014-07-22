@@ -38,23 +38,7 @@ public class GcmMessageHandler extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		/*
-		Bundle extras = intent.getExtras();
-
-		GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-		// The getMessageType() intent parameter must be the intent you received
-		// in your BroadcastReceiver.
-		String messageType = gcm.getMessageType(intent);
-
-		mes = extras.getString("title");
-		showToast();
-		Log.i("GCM",
-				"Received : (" + messageType + ")  "
-						+ extras.getString("title"));
-
-		GcmBroadcastReceiver.completeWakefulIntent(intent);
-		*/
-		
+	
 		Bundle extras = intent.getExtras();
 		GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
 		// The getMessageType() intent parameter must be the intent you received
@@ -92,6 +76,7 @@ public class GcmMessageHandler extends IntentService {
 				
 				String tag = extras.getString("Tag");
 				if (tag.equals("pushEventGeneration")) {
+					sendNotification(extras.getString("Notice"));
 					Log.i(TAG, "Receive : pushEventGeneration");
 					postFriendList();
 				} else if (tag.equals("pushEventToFriends")) {

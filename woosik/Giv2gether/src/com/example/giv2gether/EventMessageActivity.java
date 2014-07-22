@@ -14,6 +14,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -25,7 +26,7 @@ public class EventMessageActivity extends Activity {
 	Button sendMessage;
 	
 	Intent intent;
-	String email, name;
+	String BrithEmail, name, StarterEmail;
 	int webId;
 
 	@Override
@@ -34,6 +35,11 @@ public class EventMessageActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_event_message);
 		
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+		.permitAll().build();
+
+		StrictMode.setThreadPolicy(policy);
+		
 		initIntent();
 		initViews();
 	}
@@ -41,7 +47,8 @@ public class EventMessageActivity extends Activity {
 	public void initIntent() {
 		intent = getIntent();
 		
-		email = intent.getStringExtra("email");
+		BrithEmail = intent.getStringExtra("email");
+		StarterEmail = new SettingPreference(this).getID();
 		name = intent.getStringExtra("name");
 		webId = intent.getIntExtra("webId", 0);
 	}
@@ -147,16 +154,18 @@ public class EventMessageActivity extends Activity {
 		protected void onPostExecute(Void result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			new AsyncPushEventFriend(email).execute();
+			new AsyncPushEventFriend(BrithEmail, StarterEmail).execute();
 		}
 		
 	}
 	
 	class AsyncPushEventFriend extends AsyncTask<String, Void, String> {
-		String email;
+		String BirthEmail;
+		String StarterEmail;
 		
-		public AsyncPushEventFriend(String email) {
-			this.email = email;
+		public AsyncPushEventFriend(String BirthEmail, String StarterEmail) {
+			this.BirthEmail = BirthEmail;
+			this.StarterEmail = StarterEmail;
 		}
 		
 		protected String doInBackground(String... params) {
@@ -173,7 +182,8 @@ public class EventMessageActivity extends Activity {
 
 				// 전달인자
 				List params2 = new ArrayList();
-				params2.add(new BasicNameValuePair("email", email));
+				params2.add(new BasicNameValuePair("BirthEmail", BirthEmail));
+				params2.add(new BasicNameValuePair("StarterEmail", StarterEmail));
 
 				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
 						HTTP.UTF_8);
@@ -190,7 +200,7 @@ public class EventMessageActivity extends Activity {
 		protected void onPostExecute(String result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			Log.i("naddola", email+result);
+			Log.i("naddola", "BirthEmail : " + BirthEmail+result);
 			finish();
 		}
 		

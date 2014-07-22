@@ -80,8 +80,8 @@ public class LoadingActivity extends Activity {
 				
 				SyncWPocket();
 				
-				
 				GetNewsFeed();
+				
 				timer.start();
 				
 			}
