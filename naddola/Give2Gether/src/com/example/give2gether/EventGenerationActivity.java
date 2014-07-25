@@ -1,22 +1,18 @@
 package com.example.give2gether;
 
-import java.net.URL;
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.example.give2gether.async.ImageThread;
 
 public class EventGenerationActivity extends Activity {
 
@@ -106,32 +102,16 @@ public class EventGenerationActivity extends Activity {
 		wishTitle.setText(title);
 		wishPrice.setText(wish+" Wish");
 		
-		new ImageThread().execute(imagePath);
-	}
-
-	// 		Get a Image by url
-	class ImageThread extends AsyncTask<String, Void, Bitmap> {
-
-		Bitmap bmp;
-		
-		protected Bitmap doInBackground(String... params) {
-			try {
-				URL url = new URL(params[0]);
-				bmp = BitmapFactory.decodeStream(url.openStream());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		try {
+			Bitmap bmp = new ImageThread().execute(imagePath).get();
 			
-			return bmp;
-		}
-
-		protected void onPostExecute(Bitmap result) {
-			super.onPostExecute(result);
-			
-			if (result != null)
-				wishImage.setImageBitmap(result);
+			if (bmp != null)
+				wishImage.setImageBitmap(bmp);
 			else
 				wishImage.setImageResource(R.drawable.ic_launcher);
+			
+		} catch (Exception e) {
+			
 		}
 	}
 

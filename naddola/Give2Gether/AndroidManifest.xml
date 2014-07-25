@@ -9,12 +9,13 @@
         android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
     <permission
         android:name="com.example.give2gether.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
@@ -27,8 +28,7 @@
         android:icon="@drawable/app_icon"
         android:label="@string/app_name"
         android:theme="@style/Theme.Give2gether" >
-        <activity
-            android:name="com.example.give2gether.StartActivity">
+        <activity android:name="com.example.give2gether.StartActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -39,9 +39,10 @@
             android:name="com.example.give2gether.MainActivity"
             android:label="@string/app_name" >
         </activity>
-        <activity android:name="com.example.give2gether.LoginActivity"/>
-        <activity android:name="com.example.give2gether.AddFriendsActivity"/>
-        <activity android:name="com.example.give2gether.AddWishActivity"/>
+        <activity android:name="com.example.give2gether.LoginActivity" />
+        <activity android:name="com.example.give2gether.LoadingActivity"/>
+        <activity android:name="com.example.give2gether.AddFriendsActivity" />
+        <activity android:name="com.example.give2gether.AddWishActivity" />
         <activity android:name="com.example.give2gether.FacebookLoginActivity" />
         <activity android:name="com.example.give2gether.GoogleLoginActivity" />
         <activity android:name="com.example.give2gether.SignupGiv2gether" />
@@ -50,7 +51,7 @@
         <activity android:name="com.example.give2gether.EventGenerationActivity" />
         <activity android:name="com.example.give2gether.EventPartyActivity" />
         <activity android:name="com.example.give2gether.EventMessageActivity" />
-        
+
         <receiver
             android:name="com.example.give2gether.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
@@ -62,12 +63,16 @@
         </receiver>
 
         <service android:name="com.example.give2gether.GcmMessageHandler" />
-        
-         <meta-data
+
+        <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
-         <activity android:name="com.facebook.LoginActivity"></activity>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/app_id" />
+
+        <activity android:name="com.facebook.LoginActivity" >
+        </activity>
     </application>
 
 </manifest>

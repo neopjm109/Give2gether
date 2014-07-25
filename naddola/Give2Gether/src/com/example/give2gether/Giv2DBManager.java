@@ -29,13 +29,15 @@ public class Giv2DBManager {
 
 	public Giv2DBManager(Context context) {
 		db = context.openOrCreateDatabase(DB_NAME, DB_MODE, null);
-		//removeFWTable();
+//		removeFWTable();
+//		removeTable();
 		createTable();
 	}
 
 	public Giv2DBManager(Context context, String dbName, int dbMode) {
 		db = context.openOrCreateDatabase(dbName, dbMode, null);
-		removeFWTable();
+//		removeFWTable();
+//		removeTable();
 		createTable();
 	}
 	
@@ -54,15 +56,14 @@ public class Giv2DBManager {
 		db.execSQL(sql);
 
 		sql = "create table if not exists " + DB_TABLE_WISHLIST
-				+ " (id integer primary key autoincrement,"
+				+ " (id integer primary key,"
 				+ " title text not null,"
 				+ " price integer not null,"
 				+ " wish integer not null,"
 				+ " event text not null,"
 				+ " date text,"
 				+ " image text not null,"
-				+ " bookmark text not null,"
-				+ " webId integer not null)";
+				+ " bookmark text not null)";
 		
 		db.execSQL(sql);
 
@@ -177,7 +178,6 @@ public class Giv2DBManager {
 		return fl;
 	}
 	
-
 	public ArrayList<MyFriend> getGivFriendsList(){
 		Cursor result = selectGivFriendsAll();
 		ArrayList<MyFriend> fl = new ArrayList<MyFriend>();
@@ -209,8 +209,6 @@ public class Giv2DBManager {
 		return fl;
 	}
 	
-	
-	
 	public Cursor selectFriendsData(int index) {
 		String sql = "select * from " + DB_TABLE_FRIENDS + " where id=" + index + ";";
 		Cursor result = db.rawQuery(sql, null);
@@ -234,70 +232,36 @@ public class Giv2DBManager {
 	
 	
 	// Wishlist
-	
-	public void insertWishlistData(String title, int price, int wish, String imagePath, int webId) {
-		String wTitle = title;
-		int wPrice = price;
-		int wWish = wish;
-		String wImagePath = imagePath;
-		String wEvent = "false";
-		String wBookmark = "false";
-		int wWebId = webId;
-		
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date date = new Date(System.currentTimeMillis());
-		String wDate = df.format(date);
-				
-		String sql = "insert into " + DB_TABLE_WISHLIST
-				+ " values(NULL, '"
-				+ wTitle + "', '"
-				+ wPrice + "', '"
-				+ wWish + "','"
-				+ wEvent + "', '"
-				+ wDate + "','"
-				+ wImagePath + "','"
-				+ wBookmark + "','"
-				+ wWebId + "');";
-		
-		db.execSQL(sql);
-	}
 
-	public void insertWishlistData(String title, int price, int wish, String imagePath, String bookMark, int webId) {
+	public void insertWishlistData(int id, String title, int price, int wish, String imagePath, String bookMark) {
+		int wId = id;
 		String wTitle = title;
 		int wPrice = price;
 		int wWish = wish;
 		String wImagePath = imagePath;
 		String wEvent = "false";
 		String wBookmark = bookMark;
-		int wWebId = webId;
 		
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date date = new Date(System.currentTimeMillis());
 		String wDate = df.format(date);
 				
 		String sql = "insert into " + DB_TABLE_WISHLIST
-				+ " values(NULL, '"
+				+ " values('"
+				+ wId + "', '"
 				+ wTitle + "', '"
 				+ wPrice + "', '"
 				+ wWish + "','"
 				+ wEvent + "', '"
 				+ wDate + "','"
 				+ wImagePath + "','"
-				+ wBookmark + "','"
-				+ wWebId + "');";
+				+ wBookmark + "');";
 		
 		db.execSQL(sql);
 	}
 	
 	public Cursor selectWishlistData(int index) {
 		String sql = "select * from " + DB_TABLE_WISHLIST + " where id=" + index + ";";
-		Cursor result = db.rawQuery(sql, null);
-		
-		return result;
-	}
-
-	public Cursor checkWishlistData(int webId) {
-		String sql = "select * from " + DB_TABLE_WISHLIST + " where webId='" + webId + "';";
 		Cursor result = db.rawQuery(sql, null);
 		
 		return result;

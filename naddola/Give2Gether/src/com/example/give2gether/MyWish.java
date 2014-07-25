@@ -3,7 +3,7 @@ package com.example.give2gether;
 import android.graphics.Bitmap;
 
 public class MyWish {
-	int id, webId;
+	int id;
 	String title;
 	int price, wish;
 	String eventOn;
@@ -22,7 +22,6 @@ public class MyWish {
 		this.imagePath = imagePath;
 		this.bookmarkOn = bookmarkOn;
 		this.bmp = bmp;
-		this.webId = 0;
 	}
 	
 	public int getId() {
@@ -61,11 +60,8 @@ public class MyWish {
 		return bmp;
 	}
 	
-	public int getWebId() {
-		return webId;
+	public void setBmp(Bitmap bmp) {
+		this.bmp = bmp;
 	}
 	
-	public void setWebId(int webId) {
-		this.webId = webId;
-	}
 }

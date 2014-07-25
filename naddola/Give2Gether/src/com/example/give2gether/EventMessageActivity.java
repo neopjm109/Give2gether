@@ -14,18 +14,21 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class EventMessageActivity extends Activity {
 	
-	TextView eventName, eventCongratulation, eventMessage;
+	TextView eventName, eventCongratulation;
+	EditText et_eventMessage;
 	Button sendMessage;
 	
 	Intent intent;
-	String email, name;
+	String BrithEmail, name, StarterEmail, Message;
 	int webId;
 
 	@Override
@@ -34,6 +37,11 @@ public class EventMessageActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_event_message);
 		
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+		.permitAll().build();
+
+		StrictMode.setThreadPolicy(policy);
+		
 		initIntent();
 		initViews();
 	}
@@ -41,7 +49,8 @@ public class EventMessageActivity extends Activity {
 	public void initIntent() {
 		intent = getIntent();
 		
-		email = intent.getStringExtra("email");
+		BrithEmail = intent.getStringExtra("email");
+		StarterEmail = new SettingPreference(this).getID();
 		name = intent.getStringExtra("name");
 		webId = intent.getIntExtra("webId", 0);
 	}
@@ -49,9 +58,11 @@ public class EventMessageActivity extends Activity {
 	public void initViews() {
 		eventName = (TextView) findViewById(R.id.eventMessageFriendsName);
 		eventCongratulation = (TextView) findViewById(R.id.eventCongratulation);
-		eventMessage = (TextView) findViewById(R.id.eventMessage);
+		et_eventMessage = (EditText) findViewById(R.id.eventMessage);
+		et_eventMessage.setPadding(30, 30, 30, 30);
 		
 		sendMessage = (Button) findViewById(R.id.sendMessage);
+		sendMessage.setHint(name+"님의 친구들에게 보낼 메세지를 입력하세요.");
 		
 		eventName.setText(name);
 		
@@ -60,6 +71,7 @@ public class EventMessageActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
+				Message = et_eventMessage.getText().toString();
 				new AsyncUpdateEventWish(webId).execute();
 			}
 		});
@@ -147,15 +159,19 @@ public class EventMessageActivity extends Activity {
 		protected void onPostExecute(Void result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			new AsyncPushEventFriend(email).execute();
+			new AsyncPushEventFriend(BrithEmail, StarterEmail, Message).execute();
 		}
 	}
 	
 	class AsyncPushEventFriend extends AsyncTask<String, Void, String> {
-		String email;
+		String BirthEmail;
+		String StarterEmail;
+		String Message;
 		
-		public AsyncPushEventFriend(String email) {
-			this.email = email;
+		public AsyncPushEventFriend(String BirthEmail, String StarterEmail, String Message) {
+			this.BirthEmail = BirthEmail;
+			this.StarterEmail = StarterEmail;
+			this.Message = Message;
 		}
 		
 		protected String doInBackground(String... params) {
@@ -165,14 +181,16 @@ public class EventMessageActivity extends Activity {
 				HttpClient client = new DefaultHttpClient();
 				String postUrl;
 
-				//postUrl = "http://naddola.cafe24.com/gcmtest02.php";
+//				postUrl = "http://naddola.cafe24.com/gcmtest02.php";
 				postUrl = "http://naddola.cafe24.com/pushEventGeneration.php";
 
 				HttpPost post = new HttpPost(postUrl);
 
 				// 전달인자
 				List params2 = new ArrayList();
-				params2.add(new BasicNameValuePair("email", email));
+				params2.add(new BasicNameValuePair("BirthEmail", BirthEmail));
+				params2.add(new BasicNameValuePair("StarterEmail", StarterEmail));
+				params2.add(new BasicNameValuePair("Message", Message));
 
 				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
 						HTTP.UTF_8);
@@ -181,6 +199,7 @@ public class EventMessageActivity extends Activity {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
 			return null;
 		}
 
@@ -188,8 +207,9 @@ public class EventMessageActivity extends Activity {
 		protected void onPostExecute(String result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			Log.i("naddola", email+result);
+			Log.i("naddola", "BirthEmail : " + BirthEmail+result);
 			finish();
 		}
+		
 	}
 }

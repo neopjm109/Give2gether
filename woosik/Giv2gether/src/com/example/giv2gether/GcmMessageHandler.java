@@ -9,12 +9,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.hmjcompany.give2gether.async.*;
-
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.hmjcompany.give2gether.async.AsyncTaskPostFriendList;
 public class GcmMessageHandler extends IntentService {
 
 
@@ -54,10 +54,10 @@ public class GcmMessageHandler extends IntentService {
 			 */
 			if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR
 					.equals(messageType)) {
-				sendNotification("Send error: " + extras.toString());
+				sendNotification("Giv2gether", "Send error: " + extras.toString());
 			} else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED
 					.equals(messageType)) {
-				sendNotification("Deleted messages on server: "
+				sendNotification("Giv2gether", "Deleted messages on server: "
 						+ extras.toString());
 				// If it's a regular GCM message, do some work.
 			} else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE
@@ -76,11 +76,11 @@ public class GcmMessageHandler extends IntentService {
 				
 				String tag = extras.getString("Tag");
 				if (tag.equals("pushEventGeneration")) {
-					sendNotification(extras.getString("Notice"));
+					sendNotification(extras.getString("Notice"), extras.getString("Message"));
 					Log.i(TAG, "Receive : pushEventGeneration");
-					postFriendList();
+					postFriendList(extras.getString("Message"));
 				} else if (tag.equals("pushEventToFriends")) {
-					sendNotification(extras.getString("Notice"));
+					sendNotification(extras.getString("Notice"), extras.getString("Message"));
 					Log.i(TAG, "Receive : pushEventToFriends");
 				}
 				Log.i(TAG, "Received: " + extras.toString());
@@ -93,17 +93,20 @@ public class GcmMessageHandler extends IntentService {
 	// Put the message into a notification and post it.
 	// This is just one simple example of what you might choose to do with
 	// a GCM message.
-	private void sendNotification(String msg) {
+	private void sendNotification(String title, String msg) {
 		mNotificationManager = (NotificationManager) this
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-				new Intent(this, MainActivity.class), 0);
+				new Intent(this, LoadingActivity.class), 0);
+		Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);         
+		long[] pattern = {0, 100, 1000, 200};          // 진동, 무진동, 진동 무진동 숫으로 시간을 설정한다.
+		vibe.vibrate(pattern, -1);
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
 				this)
 				// .setSmallIcon(R.drawable.ic_stat_gcm)
-				.setContentTitle("Giv2gether")
+				.setContentTitle(title)
 				.setSmallIcon(R.drawable.app_icon)
 				.setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
 				.setContentText(msg).setAutoCancel(true);
@@ -112,7 +115,7 @@ public class GcmMessageHandler extends IntentService {
 		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
 	}
 	
-	public void postFriendList() {
+	public void postFriendList(String eventMessage) {
 		
 		SettingPreference setting = new SettingPreference(getApplicationContext());
 		Giv2DBManager dbManager = new Giv2DBManager(getApplicationContext());
@@ -121,7 +124,7 @@ public class GcmMessageHandler extends IntentService {
 
 		StrictMode.setThreadPolicy(policy);
 
-		AsyncTaskPostFriendList task = new AsyncTaskPostFriendList(setting, dbManager);
+		AsyncTaskPostFriendList task = new AsyncTaskPostFriendList(setting, dbManager, eventMessage);
 
 		task.doInBackground();
 	}
