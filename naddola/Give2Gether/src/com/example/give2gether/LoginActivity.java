@@ -128,7 +128,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 					setting.setID(c.getString("email"));
 					setting.setName(c.getString("name"));
 					
-					Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+					Intent intent = new Intent(LoginActivity.this, LoadingActivity.class);
 					startActivity(intent);
 				} else {
 					Toast.makeText(getApplicationContext(), loginPw.getText().toString() + "!=" + chkPassword, Toast.LENGTH_SHORT).show();

@@ -33,16 +33,9 @@ public class StartActivity extends Activity implements OnClickListener{
 		mobile = cManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
 		wifi = cManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 		
-		if(setting.isLogin()){
-			Intent intent = new Intent(StartActivity.this, MainActivity.class);
-			startActivity(intent);
-			finish();
-		}
-		
-		/*
 		if (wifi.isConnected() || mobile.isConnected()) {
 			if(setting.isLogin()){
-				Intent intent = new Intent(StartActivity.this, MainActivity.class);
+				Intent intent = new Intent(StartActivity.this, LoadingActivity.class);
 				startActivity(intent);
 				finish();
 			}
@@ -50,7 +43,6 @@ public class StartActivity extends Activity implements OnClickListener{
 			Toast.makeText(getApplicationContext(), "Check your network state", Toast.LENGTH_SHORT).show();
 			finish();
 		}
-		*/
 		
 		initViews();
 	}

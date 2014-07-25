@@ -36,8 +36,8 @@ public class MainActivity extends FragmentActivity {
 		initTabs();
 		
 		dbManager = new Giv2DBManager(this);
+				
 		db = dbManager.getDatabase();
-		
 	}
 
 	public void initTabs() {

@@ -1,42 +1,22 @@
 package com.example.give2gether;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.example.give2gether.AddFriendsActivity.HttpPostAsyncTaskJsonArray;
+import com.example.give2gether.async.AsyncTaskPostFriendList;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-
 public class GcmMessageHandler extends IntentService {
 
-	Giv2DBManager dbManager;
 
 	public static final int NOTIFICATION_ID = 1;
 	public static String TAG = "naddola";
@@ -53,18 +33,12 @@ public class GcmMessageHandler extends IntentService {
 	public void onCreate() {
 		// TODO Auto-generated method stub
 		super.onCreate();
-		init();
-	}
-
-	public void init() {
-		dbManager = new Giv2DBManager(getApplicationContext());
 		handler = new Handler();
-		dbManager.getFriendsList();
 	}
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-
+	
 		Bundle extras = intent.getExtras();
 		GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
 		// The getMessageType() intent parameter must be the intent you received
@@ -80,10 +54,10 @@ public class GcmMessageHandler extends IntentService {
 			 */
 			if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR
 					.equals(messageType)) {
-				sendNotification("Send error: " + extras.toString());
+				sendNotification("Giv2gether", "Send error: " + extras.toString());
 			} else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED
 					.equals(messageType)) {
-				sendNotification("Deleted messages on server: "
+				sendNotification("Giv2gether", "Deleted messages on server: "
 						+ extras.toString());
 				// If it's a regular GCM message, do some work.
 			} else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE
@@ -99,13 +73,14 @@ public class GcmMessageHandler extends IntentService {
 					}
 				}
 				Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
-
+				
 				String tag = extras.getString("Tag");
 				if (tag.equals("pushEventGeneration")) {
+					sendNotification(extras.getString("Notice"), extras.getString("Message"));
 					Log.i(TAG, "Receive : pushEventGeneration");
-					postFriendList();
+					postFriendList(extras.getString("Message"));
 				} else if (tag.equals("pushEventToFriends")) {
-					sendNotification(extras.getString("Notice"));
+					sendNotification(extras.getString("Notice"), extras.getString("Message"));
 					Log.i(TAG, "Receive : pushEventToFriends");
 				}
 				Log.i(TAG, "Received: " + extras.toString());
@@ -118,97 +93,40 @@ public class GcmMessageHandler extends IntentService {
 	// Put the message into a notification and post it.
 	// This is just one simple example of what you might choose to do with
 	// a GCM message.
-	private void sendNotification(String msg) {
+	private void sendNotification(String title, String msg) {
 		mNotificationManager = (NotificationManager) this
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 
-		long[] vib = { 0, 100, 200, 300 };
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				new Intent(this, MainActivity.class), 0);
+		Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);         
+		long[] pattern = {0, 100, 1000, 200};          // 진동, 무진동, 진동 무진동 숫으로 시간을 설정한다.
+		vibe.vibrate(pattern, -1);
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
 				this)
 				// .setSmallIcon(R.drawable.ic_stat_gcm)
-				.setContentTitle("Giv2gether")
+				.setContentTitle(title)
 				.setSmallIcon(R.drawable.app_icon)
 				.setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
-				.setContentText(msg).setAutoCancel(true).setVibrate(vib);
+				.setContentText(msg).setAutoCancel(true);
 
 		mBuilder.setContentIntent(contentIntent);
 		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
-
 	}
-
-	public void postFriendList() {
+	
+	public void postFriendList(String eventMessage) {
+		
+		SettingPreference setting = new SettingPreference(getApplicationContext());
+		Giv2DBManager dbManager = new Giv2DBManager(getApplicationContext());
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
 				.permitAll().build();
 
 		StrictMode.setThreadPolicy(policy);
 
-		AsyncTaskPostFriendList task = new AsyncTaskPostFriendList();
+		AsyncTaskPostFriendList task = new AsyncTaskPostFriendList(setting, dbManager, eventMessage);
 
 		task.doInBackground();
-	}
-
-	class AsyncTaskPostFriendList extends AsyncTask<String, Integer, Long> {
-
-		JSONArray jFriendArr;
-		String BirthEmail;
-
-		@Override
-		protected Long doInBackground(String... params) {
-
-			SettingPreference setting = new SettingPreference(getApplicationContext());
-			BirthEmail = setting.getID();
-			ArrayList<MyFriend> fl = dbManager.getGivFriendsList();
-			jFriendArr = new JSONArray();
-
-			for (int i = 0; i < fl.size(); i++) {
-				JSONObject obj = new JSONObject();
-				try {
-					obj.put("email", fl.get(i).getEmail());
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				jFriendArr.put(obj);
-			}
-
-			try {
-				HttpClient client = new DefaultHttpClient();
-				String postUrl;
-
-				postUrl = "http://naddola.cafe24.com/pushEventToFriends.php";
-
-				HttpPost post = new HttpPost(postUrl);
-
-				// 전달인자
-				List params2 = new ArrayList();
-				params2.add(new BasicNameValuePair("BirthEmail", BirthEmail));
-				params2.add(new BasicNameValuePair("friends", jFriendArr
-						.toString()));
-
-				//Log.i(TAG, "sendArray - " + jFriendArr.toString());
-
-				UrlEncodedFormEntity ent = new UrlEncodedFormEntity(params2,
-						HTTP.UTF_8);
-				post.setEntity(ent);
-				HttpResponse responsePost = client.execute(post);
-				HttpEntity resEntity = responsePost.getEntity();
-
-				if (resEntity != null) {
-					String resp = EntityUtils.toString(resEntity);
-
-					Log.i(TAG, "post result : " + resp);
-				}
-
-			} catch (MalformedURLException e) {
-				//
-			} catch (IOException e) {
-				//
-			}
-			return null;
-		}
 	}
 
 }

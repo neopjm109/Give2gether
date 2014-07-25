@@ -10,8 +10,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Html;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -60,7 +58,6 @@ public class LoadingActivity extends Activity {
 			public void run() {
 				try {
 					
-					
 				} catch(Exception e) {
 					
 				} finally {
@@ -77,7 +74,6 @@ public class LoadingActivity extends Activity {
 		
 		handler.postDelayed(new Runnable() {
 			public void run() {
-				
 				SyncWPocket();
 				
 				GetNewsFeed();

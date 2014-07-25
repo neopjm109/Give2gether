@@ -30,12 +30,14 @@ public class AsyncTaskPostFriendList extends AsyncTask<String, Integer, Long> {
 		public static final String TAG = "naddola";
 		JSONArray jFriendArr;
 		String BirthEmail;
+		String EventMessage;
 		SettingPreference setting;
 		Giv2DBManager dbManager;
 
-		public AsyncTaskPostFriendList(SettingPreference setting, Giv2DBManager db){
+		public AsyncTaskPostFriendList(SettingPreference setting, Giv2DBManager db, String Message){
 			this.setting = setting;
 			this.dbManager = db;
+			this.EventMessage = Message;
 		}
 		
 		@Override
@@ -63,10 +65,11 @@ public class AsyncTaskPostFriendList extends AsyncTask<String, Integer, Long> {
 				postUrl = "http://naddola.cafe24.com/pushEventToFriends.php";
 
 				HttpPost post = new HttpPost(postUrl);
-
+				Log.i(TAG,"postFriend : "+EventMessage);
 				// 전달인자
 				List params2 = new ArrayList();
 				params2.add(new BasicNameValuePair("BirthEmail", BirthEmail));
+				params2.add(new BasicNameValuePair("EventMessage", EventMessage));
 				params2.add(new BasicNameValuePair("friends", jFriendArr
 						.toString()));
 

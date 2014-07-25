@@ -20,13 +20,13 @@
         android:text="축하합니다!"
         />
     
-    <TextView
+    <EditText
         android:id="@+id/eventMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="10"
-        android:gravity="center"
-        android:text="Blah Blah Blah"
+        android:background="@drawable/xml_border"
+		android:hint="생일자 친구들에게 보낼 메세지를 입력하세요."        
         />
     
     <Button

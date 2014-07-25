@@ -122,6 +122,7 @@ public class SignupProcActivity extends Activity {
 	}
 	
 	class HttpPostAsyncTask extends AsyncTask<String, Integer, Long>
+
 	{
 		@Override
 		protected Long doInBackground(String... params) {
@@ -172,7 +173,7 @@ public class SignupProcActivity extends Activity {
 						setting.setID(Email);
 						setting.setName(Name);
 						Intent intent = new Intent(SignupProcActivity.this,
-								MainActivity.class);
+								LoadingActivity.class);
 						startActivity(intent);
 						finish();
 					}else if(resp.equals("Signed email")){
