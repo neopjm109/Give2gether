@@ -44,7 +44,7 @@ public class SignupProcActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		
 		Intent intent = getIntent();
 		Email = intent.getStringExtra("email");
 		Password = intent.getStringExtra("password");
@@ -164,9 +164,8 @@ public class SignupProcActivity extends Activity {
 
 				if (resEntity != null) {
 					String resp = EntityUtils.toString(resEntity);
-					
-					if (resp.equals("SNS Login Success") ||
-							resp.equals("Giv2gether Signup Success")) {
+					Log.i(TAG, resp);
+					if (resp.equals("SNS Login Success")) {
 						SettingPreference setting = new SettingPreference(
 								SignupProcActivity.this);
 						setting.setAutoLoginTrue();
@@ -175,6 +174,37 @@ public class SignupProcActivity extends Activity {
 						Intent intent = new Intent(SignupProcActivity.this,
 								LoadingActivity.class);
 						startActivity(intent);
+						ArrayList<Activity> mActivityManager = StartActivity.mActivityManager;
+						for(int i=0; i<mActivityManager.size(); i++)
+							mActivityManager.get(i).finish();
+						finish();
+					}else if (resp.equals("SNS Signup Success")) {
+						SettingPreference setting = new SettingPreference(
+								SignupProcActivity.this);
+						setting.setAutoLoginTrue();
+						setting.setID(Email);
+						setting.setName(Name);
+						Intent intent = new Intent(SignupProcActivity.this,
+								AddFriendsActivity.class);
+						intent.putExtra("before", "Signup");
+						startActivity(intent);
+						ArrayList<Activity> mActivityManager = StartActivity.mActivityManager;
+						for(int i=0; i<mActivityManager.size(); i++)
+							mActivityManager.get(i).finish();
+						finish();
+					}else if(resp.equals("Giv2gether Signup Success")){
+						SettingPreference setting = new SettingPreference(
+								SignupProcActivity.this);
+						setting.setAutoLoginTrue();
+						setting.setID(Email);
+						setting.setName(Name);
+						Intent intent = new Intent(SignupProcActivity.this,
+								AddFriendsActivity.class);
+						intent.putExtra("before", "Signup");
+						startActivity(intent);
+						ArrayList<Activity> mActivityManager = StartActivity.mActivityManager;
+						for(int i=0; i<mActivityManager.size(); i++)
+							mActivityManager.get(i).finish(); 
 						finish();
 					}else if(resp.equals("Signed email")){
 						Toast.makeText(getApplicationContext(), "이미 가입된 email입니다.",

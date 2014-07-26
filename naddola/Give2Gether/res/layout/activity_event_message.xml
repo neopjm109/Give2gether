@@ -9,14 +9,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:layout_weight="0.5"
+        android:textSize="30dip"
         android:text="Friends Name" />
     
     <TextView
         android:id="@+id/eventCongratulation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="10"
+        android:layout_weight="1"
         android:gravity="center"
+        android:textSize="20dip"
         android:text="축하합니다!"
         />
     
@@ -24,7 +27,8 @@
         android:id="@+id/eventMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="10"
+        android:layout_weight="1"
+        android:textSize="15dip"
         android:background="@drawable/xml_border"
 		android:hint="생일자 친구들에게 보낼 메세지를 입력하세요."        
         />
