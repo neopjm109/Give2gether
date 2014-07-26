@@ -14,6 +14,7 @@ import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,8 +29,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.hmjcompany.give2gether.async.AsyncFriendsWish;
-import com.hmjcompany.give2gether.async.ImageThread;
+import com.hmjcompany.give2gether.async.ImageViewThread;
 import com.hmjcompany.give2gether.async.getEventingFriendsHttpPostAsyncTask;
 
 public class FriendsFragment extends Fragment {
@@ -63,6 +63,9 @@ public class FriendsFragment extends Fragment {
 			Bundle savedInstanceState) {
 		rootView = inflater.inflate(R.layout.tab_friends, container, false);
 
+		Log.i("PJM", "3");
+		
+		init();
 		setHasOptionsMenu(true);
 
 		return rootView;
@@ -90,7 +93,7 @@ public class FriendsFragment extends Fragment {
 		arrGivFriendList = new ArrayList<MyFriend>();
 		arrContactFriendList = new ArrayList<MyFriend>();
 		arrSearchFriendList = new ArrayList<MyFriend>();
-		
+
 		arrMyFriendsWishList = new ArrayList<MyFriendsWish>();
 		selectFWishAll();
 
@@ -122,6 +125,7 @@ public class FriendsFragment extends Fragment {
 
 		listFriend.setAdapter(baseAdapter);
 		listFriend.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		
 	}
 
 	public void setTextWatcher() {
@@ -260,6 +264,9 @@ public class FriendsFragment extends Fragment {
 				mName.setText(mData.getName());
 				if (mData.getBirth() != null)
 					mBirth.setText(mData.getBirth());
+				
+				new ImageViewThread(mImage).execute(selectFWishlistData(mData.getPhone()).getImagePath());
+				
 			}
 			
 			mImage.setOnClickListener(new View.OnClickListener() {
@@ -273,83 +280,18 @@ public class FriendsFragment extends Fragment {
 				}
 			});
 
-			selectFWishlistData(mData.getPhone());
-
-			try {
-				JSONObject jObj = new AsyncFriendsWish().
-						execute("http://naddola.cafe24.com/getFriendWish.php?phone="+mData.getPhone()).get();
-				JSONArray friendsWish;
-
-				if(jObj != null) {
-					
-					friendsWish = jObj.getJSONArray("wishlist");
-
-					for(int i=0; i<friendsWish.length(); i++) {
-						
-						JSONObject c = friendsWish.getJSONObject(i);
-						String phone = c.getString("phone");
-						String title = c.getString("title");
-						int price = c.getInt("price");
-						int wish = c.getInt("wish");
-						int bookmarkOn = c.getInt("bookmark");
-						String bookmark;
-						int eventOn = c.getInt("event");
-						String event;
-						String date = c.getString("date");
-						String imagePath = c.getString("image");
-						int webId = c.getInt("id");
-
-						if (bookmarkOn == 0) {
-							bookmark = "false";
-						} else {
-							bookmark = "true";
-						}
-						
-						if (eventOn == 0) {
-							event = "false";
-						} else {
-							event = "true";
-						}
-						
-						if (!checkFWishlistData(phone)) {
-							insertFWishlistData(phone, title, price, wish, date, imagePath, bookmark, event, webId);					
-						}
-
-						Bitmap bmp = new ImageThread().execute(imagePath).get();
-						if(!editOn) {
-							mImage.setImageBitmap(bmp);
-						} else {
-							mImage.setImageResource(android.R.drawable.ic_menu_delete);
-						}
-						EventFriendAdapter.notifyDataSetChanged();
-
-					}
-				}
-				
-			} catch (Exception e) {
-				
-			}
-
 			v.setOnClickListener(new View.OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
+
+					MyFriendsWish myFwish = selectFWishlistData(mData.getPhone());
 					
-					String title = null;
-					int wish = 0;
-					String imagePath = null;
-					int webId = 0;
-					
-					for (int i=0; i<arrMyFriendsWishList.size(); i++) {
-						if (mData.getPhone().equals(arrMyFriendsWishList.get(i).phone)) {
-							title = arrMyFriendsWishList.get(i).getTitle();
-							wish = arrMyFriendsWishList.get(i).getWish();
-							imagePath = arrMyFriendsWishList.get(i).getImagePath();
-							webId = arrMyFriendsWishList.get(i).getWebId();
-							break;
-						}
-					}
+					String title = myFwish.getTitle();
+					int wish = myFwish.getWish();
+					String imagePath = myFwish.getImagePath();
+					int webId = myFwish.getId();
 					
 					Intent intent = new Intent(mActivity, EventPartyActivity.class);
 					intent.putExtra("name", mData.getName());
@@ -408,6 +350,11 @@ public class FriendsFragment extends Fragment {
 				mName.setText(mData.getName());
 				if (mData.getBirth() != null)
 					mBirth.setText(mData.getBirth());
+
+				if(selectFWishlistData(mData.getPhone()) != null) {
+					new ImageViewThread(mImage).execute(selectFWishlistData(mData.getPhone()).getImagePath());
+				}
+				
 			}
 			
 			mImage.setOnClickListener(new View.OnClickListener() {
@@ -423,92 +370,20 @@ public class FriendsFragment extends Fragment {
 			
 			selectFWishlistData(mData.getPhone());
 
-			try {
-				JSONObject jObj = new AsyncFriendsWish().execute("http://naddola.cafe24.com/getFriendWish.php?phone="+mData.getPhone()).get();
-				JSONArray friendsWish = jObj.getJSONArray("wishlist");
-				
-				for(int i=0; i<friendsWish.length(); i++) {
-					JSONObject c = friendsWish.getJSONObject(i);
-					String phone = c.getString("phone");
-					String title = c.getString("title");
-					int price = c.getInt("price");
-					int wish = c.getInt("wish");
-					int bookmarkOn = c.getInt("bookmark");
-					String bookmark;
-					int eventOn = c.getInt("event");
-					String event;
-					String date = c.getString("date");
-					String imagePath = c.getString("image");
-					int webId = c.getInt("id");
-
-					if (bookmarkOn == 0) {
-						bookmark = "false";
-					} else {
-						bookmark = "true";
-					}
-					
-					if (eventOn == 0) {
-						event = "false";
-					} else {
-						event = "true";
-					}
-					
-					if (!checkFWishlistData(phone)) {
-						insertFWishlistData(phone, title, price, wish, date, imagePath, bookmark, event, webId);					
-					}
-
-					Bitmap bmp = new ImageThread().execute(imagePath).get();
-					if(!editOn) {
-						mImage.setImageBitmap(bmp);
-					} else {
-						mImage.setImageResource(android.R.drawable.ic_menu_delete);
-					}
-					GivFriendAdapter.notifyDataSetChanged();
-
-				}
-			} catch (Exception e) {
-				
-			}			
 			v.setOnClickListener(new View.OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
-					
-					String title = null;
-					int wish = 0;
-					String imagePath = null;
-					int webId = 0;
-					boolean bNull = false;
-					
-					for (int i=0; i<arrMyFriendsWishList.size(); i++) {
-						if (mData.getPhone().equals(arrMyFriendsWishList.get(i).phone)) {
-							title = arrMyFriendsWishList.get(i).getTitle();
-							wish = arrMyFriendsWishList.get(i).getWish();
-							imagePath = arrMyFriendsWishList.get(i).getImagePath();
-							webId = arrMyFriendsWishList.get(i).getWebId();
-							break;
-						}
-						
-						if ( i == (arrMyFriendsWishList.size()-1) &&
-								!mData.getPhone().equals(arrMyFriendsWishList.get(i).phone)) {
-							bNull = true;
-						}
-					}
-					
-					/*
-					Intent intent = new Intent(mActivity, EventGenerationActivity.class);
-					intent.putExtra("email", mData.getEmail());
-					intent.putExtra("name", mData.getName());
-					intent.putExtra("title",title);
-					intent.putExtra("wish", wish);
-					intent.putExtra("imagePath", imagePath);
-					intent.putExtra("webId", webId);
-					startActivity(intent);
-					*/
+
+					MyFriendsWish myFwish = selectFWishlistData(mData.getPhone());
 				
-					
-					if (!bNull) {
+					if (myFwish != null) {
+						
+						String title = myFwish.getTitle();
+						int wish = myFwish.getWish();
+						String imagePath = myFwish.getImagePath();
+						int webId = myFwish.getId();
 					
 						Intent intent = new Intent(mActivity, EventGenerationActivity.class);
 						intent.putExtra("email", mData.getEmail());
@@ -524,7 +399,6 @@ public class FriendsFragment extends Fragment {
 						Toast.makeText(mActivity.getApplicationContext(), "친구의 위시가 없네요", Toast.LENGTH_SHORT).show();
 						
 					}
-					
 					
 				}
 			});
@@ -678,17 +552,16 @@ public class FriendsFragment extends Fragment {
 		baseAdapter.notifyDataSetChanged();
 	}
 
-	public void insertFWishlistData (String phone, String title, int price, int wish, String date, String imagePath, String bookmark, String event, int webId) {
-		dbManager.insertFWishlistData(phone, title, price, wish, date, imagePath, bookmark, event, webId);
-
-		selectFWishAll();
+	public void insertFWishlistData (int id, String phone, String title, int price, int wish, String date, String imagePath, String bookmark, String event) {
+		dbManager.insertFWishlistData(id, phone, title, price, wish, date, imagePath, bookmark, event);
 
 		EventFriendAdapter.notifyDataSetChanged();
 		GivFriendAdapter.notifyDataSetChanged();
 	}
 	
-	public void selectFWishlistData(int index) {
+	public MyFriendsWish selectFWishlistData(int index) {
 		Cursor result = dbManager.selectFWishlistData(index);
+		MyFriendsWish myFWish = null;
 		
 		if (result.moveToFirst()) {
 			
@@ -701,20 +574,21 @@ public class FriendsFragment extends Fragment {
 			String date = result.getString(6);
 			String imagePath = result.getString(7);
 			String bookmarkOn = result.getString(8);
-			int webId = result.getInt(9);
 
-			MyFriendsWish myFWish = new MyFriendsWish(id, phone, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
-			myFWish.setWebId(webId);
+			myFWish = new MyFriendsWish(id, phone, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
 		}
 		
 		result.close();
+		
+		return myFWish;
 	}
 	
-	public void selectFWishlistData(String phone_index) {
+	public MyFriendsWish selectFWishlistData(String phone_index) {
 		Cursor result = dbManager.selectFWishlistData(phone_index);
+		MyFriendsWish myFWish = null;
 		
 		if (result.moveToFirst()) {
-
+			
 			int id = result.getInt(0);
 			String phone = result.getString(1);
 			String title = result.getString(2);
@@ -724,13 +598,13 @@ public class FriendsFragment extends Fragment {
 			String date = result.getString(6);
 			String imagePath = result.getString(7);
 			String bookmarkOn = result.getString(8);
-			int webId = result.getInt(9);
-			
-			MyFriendsWish myFWish = new MyFriendsWish(id, phone, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
-			myFWish.setWebId(webId);
+
+			myFWish = new MyFriendsWish(id, phone, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
 		}
 		
 		result.close();
+		
+		return myFWish;	
 	}
 
 	public boolean checkFWishlistData(int webId) {
@@ -771,11 +645,8 @@ public class FriendsFragment extends Fragment {
 			String date = result.getString(6);
 			String imagePath = result.getString(7);
 			String bookmarkOn = result.getString(8);
-			int webId = result.getInt(9);
 			
 			MyFriendsWish myFWish = new MyFriendsWish(id, phone, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
-			myFWish.setWebId(webId);
-			
 			arrMyFriendsWishList.add(myFWish);
 
 			result.moveToNext();
@@ -792,5 +663,4 @@ public class FriendsFragment extends Fragment {
 	public void removeFWishlistData(int index, int webId) {
 		dbManager.removeFWishlistData(index);
 	}
-
 }

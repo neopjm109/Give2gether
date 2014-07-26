@@ -15,6 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.hmjcompany.give2gether.async.AsyncCheckNewsFeed;
+import com.hmjcompany.give2gether.async.AsyncFriendsWish;
 import com.hmjcompany.give2gether.async.AsyncTaskWPocketSynchronize;
 
 public class LoadingActivity extends Activity {
@@ -57,6 +58,17 @@ public class LoadingActivity extends Activity {
 		timer = new Thread() {
 			public void run() {
 				try {
+					SyncWPocket();
+					
+					Thread.sleep(500);
+					
+					GetNewsFeed();
+
+					Thread.sleep(500);
+					
+					GetFriendsWish();
+
+					Thread.sleep(500);
 					
 				} catch(Exception e) {
 					
@@ -74,9 +86,6 @@ public class LoadingActivity extends Activity {
 		
 		handler.postDelayed(new Runnable() {
 			public void run() {
-				SyncWPocket();
-				
-				GetNewsFeed();
 				
 				timer.start();
 				
@@ -130,11 +139,62 @@ public class LoadingActivity extends Activity {
 
 		result.close();
 	}
+
+	public void insertFWishlistData (int id, String phone, String title, int price, int wish, String date, String imagePath, String bookmark, String event) {
+		dbManager.insertFWishlistData(id, phone, title, price, wish, date, imagePath, bookmark, event);
+	}
+	
+	public boolean checkFWishlistData(int id) {
+		Cursor result = dbManager.checkFWishlistData(id);
 		
+		if (result.getCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean checkFWishlistData(String phone) {
+		Cursor result = dbManager.checkFWishlistData(phone);
+		
+		if (result.getCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public void selectFWishAll() {
+		Cursor result = dbManager.selectFWishAll();
+		
+		result.moveToFirst();
+		
+		while (!result.isAfterLast()) {
+			
+			int id = result.getInt(0);
+			String phone = result.getString(1);
+			String title = result.getString(2);
+			int price = result.getInt(3);
+			int wish = result.getInt(4);
+			String eventOn = result.getString(5);
+			String date = result.getString(6);
+			String imagePath = result.getString(7);
+			String bookmarkOn = result.getString(8);
+			int webId = result.getInt(9);
+			
+			MyFriendsWish myFWish = new MyFriendsWish(id, phone, title, price, wish, eventOn, date, imagePath, bookmarkOn, null);
+			
+			result.moveToNext();
+		}
+		
+		result.close();
+		
+	}
+	
 	/*
 	 * 		1. WPocket Synchronize
 	 * 		2. Get News Feed
-	 * 		3. 
+	 * 		3. Get Friends Wish
 	 */
 	
 	public void SyncWPocket() {
@@ -180,8 +240,8 @@ public class LoadingActivity extends Activity {
 		} catch (Exception e) {
 			
 		}
-		
-		progressBar.setProgress(progress+=30);
+
+		progressBar.setProgress(progress+=10);
 	}
 	
 	public void GetNewsFeed() {
@@ -221,6 +281,7 @@ public class LoadingActivity extends Activity {
 		} catch (Exception e) {
 			
 		}
+		progressBar.setProgress(progress+=10);
 
 		// 시작된 이벤트
 		try {
@@ -251,7 +312,72 @@ public class LoadingActivity extends Activity {
 		} catch (Exception e) {
 			
 		}
-		progressBar.setProgress(progress+=40);
+		progressBar.setProgress(progress+=10);
+	}
+	
+	public void GetFriendsWish() {
+
+		progressBar.setProgress(progress+=10);
+		runOnUiThread(new Runnable() {
+			public void run() {
+				loadingName.setText("친구 이벤트 위시 받는중");
+			}
+		});
+
+		progressBar.setProgress(progress+=10);
+		for(int k=0; k<arrMyFriendList.size(); k++) {
+
+			final MyFriend mData = arrMyFriendList.get(k);
+			
+			try {
+				JSONObject jObj = new AsyncFriendsWish().
+						execute("http://naddola.cafe24.com/getFriendWish.php?phone="+mData.getPhone()).get();
+				JSONArray friendsWish;
+	
+				if(jObj != null) {
+					
+					friendsWish = jObj.getJSONArray("wishlist");
+	
+					for(int i=0; i<friendsWish.length(); i++) {
+						
+						JSONObject c = friendsWish.getJSONObject(i);
+						int id = c.getInt("id");
+						String phone = c.getString("phone");
+						String title = c.getString("title");
+						int price = c.getInt("price");
+						int wish = c.getInt("wish");
+						int bookmarkOn = c.getInt("bookmark");
+						String bookmark;
+						int eventOn = c.getInt("event");
+						String event;
+						String date = c.getString("date");
+						String imagePath = c.getString("image");
+	
+						if (bookmarkOn == 0) {
+							bookmark = "false";
+						} else {
+							bookmark = "true";
+						}
+						
+						if (eventOn == 0) {
+							event = "false";
+						} else {
+							event = "true";
+						}
+						
+						if (!checkFWishlistData(phone)) {
+							insertFWishlistData(id, phone, title, price, wish, date, imagePath, bookmark, event);					
+						}
+	
+					}
+				}
+				
+			} catch (Exception e) {
+				
+			}	
+		}
+
+		progressBar.setProgress(progress+=10);
 	}
 
 }

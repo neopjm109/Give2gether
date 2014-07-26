@@ -1,6 +1,5 @@
 package com.example.giv2gether;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import android.app.Activity;

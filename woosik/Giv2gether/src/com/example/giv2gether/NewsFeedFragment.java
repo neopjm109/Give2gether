@@ -95,11 +95,11 @@ public class NewsFeedFragment extends Fragment {
 		if (feedlist.size() == 0) {
 			noFeed.setVisibility(View.VISIBLE);
 		} else {
-			noFeed.setVisibility(View.INVISIBLE);
+			noFeed.setVisibility(View.GONE);
 		}
 
 		if (feedlist.size() > 0) {
-			noFeed.setVisibility(View.INVISIBLE);
+			noFeed.setVisibility(View.GONE);
 		}
 		
 //		selectFriendsAll();

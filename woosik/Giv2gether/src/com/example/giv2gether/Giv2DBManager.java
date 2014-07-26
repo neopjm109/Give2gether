@@ -68,7 +68,7 @@ public class Giv2DBManager {
 		db.execSQL(sql);
 
 		sql = "create table if not exists " + DB_TABLE_FRIENDS_WISHLIST
-				+ " (id integer primary key autoincrement,"
+				+ " (id integer primary key,"
 				+ " phone text not null,"
 				+ " title text not null,"
 				+ " price integer not null,"
@@ -76,8 +76,7 @@ public class Giv2DBManager {
 				+ " event text not null,"
 				+ " date text,"
 				+ " image text not null,"
-				+ " bookmark text not null,"
-				+ " webId integer not null)";
+				+ " bookmark text not null)";
 		
 		db.execSQL(sql);
 	}
@@ -140,13 +139,6 @@ public class Giv2DBManager {
 		return result;
 	}
 	
-	public Cursor selectGivFriendsAll() {
-		String sql = "select * from " + DB_TABLE_FRIENDS + " where signed = 1;";
-		Cursor result = db.rawQuery(sql, null);
-		
-		return result;
-	}
-	
 	public ArrayList<MyFriend> getFriendsList(){
 		Cursor result = selectFriendsAll();
 		ArrayList<MyFriend> fl = new ArrayList<MyFriend>();
@@ -177,13 +169,13 @@ public class Giv2DBManager {
 		}
 		return fl;
 	}
-	
+
 	public ArrayList<MyFriend> getGivFriendsList(){
 		Cursor result = selectGivFriendsAll();
 		ArrayList<MyFriend> fl = new ArrayList<MyFriend>();
-		
+
 		result.moveToFirst();
-		
+
 		while (!result.isAfterLast()) {
 			int id = result.getInt(0);
 			String name = result.getString(1);
@@ -197,13 +189,13 @@ public class Giv2DBManager {
 			else
 				signed = false;
 			//String imagePath = result.getString(5);
-			
+
 			MyFriend tempFriend= new MyFriend(id, name, email, phone, birth, signed, null);
-			
+
 			fl.add(tempFriend);
 
 			//new ImageThread().execute(tempFriend);
-	
+
 			result.moveToNext();
 		}
 		return fl;
@@ -295,7 +287,8 @@ public class Giv2DBManager {
 
 	// Friends Wishlist
 	
-	public void insertFWishlistData(String phone, String title, int price, int wish, String date, String imagePath, String bookmark, String event, int webId) {
+	public void insertFWishlistData(int id, String phone, String title, int price, int wish, String date, String imagePath, String bookmark, String event) {
+		int wId = id;
 		String wPhone = phone;
 		String wTitle = title;
 		int wPrice = price;
@@ -304,7 +297,6 @@ public class Giv2DBManager {
 		String wImagePath = imagePath;
 		String wEvent = event;
 		String wBookmark = bookmark;
-		int wWebId = webId;
 
 		if (wEvent.equals("0")) {
 			wEvent = "false";
@@ -319,7 +311,8 @@ public class Giv2DBManager {
 		}
 				
 		String sql = "insert into " + DB_TABLE_FRIENDS_WISHLIST
-				+ " values(NULL, '"
+				+ " values('"
+				+ wId + "', '"
 				+ wPhone +"', '"
 				+ wTitle + "', '"
 				+ wPrice + "', '"
@@ -327,8 +320,7 @@ public class Giv2DBManager {
 				+ wEvent + "', '"
 				+ wDate + "','"
 				+ wImagePath + "','"
-				+ wBookmark + "','"
-				+ wWebId + "');";
+				+ wBookmark + "');";
 		
 		db.execSQL(sql);
 	}
@@ -347,8 +339,8 @@ public class Giv2DBManager {
 		return result;
 	}
 
-	public Cursor checkFWishlistData(int webId) {
-		String sql = "select * from " + DB_TABLE_FRIENDS_WISHLIST + " where webId='" + webId + "';";
+	public Cursor checkFWishlistData(int id) {
+		String sql = "select * from " + DB_TABLE_FRIENDS_WISHLIST + " where id='" + id + "';";
 		Cursor result = db.rawQuery(sql, null);
 		
 		return result;
@@ -367,7 +359,14 @@ public class Giv2DBManager {
 		
 		return result;
 	}
-	
+
+	public Cursor selectGivFriendsAll() {
+		String sql = "select * from " + DB_TABLE_FRIENDS + " where signed = 1;";
+		Cursor result = db.rawQuery(sql, null);
+
+		return result;
+	}
+
 	public void updateFWishlistData(int flag, int id, String query) {
 		
 		String set = null;
