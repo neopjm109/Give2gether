@@ -1,5 +1,7 @@
 package com.example.give2gether;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -36,6 +38,8 @@ public class SignupGiv2gether extends Activity implements OnClickListener,
 	}
 
 	public void init() {
+		ArrayList<Activity> mActivityManager = StartActivity.mActivityManager;
+		mActivityManager.add(this);
 		bt_signup = (Button) findViewById(R.id.signup_button);
 		et_email = (EditText) findViewById(R.id.signup_email);
 		et_password1 = (EditText) findViewById(R.id.signup_password1);

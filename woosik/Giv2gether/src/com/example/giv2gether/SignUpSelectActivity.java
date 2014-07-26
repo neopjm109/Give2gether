@@ -21,6 +21,7 @@ public class SignUpSelectActivity extends Activity implements OnClickListener {
 	}
 
 	public void initViews() {
+		StartActivity.mActivityManager.add(this);
 		btnFacebookLogin = (Button) findViewById(R.id.signup_facebookButton);
 		btnGoogleLogin = (Button) findViewById(R.id.signup_googleButton);
 		btngiv2gether = (Button) findViewById(R.id.signup_Give2Gether);

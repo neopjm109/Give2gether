@@ -25,6 +25,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -64,6 +65,7 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 	ArrayList<Contact> mContactList;
 	ArrayList<Contact> mGivFriendList;
 	ArrayList<MyFriend> mFriendList;
+	String before;
 
 	EditText et_search;
 	ArrayList<Contact> mSearchContactList;
@@ -92,6 +94,7 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 	}
 	
 	public void init() {
+		before = getIntent().getStringExtra("before");
 		actionBar = getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		dbManager = new Giv2DBManager(getApplicationContext());
@@ -102,7 +105,16 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 		bt_confirm.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				finish();
+				if(before == null){
+					finish();
+				}
+				else if(before.equals("Signup")){
+					Intent intent = new Intent(AddFriendsActivity.this, LoadingActivity.class);
+					startActivity(intent);
+					finish();
+				}
+				
+				
 			}
 		});
 

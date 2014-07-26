@@ -1,5 +1,8 @@
 package com.example.give2gether;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +23,8 @@ public class StartActivity extends Activity implements OnClickListener{
 	
 	Button btnSignup;
 	Button btnLogin;
+	
+	public static ArrayList<Activity> mActivityManager = new ArrayList<Activity>();
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -58,7 +63,7 @@ public class StartActivity extends Activity implements OnClickListener{
 
 	@Override
 	public void onClick(View v) {
-		
+		mActivityManager.add(this);
 		Intent intent;
 		switch(v.getId()){
 
