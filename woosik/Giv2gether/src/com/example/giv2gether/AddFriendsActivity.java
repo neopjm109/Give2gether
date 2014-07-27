@@ -21,6 +21,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.hmjcompany.give2gether.async.AsyncFriendsWish;
+
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ContentUris;
@@ -73,6 +75,8 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 
 	Button bt_confirm;
 	ActionBar actionBar;
+	
+	ArrayList<MyFriend> arrMyFriendList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +102,7 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 		actionBar = getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		dbManager = new Giv2DBManager(getApplicationContext());
+		arrMyFriendList = new ArrayList<MyFriend>();
 
 		list = (ListView) findViewById(R.id.AddFriends_list);
 		et_search = (EditText) findViewById(R.id.AddFriend_et_search);
@@ -106,6 +111,58 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 			@Override
 			public void onClick(View v) {
 				if(before == null){
+					for(int k=0; k<arrMyFriendList.size(); k++) {
+
+						final MyFriend mData = arrMyFriendList.get(k);
+						
+						try {
+							JSONObject jObj = new AsyncFriendsWish().
+									execute("http://naddola.cafe24.com/getFriendWish.php?phone="+mData.getPhone()).get();
+							JSONArray friendsWish;
+				
+							if(jObj != null) {
+								
+								friendsWish = jObj.getJSONArray("wishlist");
+				
+								for(int i=0; i<friendsWish.length(); i++) {
+									
+									JSONObject c = friendsWish.getJSONObject(i);
+									int id = c.getInt("id");
+									String phone = c.getString("phone");
+									String title = c.getString("title");
+									int price = c.getInt("price");
+									int wish = c.getInt("wish");
+									int bookmarkOn = c.getInt("bookmark");
+									String bookmark;
+									int eventOn = c.getInt("event");
+									String event;
+									String date = c.getString("date");
+									String imagePath = c.getString("image");
+				
+									if (bookmarkOn == 0) {
+										bookmark = "false";
+									} else {
+										bookmark = "true";
+									}
+									
+									if (eventOn == 0) {
+										event = "false";
+									} else {
+										event = "true";
+									}
+									
+									if (!checkFWishlistData(phone)) {
+										insertFWishlistData(id, phone, title, price, wish, date, imagePath, bookmark, event);					
+									}
+				
+								}
+							}
+							
+						} catch (Exception e) {
+							
+						}	
+					}
+
 					finish();
 				}
 				else if(before.equals("Signup")){
@@ -169,9 +226,11 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 						tempFriend.getPhone() + tempFriend.getBirth()+"signed");
 				dbManager.insertFriendsData(tempFriend.getName(), tempFriend.getEmail(),
 						tempFriend.getPhone(), tempFriend.getBirth(), 1);
+				arrMyFriendList.add(tempFriend);
 			} else {
 				dbManager.insertFriendsData(tempContact.getName(), null,
 						tempContact.getPhonenum(), null, 0);
+				arrMyFriendList.add(tempFriend);
 			}
 		}
 		baseAdapter.notifyDataSetChanged();
@@ -573,4 +632,30 @@ public class AddFriendsActivity extends Activity implements OnItemClickListener 
 			return null;
 		}
 	}
+
+	public void insertFWishlistData (int id, String phone, String title, int price, int wish, String date, String imagePath, String bookmark, String event) {
+		dbManager.insertFWishlistData(id, phone, title, price, wish, date, imagePath, bookmark, event);
+	}
+
+	public boolean checkFWishlistData(int webId) {
+		Cursor result = dbManager.checkFWishlistData(webId);
+		
+		if (result.getCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean checkFWishlistData(String phone) {
+		Cursor result = dbManager.checkFWishlistData(phone);
+		
+		if (result.getCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+
 }

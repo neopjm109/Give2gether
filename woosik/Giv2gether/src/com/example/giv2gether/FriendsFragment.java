@@ -262,6 +262,7 @@ public class FriendsFragment extends Fragment {
 
 			if (mData != null) {
 				mName.setText(mData.getName());
+				Log.i("PJM", mData.getPhone());
 				if (mData.getBirth() != null)
 					mBirth.setText(mData.getBirth());
 				
