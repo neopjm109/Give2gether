@@ -43,6 +43,7 @@ import android.widget.TextView;
 import com.hmjcompany.give2gether.async.HttpPostAsyncTaskJsonArray;
 import com.hmjcompany.give2gether.async.getSignedFriendHttpPostAsyncTask;
 
+// Test Origon write
 public class AddFriendsActivity extends Activity implements OnItemClickListener {
 
 	public static final String TAG = "naddola";
