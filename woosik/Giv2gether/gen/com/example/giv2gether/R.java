@@ -658,11 +658,11 @@ containing a value of this type.
         public static final int Friend_list_Birth=0x7f060068;
         public static final int Friend_list_Name=0x7f060067;
         public static final int Friend_list_PhotoWish=0x7f060069;
-        public static final int Setting_AutoLogin=0x7f060079;
-        public static final int Setting_ResetDB=0x7f06007a;
-        public static final int action_settings=0x7f060080;
+        public static final int Setting_AutoLogin=0x7f06007a;
+        public static final int Setting_ResetDB=0x7f06007b;
+        public static final int action_settings=0x7f060081;
         public static final int book_now=0x7f060010;
-        public static final int btnAddWish=0x7f06007e;
+        public static final int btnAddWish=0x7f06007f;
         public static final int btnEventGenerate=0x7f060020;
         public static final int btnEventPresent=0x7f06002d;
         public static final int btnLogin=0x7f06003b;
@@ -699,8 +699,8 @@ containing a value of this type.
         public static final int com_facebook_usersettingsfragment_login_button=0x7f06005f;
         public static final int com_facebook_usersettingsfragment_logo_image=0x7f06005d;
         public static final int com_facebook_usersettingsfragment_profile_name=0x7f06005e;
-        public static final int dialogImage=0x7f060073;
-        public static final int dialogPrice=0x7f060074;
+        public static final int dialogImage=0x7f060074;
+        public static final int dialogPrice=0x7f060075;
         public static final int editEventPay=0x7f06002c;
         public static final int editTitle=0x7f060019;
         public static final int eventCongratulation=0x7f060022;
@@ -719,10 +719,10 @@ containing a value of this type.
         public static final int eventProgressText=0x7f06002b;
         public static final int eventTitle=0x7f060028;
         public static final int facebookstatus=0x7f06002f;
-        public static final int feedList=0x7f06007d;
+        public static final int feedList=0x7f06007e;
         public static final int findPw=0x7f06003d;
-        public static final int friend_et_search=0x7f060076;
-        public static final int friend_listview=0x7f060077;
+        public static final int friend_et_search=0x7f060077;
+        public static final int friend_listview=0x7f060078;
         public static final int friendsBirth=0x7f06006c;
         public static final int friendsCheckToggle=0x7f06006a;
         public static final int friendsName=0x7f06006b;
@@ -736,8 +736,8 @@ containing a value of this type.
         public static final int imgStart=0x7f060043;
         public static final int itemList=0x7f06001a;
         public static final int large=0x7f060015;
-        public static final int listMyWish=0x7f06007f;
-        public static final int list_header_title=0x7f060075;
+        public static final int listMyWish=0x7f060080;
+        public static final int list_header_title=0x7f060076;
         public static final int loadingLogo=0x7f060036;
         public static final int loadingName=0x7f060038;
         public static final int loadingProgress=0x7f060037;
@@ -745,14 +745,15 @@ containing a value of this type.
         public static final int loginPw=0x7f06003a;
         public static final int mImage=0x7f060064;
         public static final int mPrice=0x7f060066;
-        public static final int mText=0x7f060078;
+        public static final int mText=0x7f060079;
         public static final int mTitle=0x7f060065;
         public static final int match_parent=0x7f06000c;
         public static final int monochrome=0x7f060013;
-        public static final int noFeed=0x7f06007c;
+        public static final int newsfeedNotice=0x7f06006f;
+        public static final int noFeed=0x7f06007d;
         public static final int none=0x7f060000;
         public static final int normal=0x7f060001;
-        public static final int optionsView=0x7f06007b;
+        public static final int optionsView=0x7f06007c;
         public static final int pager=0x7f06003e;
         public static final int picker_subtitle=0x7f060055;
         public static final int production=0x7f060007;
@@ -772,10 +773,10 @@ containing a value of this type.
         public static final int small=0x7f060014;
         public static final int strict_sandbox=0x7f060009;
         public static final int terrain=0x7f060003;
-        public static final int wishFuncBtn=0x7f060072;
-        public static final int wishImage=0x7f06006f;
-        public static final int wishPrice=0x7f060071;
-        public static final int wishTitle=0x7f060070;
+        public static final int wishFuncBtn=0x7f060073;
+        public static final int wishImage=0x7f060070;
+        public static final int wishPrice=0x7f060072;
+        public static final int wishTitle=0x7f060071;
         public static final int wrap_content=0x7f06000d;
     }
     public static final class integer {
@@ -814,16 +815,17 @@ containing a value of this type.
         public static final int custom_auto_list=0x7f03001d;
         public static final int custom_friend_list=0x7f03001e;
         public static final int custom_friends_list=0x7f03001f;
-        public static final int custom_wish_list=0x7f030020;
-        public static final int dialog_add_wish=0x7f030021;
-        public static final int dialog_menu=0x7f030022;
-        public static final int list_header=0x7f030023;
-        public static final int tab_friends=0x7f030024;
-        public static final int tab_main=0x7f030025;
-        public static final int tab_mypage=0x7f030026;
-        public static final int tab_newsfeed=0x7f030027;
-        public static final int tab_wish=0x7f030028;
-        public static final int tab_wpocket=0x7f030029;
+        public static final int custom_newsfeed_list=0x7f030020;
+        public static final int custom_wish_list=0x7f030021;
+        public static final int dialog_add_wish=0x7f030022;
+        public static final int dialog_menu=0x7f030023;
+        public static final int list_header=0x7f030024;
+        public static final int tab_friends=0x7f030025;
+        public static final int tab_main=0x7f030026;
+        public static final int tab_mypage=0x7f030027;
+        public static final int tab_newsfeed=0x7f030028;
+        public static final int tab_wish=0x7f030029;
+        public static final int tab_wpocket=0x7f03002a;
     }
     public static final class menu {
         public static final int main=0x7f0a0000;

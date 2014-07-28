@@ -18,16 +18,21 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MyPageFragment extends Fragment {
+	
+	Button bt_resetDB;
 	
 	View rootView;
 	ListView optionsView;
@@ -54,6 +59,16 @@ public class MyPageFragment extends Fragment {
 		setting = new SettingPreference(getActivity());
 		mActivity = (MainActivity) getActivity();
 		
+		bt_resetDB = (Button)rootView.findViewById(R.id.Setting_ResetDB);
+		bt_resetDB.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Giv2DBManager db = new Giv2DBManager(mActivity);
+				db.removeTable();
+				Toast.makeText(mActivity, "DB 초Gi화 했er", Toast.LENGTH_SHORT).show();
+				mActivity.finish();
+			}
+		});
 		TextView tv = (TextView) rootView.findViewById(R.id.mText);
 		tv.setText("Welcome " + setting.getID());
 		CheckBox ck = (CheckBox)rootView.findViewById(R.id.Setting_AutoLogin);
