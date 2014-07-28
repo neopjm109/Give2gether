@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -79,8 +80,17 @@ public class NewsFeedFragment extends Fragment {
 				
 				((TextView) view).setTextColor(Color.BLACK);
 				
+				view.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+					}
+				});
+				
 				return view;
 			}
+			
+			
 			
 		};
 		

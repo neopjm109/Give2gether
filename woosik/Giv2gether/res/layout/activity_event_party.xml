@@ -77,6 +77,7 @@
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:numeric="integer"
+            android:gravity="center_horizontal"
             android:singleLine="true" />
     
 	    <TextView
